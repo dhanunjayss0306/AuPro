@@ -18,6 +18,7 @@ export interface MomentPost {
   avatarUrl?: string;
   location?: string;
   isOfficial?: boolean;
+  category?: 'normal' | 'problem' | 'announcement';
   imageUrl?: string;
   documentUrl?: string;
   imageCaption?: string;
@@ -231,6 +232,12 @@ export function MomentCard({ post, onToast }: { post: MomentPost; onToast?: (mes
                 <span className="insta-verified-badge" title="Verified Campus Official">
                   ✓
                 </span>
+              )}
+              {post.category === 'problem' && (
+                <span className="post-category-tag problem">⚠️ Problem</span>
+              )}
+              {post.category === 'announcement' && (
+                <span className="post-category-tag announcement">📢 Notice</span>
               )}
             </div>
             {post.location && (

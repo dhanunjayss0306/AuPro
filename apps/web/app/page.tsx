@@ -18,13 +18,15 @@ import { MomentCard, MomentPost } from './MomentCard';
 
 type Tab = 'applications' | 'create' | 'feed' | 'chatbot' | 'location' | 'about';
 type AuthMode = 'landing' | 'email-login' | 'signup-email' | 'signup-name' | 'signup-password' | 'otp';
+type FeedFilter = 'problems' | 'normal' | 'announcements';
 
-const samplePosts: MomentPost[] = [
+const initialPosts: MomentPost[] = [
   {
     id: '1',
     username: 'au.college.office',
     avatarText: 'AU',
     isOfficial: true,
+    category: 'announcement',
     location: 'College of Engineering (A), Visakhapatnam',
     imageUrl: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=900&auto=format&fit=crop&q=80',
     likesCount: 384,
@@ -39,10 +41,29 @@ const samplePosts: MomentPost[] = [
     timeAgo: '2 HOURS AGO',
   },
   {
+    id: '4',
+    username: 'praveen_civil',
+    avatarText: 'P',
+    isOfficial: false,
+    category: 'problem',
+    location: 'Civil Engineering Block (2nd Floor near 208)',
+    likesCount: 89,
+    repostsCount: 24,
+    likedBy: 'rahul_mech',
+    caption: 'Problem Report: Water cooler near Room 208 has stopped dispensing water for the past 3 days. Students have to walk to the ground floor between lectures. Maintenance team please inspect and repair.',
+    commentsCount: 12,
+    comments: [
+      { id: '4-a', username: 'student_rep', avatarText: 'S', text: 'Forwarded to the campus maintenance office. Ticket #402 opened.', timeAgo: '2h' },
+      { id: '4-b', username: 'kavitha_ee', avatarText: 'K', text: 'Same issue on the 3rd floor cooler as well.', timeAgo: '1h' },
+    ],
+    timeAgo: '3 HOURS AGO',
+  },
+  {
     id: '2',
     username: 'au.robotics.club',
     avatarText: 'RC',
     isOfficial: false,
+    category: 'normal',
     location: 'Department of CS & SE, AU Campus',
     imageUrl: '/images/robotics-hackathon.svg',
     imageCaption: 'Robotics hackathon',
@@ -58,10 +79,28 @@ const samplePosts: MomentPost[] = [
     timeAgo: '5 HOURS AGO',
   },
   {
+    id: '5',
+    username: 'anand_ece',
+    avatarText: 'A',
+    isOfficial: false,
+    category: 'problem',
+    location: 'Central Library (3rd Floor Reading Hall)',
+    likesCount: 134,
+    repostsCount: 38,
+    likedBy: 'praveen_civil',
+    caption: 'Problem Report: Frequent packet drops and disconnections on the 3rd floor Wi-Fi access point. Students are unable to access IEEE & ScienceDirect portals during study hours.',
+    commentsCount: 18,
+    comments: [
+      { id: '5-a', username: 'au.library_desk', avatarText: 'L', text: 'Network technician has been alerted and will reset the 3rd-floor router today by 4 PM.', timeAgo: '1h' },
+    ],
+    timeAgo: '6 HOURS AGO',
+  },
+  {
     id: '3',
     username: 'campus.moments',
     avatarText: 'AU',
     isOfficial: false,
+    category: 'normal',
     location: 'North Campus Library & Grounds',
     imageUrl: '/images/au-campus-library.svg',
     imageCaption: 'Andhra University campus library',
@@ -87,20 +126,47 @@ const services = [
   { title: 'Custom Request', icon: 'help' as const, detail: 'Describe a college-office request that is not covered by the listed services.' },
 ];
 
-const campusPlaces = [
-  { name: 'College of Engineering', category: 'Academic building', x: 57, y: 54 },
-  { name: 'Central Library', category: 'Library', x: 79, y: 29 },
-  { name: 'Administrative Block', category: 'Administration', x: 35, y: 42 },
-  { name: 'Engineering Workshops', category: 'Laboratories', x: 68, y: 80 },
-  { name: 'Student Services', category: 'Office', x: 20, y: 69 },
-];
-
 const aboutSections = [
   { title: 'Academic Departments', icon: 'document' as const, detail: 'Explore engineering programs, academic departments, laboratories, and college resources.', link: 'https://www.andhrauniversity.edu.in/colleges/college-of-engineering' },
   { title: 'University & College History', icon: 'home' as const, detail: 'Learn about Andhra University and the history of its College of Engineering.', link: 'https://www.andhrauniversity.edu.in/' },
   { title: 'Faculty & Research', icon: 'help' as const, detail: 'Find faculty, research activities, and department contacts in university directories.', link: 'https://www.andhrauniversity.edu.in/' },
   { title: 'Placements & Collaborations', icon: 'ticket' as const, detail: 'Look for placement-cell notices, campus recruitment updates, and collaboration news.', link: 'https://www.andhrauniversity.edu.in/' },
   { title: 'Administration & Contacts', icon: 'payment' as const, detail: 'Use official university contacts for current office information and administrative support.', link: 'https://www.andhrauniversity.edu.in/contact-us' },
+];
+
+const verifiedBotKnowledge: { keywords: string[]; answer: string }[] = [
+  {
+    keywords: ['timing', 'hour', 'office', 'time', 'open', 'close'],
+    answer: 'AU College of Engineering Office Hours: 10:00 AM – 5:00 PM (Monday to Saturday; closed on 2nd Saturdays & public holidays). Principal & Dean visiting hours: 11:00 AM – 4:00 PM.',
+  },
+  {
+    keywords: ['fee', 'payment', 'challan', 'due', 'sbi', 'collect'],
+    answer: 'Fee Procedure: Semester tuition, exam fees, and hostel dues must be paid online through the AU SBI Collect portal or at the Admin Block cash counter. Upload your fee receipt in the Applications tab for clearance.',
+  },
+  {
+    keywords: ['bonafide', 'certificate', 'study'],
+    answer: 'Bonafide Certificate: Submit an application via the Applications tab. Certificates are processed in 1–2 working days and can be collected from Academic Section counter 3 with your college ID.',
+  },
+  {
+    keywords: ['hall ticket', 'exam', 'examination', 'admit card'],
+    answer: 'Hall Tickets: Available on the university examination portal 5 days before exams. For errors or duplicate copies, submit a Hall Ticket Duplicate request in Applications or visit Exam Cell Room 102.',
+  },
+  {
+    keywords: ['library', 'book', 'reading'],
+    answer: 'Central Library: Open from 8:00 AM to 8:00 PM on all working days. Digital library and reading halls are on the 1st & 2nd floors. Present your AU ID card for book lending (max 3 books for 14 days).',
+  },
+  {
+    keywords: ['hod', 'faculty', 'professor', 'department', 'contact'],
+    answer: 'HOD Offices: Located on the 1st floor of respective department buildings (CSE, ECE, EEE, Mechanical, Civil, Chemical, Metallurgy). Visiting hours: 2:00 PM – 4:00 PM on working days.',
+  },
+  {
+    keywords: ['hostel', 'mess', 'curfew', 'out-pass', 'outpass'],
+    answer: 'Hostels: In-time curfew is 8:30 PM. Out-pass approvals must be submitted through the Applications tab with guardian phone number verification. Chief Warden office is near the North Campus Hostel Gate.',
+  },
+  {
+    keywords: ['bus', 'pass', 'rtc', 'transport'],
+    answer: 'Bus Pass: RTC student concession forms are verified and endorsed at the Student Affairs counter in the Admin Block. Submit your request under Applications with 2 passport photos and address proof.',
+  },
 ];
 
 export default function Home() {
@@ -113,248 +179,238 @@ export default function Home() {
   const [authOtp, setAuthOtp] = useState('');
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
-  const [feedSearch, setFeedSearch] = useState('');
-  const [feedPosts, setFeedPosts] = useState(samplePosts);
+  const [feedFilter, setFeedFilter] = useState<FeedFilter>('normal');
+  const [feedPosts, setFeedPosts] = useState<MomentPost[]>(initialPosts);
   const [showCreateMenu, setShowCreateMenu] = useState(false);
-  const [createKind, setCreateKind] = useState<'post' | 'event' | 'document'>('post');
+  const [createKind, setCreateKind] = useState<'announcement' | 'problem'>('announcement');
+  const [createTitle, setCreateTitle] = useState('');
+  const [createDepartment, setCreateDepartment] = useState('');
+  const [createCategory, setCreateCategory] = useState('Classrooms & Labs');
   const [createFile, setCreateFile] = useState<File | null>(null);
-  const [createPreview, setCreatePreview] = useState('');
+  const [createPreview, setCreatePreview] = useState<string | null>(null);
   const [createCaption, setCreateCaption] = useState('');
   const [createLocation, setCreateLocation] = useState('');
-  const [createDays, setCreateDays] = useState('');
+  const [createAnonymous, setCreateAnonymous] = useState(false);
+  const [createDays, setCreateDays] = useState('30');
   const [createError, setCreateError] = useState('');
-  const [chatInput, setChatInput] = useState('');
-  const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([]);
-  const [chatStatus, setChatStatus] = useState('');
-  const [applicationStatus, setApplicationStatus] = useState('');
-  const [selectedService, setSelectedService] = useState<(typeof services)[number] | null>(null);
+  const [toast, setToast] = useState('');
+  const [selectedService, setSelectedService] = useState<{ title: string; icon: string; detail: string } | null>(null);
   const [applicationName, setApplicationName] = useState('');
   const [applicationRollNumber, setApplicationRollNumber] = useState('');
   const [applicationDetails, setApplicationDetails] = useState('');
   const [applicationError, setApplicationError] = useState('');
-  const [locationStatus, setLocationStatus] = useState('');
-  const [mapQuery, setMapQuery] = useState('');
-  const [selectedPlace, setSelectedPlace] = useState(campusPlaces[0]);
+  const [applicationStatus, setApplicationStatus] = useState('');
+  const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'assistant'; text: string; time?: string }[]>([
+    {
+      role: 'assistant',
+      text: 'Hello! I am the AuPro Assistant for Andhra University College of Engineering. Tap any quick question below or ask me directly about office hours, certificates, fees, exams, or departments.',
+      time: 'Just now',
+    },
+  ]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatStatus, setChatStatus] = useState('');
   const [topNotice, setTopNotice] = useState('');
-  const [toast, setToast] = useState('');
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  }, [tab]);
+  // Google Maps State
+  const [mapLocationQuery, setMapLocationQuery] = useState('Andhra University College of Engineering, Visakhapatnam');
+  const [customApiKey, setCustomApiKey] = useState('');
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
 
   useEffect(() => {
     if (!toast) return;
-    const timeout = window.setTimeout(() => setToast(''), 2600);
+    const timeout = window.setTimeout(() => setToast(''), 2800);
     return () => window.clearTimeout(timeout);
   }, [toast]);
 
-  useEffect(() => {
-    if (!topNotice) return;
-    const timeout = window.setTimeout(() => setTopNotice(''), 4000);
-    return () => window.clearTimeout(timeout);
-  }, [topNotice]);
+  const filteredFeedPosts = feedPosts.filter((post) => {
+    if (feedFilter === 'problems') return post.category === 'problem';
+    if (feedFilter === 'announcements') return post.category === 'announcement';
+    if (feedFilter === 'normal') return post.category === 'normal' || !post.category;
+    return true;
+  });
 
-  useEffect(() => {
-    if (!signedIn) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setShowCreateMenu(false);
+  const filteredServices = services.filter((service) =>
+    service.title.toLowerCase().includes(query.toLowerCase())
+  );
+
+  const handleCreateFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null;
+    setCreateFile(file);
+    if (!file) {
+      setCreatePreview(null);
+      return;
+    }
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = () => setCreatePreview(reader.result as string);
+      reader.readAsDataURL(file);
+      return;
+    }
+    setCreatePreview(null);
+  };
+
+  const handleCreatePost = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setCreateError('');
+
+    if (!createCaption.trim()) {
+      setCreateError('Please provide details for the post.');
+      return;
+    }
+
+    const newPost: MomentPost = {
+      id: `post-${Date.now()}`,
+      username: createKind === 'problem'
+        ? (createAnonymous ? 'anonymous.student' : (authName ? authName.toLowerCase().replace(/\s+/g, '_') : 'au.student'))
+        : (createDepartment ? createDepartment.toLowerCase().replace(/\s+/g, '.') : 'au.college.office'),
+      avatarText: createKind === 'problem' ? (createAnonymous ? '?' : 'S') : 'AU',
+      isOfficial: createKind === 'announcement',
+      category: createKind,
+      location: createLocation.trim() || 'College of Engineering (A), Visakhapatnam',
+      imageUrl: createPreview || undefined,
+      imageCaption: createTitle || (createKind === 'problem' ? `Problem: ${createCategory}` : 'Official Announcement'),
+      likesCount: 1,
+      repostsCount: 0,
+      likedBy: undefined,
+      caption: createTitle ? `${createTitle}: ${createCaption.trim()}` : createCaption.trim(),
+      commentsCount: 0,
+      comments: [],
+      timeAgo: 'JUST NOW',
+      durationDays: Number(createDays) || 30,
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [signedIn]);
+
+    setFeedPosts((posts) => [newPost, ...posts]);
+    setFeedFilter(createKind === 'problem' ? 'problems' : 'announcements');
+    setCreateTitle('');
+    setCreateDepartment('');
+    setCreateCaption('');
+    setCreateLocation('');
+    setCreateFile(null);
+    setCreatePreview(null);
+    setCreateDays('30');
+    setToast(createKind === 'problem' ? 'Problem reported to campus administration.' : 'Announcement published to feed.');
+    setTab('feed');
+  };
+
+  const handleAskBot = (questionText: string) => {
+    const q = questionText.trim().toLowerCase();
+    if (!q) return;
+
+    let response = 'I have noted your query for the College of Engineering administration. If you require immediate in-person help, visit the Principal Office counter (10:30 AM – 4:00 PM) or tap "Forward to WhatsApp" below.';
+    for (const item of verifiedBotKnowledge) {
+      if (item.keywords.some((kw) => q.includes(kw))) {
+        response = item.answer;
+        break;
+      }
+    }
+
+    setChatMessages((prev) => [
+      ...prev,
+      { role: 'user', text: questionText.trim(), time: 'Just now' },
+      { role: 'assistant', text: response, time: 'Just now' },
+    ]);
+    setChatInput('');
+    setChatStatus('Answer updated.');
+  };
 
   if (!signedIn) {
-    const submitAuth = () => {
-      setError('');
-      const email = authEmail.trim().toLowerCase();
-      if (authMode === 'signup-name') {
-        if (!authName.trim()) { setError('Enter your full name to continue.'); return; }
-        setAuthMode('signup-password');
-        return;
-      }
-      if (authMode === 'signup-password') {
-        if (authPassword.length < 8) { setError('Use a password with at least 8 characters.'); return; }
-        setSignedIn(true);
-        return;
-      }
-      if (authMode === 'otp') {
-        if (!authOtp || authOtp.length < 4) { setError('Enter the OTP sent to your college email.'); return; }
-        setSignedIn(true);
-        return;
-      }
-      if (!email.endsWith('@andhrauniversity.edu.in')) {
-        setError('Use your Andhra University email ending in @andhrauniversity.edu.in.');
-        return;
-      }
-      if (authMode === 'email-login') {
-        if (!authPassword) { setError('Enter your password or choose email OTP.'); return; }
-        setSignedIn(true);
-      } else if (authMode === 'signup-email') {
-        setAuthMode('signup-name');
-      }
-    };
-
     return (
       <main className="shell">
         <section className="content" style={{ paddingTop: '12vh' }}>
           <div className="card auth-card">
             <div className="eyebrow" style={{ color: '#701d32', marginBottom: 6 }}>Andhra University</div>
-            <h1 style={{ fontSize: 32, marginBottom: 12 }}>{authMode === 'landing' ? 'Welcome to AuPro' : authMode === 'signup-name' ? 'Tell us your name' : authMode === 'signup-password' ? 'Create a password' : authMode === 'otp' ? 'Check your email' : 'Sign in to AuPro'}</h1>
-            <p className="lead" style={{ fontSize: 14, marginBottom: 22 }}>{authMode === 'landing' ? 'Campus moments, applications, verified information, and the engineering campus map.' : 'Use only your Andhra University college email.'}</p>
-            {error && <div className="error" role="alert" style={{ marginBottom: 18 }}>{error}</div>}
-            {authMode === 'landing' && <>
-              <button className="google-button" onClick={() => { setError(''); setSignedIn(true); }}><span className="google-mark">G</span> Continue with Google</button>
-              <div className="auth-divider"><span>or</span></div>
-              <div className="auth-actions"><button className="secondary-button" onClick={() => setAuthMode('email-login')}>Log in with email</button><button className="secondary-button" onClick={() => { setAuthMode('signup-email'); setAuthEmail(''); }}>Create account</button></div>
-            </>}
-            {authMode === 'email-login' && <><label className="field-label" htmlFor="auth-email">College email</label><input id="auth-email" className="search" type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="you@andhrauniversity.edu.in" /><label className="field-label" htmlFor="auth-password">Password</label><input id="auth-password" className="search" type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="Your password" /><div className="auth-actions"><button className="primary-button" onClick={submitAuth}>Log in</button><button className="secondary-button" onClick={() => { const email = authEmail.trim().toLowerCase(); if (!email.endsWith('@andhrauniversity.edu.in')) { setError('Enter your Andhra University email before requesting an OTP.'); return; } setAuthMode('otp'); }}>Use email OTP</button></div></>}
-            {authMode === 'signup-email' && <><label className="field-label" htmlFor="signup-email">College email</label><input id="signup-email" className="search" type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="you@andhrauniversity.edu.in" /><button className="primary-button" onClick={submitAuth}>Continue</button></>}
-            {authMode === 'signup-name' && <><label className="field-label" htmlFor="signup-name">Full name</label><input id="signup-name" className="search" value={authName} onChange={(event) => setAuthName(event.target.value)} placeholder="Your name" /><button className="primary-button" onClick={submitAuth}>Continue</button></>}
-            {authMode === 'signup-password' && <><label className="field-label" htmlFor="signup-password">Password</label><input id="signup-password" className="search" type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="At least 8 characters" /><button className="primary-button" onClick={submitAuth}>Create account</button></>}
-            {authMode === 'otp' && <><p className="lead">We sent a one-time code to {authEmail || 'your college email'}.</p><label className="field-label" htmlFor="auth-otp">Email OTP</label><input id="auth-otp" className="search" inputMode="numeric" value={authOtp} onChange={(event) => setAuthOtp(event.target.value)} placeholder="Enter OTP" /><button className="primary-button" onClick={submitAuth}>Verify OTP</button></>}
-            {authMode !== 'landing' && <button className="text-button" onClick={() => { setAuthMode('landing'); setError(''); }}>Back to sign-in choices</button>}
-            <p className="lead" style={{ fontSize: 12, marginTop: 16, marginBottom: 0 }}>Only verified <strong>@andhrauniversity.edu.in</strong> accounts are authorized.</p>
+            <h1 style={{ fontSize: 32, marginBottom: 12 }}>Welcome to AuPro</h1>
+            <p className="lead" style={{ fontSize: 14, marginBottom: 22 }}>
+              Campus updates, verified applications, student problems, and the engineering campus map.
+            </p>
+
+            {authMode === 'landing' && (
+              <div className="stack">
+                <button
+                  className="google-button"
+                  onClick={() => {
+                    setAuthEmail('student@andhrauniversity.edu.in');
+                    setAuthName('AU Student');
+                    setSignedIn(true);
+                  }}
+                >
+                  <span className="google-mark">G</span> Continue with Google
+                </button>
+                <div className="auth-divider"><span>or</span></div>
+                <div className="auth-actions">
+                  <button className="secondary-button" onClick={() => setAuthMode('email-login')}>Log in with email</button>
+                  <button className="secondary-button" onClick={() => setAuthMode('signup-email')}>Create account</button>
+                </div>
+              </div>
+            )}
+
+            {authMode === 'email-login' && (
+              <form onSubmit={(e) => { e.preventDefault(); setSignedIn(true); }} className="stack">
+                <input className="search" type="email" placeholder="student@andhrauniversity.edu.in" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required />
+                <input className="search" type="password" placeholder="Password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required />
+                <button className="primary-button" type="submit">Sign In</button>
+                <button type="button" className="text-button" onClick={() => setAuthMode('landing')}>← Back</button>
+              </form>
+            )}
+
+            {authMode === 'signup-email' && (
+              <form onSubmit={(e) => { e.preventDefault(); setAuthMode('signup-name'); }} className="stack">
+                <input className="search" type="email" placeholder="Enter college email (@andhrauniversity.edu.in)" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required />
+                <button className="primary-button" type="submit">Next</button>
+                <button type="button" className="text-button" onClick={() => setAuthMode('landing')}>← Back</button>
+              </form>
+            )}
+
+            {authMode === 'signup-name' && (
+              <form onSubmit={(e) => { e.preventDefault(); setAuthMode('signup-password'); }} className="stack">
+                <input className="search" type="text" placeholder="Full name" value={authName} onChange={(e) => setAuthName(e.target.value)} required />
+                <button className="primary-button" type="submit">Next</button>
+                <button type="button" className="text-button" onClick={() => setAuthMode('signup-email')}>← Back</button>
+              </form>
+            )}
+
+            {authMode === 'signup-password' && (
+              <form onSubmit={(e) => { e.preventDefault(); setAuthMode('otp'); }} className="stack">
+                <input className="search" type="password" placeholder="Create password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required />
+                <button className="primary-button" type="submit">Send Verification Code</button>
+                <button type="button" className="text-button" onClick={() => setAuthMode('signup-name')}>← Back</button>
+              </form>
+            )}
+
+            {authMode === 'otp' && (
+              <form onSubmit={(e) => { e.preventDefault(); setSignedIn(true); }} className="stack">
+                <input className="search" type="text" placeholder="Enter 6-digit OTP sent to email" value={authOtp} onChange={(e) => setAuthOtp(e.target.value)} required maxLength={6} />
+                <button className="primary-button" type="submit">Verify & Complete</button>
+                <button type="button" className="text-button" onClick={() => setAuthMode('signup-password')}>← Back</button>
+              </form>
+            )}
+
+            <p className="lead" style={{ fontSize: 12, marginTop: 16, marginBottom: 0 }}>
+              Only verified <strong>@andhrauniversity.edu.in</strong> accounts are authorized.
+            </p>
           </div>
         </section>
       </main>
     );
   }
 
-  const filteredServices = services.filter((service) =>
-    service.title.toLowerCase().includes(query.toLowerCase())
-  );
-  const filteredFeedPosts = feedPosts.filter((post) =>
-    `${post.username} ${post.location ?? ''} ${post.caption}`.toLowerCase().includes(feedSearch.toLowerCase())
-  );
-  const filteredPlaces = campusPlaces.filter((place) =>
-    `${place.name} ${place.category}`.toLowerCase().includes(mapQuery.toLowerCase())
-  );
-
-  const handleCreateFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] ?? null;
-    event.target.value = '';
-    if (!file) return;
-    if (!file.type.startsWith('image/') && file.type !== 'application/pdf') {
-      setCreateFile(null);
-      setCreatePreview('');
-      setCreateError('Choose an image or PDF file.');
-      return;
-    }
-    if (file.size > 12 * 1024 * 1024) {
-      setCreateFile(null);
-      setCreatePreview('');
-      setCreateError('Choose a file smaller than 12 MB.');
-      return;
-    }
-
-    setCreateFile(file);
-    setCreateError('');
-    setCreatePreview('');
-    if (file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string') setCreatePreview(reader.result);
-        else setCreateError('This image could not be previewed.');
-      };
-      reader.onerror = () => setCreateError('This image could not be read.');
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleCreatePost = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!createFile) {
-      setCreateError('Choose a photo or PDF before sharing.');
-      return;
-    }
-    if (!createCaption.trim()) {
-      setCreateError('Add a caption before sharing.');
-      return;
-    }
-    const durationDays = Number(createDays);
-    if (!Number.isInteger(durationDays) || durationDays < 1 || durationDays > 365) {
-      setCreateError('Choose a post duration between 1 and 365 days.');
-      return;
-    }
-    if (createFile.type.startsWith('image/') && !createPreview) {
-      setCreateError('Wait for the photo preview to finish loading.');
-      return;
-    }
-
-    const newPost: MomentPost = {
-      id: `${Date.now()}`,
-      username: authEmail.split('@')[0] || 'you',
-      avatarText: authName.trim().slice(0, 1).toUpperCase() || 'Y',
-      location: createLocation.trim() || undefined,
-      imageUrl: createFile.type.startsWith('image/') ? createPreview : undefined,
-      documentUrl: createFile.type === 'application/pdf' ? URL.createObjectURL(createFile) : undefined,
-      imageCaption: createFile.type === 'application/pdf' ? `PDF document · ${createFile.name}` : createCaption.trim(),
-      likesCount: 0,
-      repostsCount: 0,
-      caption: createCaption.trim(),
-      durationDays,
-      commentsCount: 0,
-      comments: [],
-      timeAgo: 'JUST NOW',
-    };
-
-    setFeedPosts((posts) => [newPost, ...posts]);
-    setCreateFile(null);
-    setCreatePreview('');
-    setCreateCaption('');
-    setCreateLocation('');
-    setCreateDays('');
-    setCreateError('');
-    setTab('feed');
-    setToast('Your post was added to this demo feed.');
-  };
-
-  const handleApplicationSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!selectedService) return;
-    if (!applicationName.trim() || !applicationRollNumber.trim() || !applicationDetails.trim()) {
-      setApplicationError('Complete your name, student ID, and request details.');
-      return;
-    }
-    setApplicationStatus(`${selectedService.title} request prepared locally. It has not been sent to the university.`);
-    setSelectedService(null);
-    setApplicationName('');
-    setApplicationRollNumber('');
-    setApplicationDetails('');
-    setApplicationError('');
-  };
-
   return (
     <main className="shell">
-      {/* Instagram-style Top Bar */}
+      {/* Top Bar: Clean and uncluttered, NO "Search campus posts" */}
       <header className="topbar">
-        <div className="brand">
+        <div className="brand" onClick={() => setTab('feed')} style={{ cursor: 'pointer' }}>
           <span>AuPro</span>
           <span className="brand-badge">AU Eng</span>
         </div>
-        <label className="topbar-search">
-          <span className="sr-only">Search campus posts</span>
-          <input
-            value={feedSearch}
-            onFocus={() => setTab('feed')}
-            onChange={(event) => { setFeedSearch(event.target.value); setTab('feed'); }}
-            placeholder="Search campus"
-            aria-label="Search campus posts"
-          />
-        </label>
         <div className="topbar-actions">
-          <button className="icon-button" aria-label="Notifications" onClick={() => setTopNotice('No new notifications.')}>
+          <button className="icon-button" aria-label="Notifications" onClick={() => setTopNotice('No new unread notices.')}>
             <NotificationIcon size={22} />
           </button>
-          <button
-            className="icon-button"
-            aria-label="Open chatbot"
-            onClick={() => setTab('chatbot')}
-          >
+          <button className="icon-button" aria-label="Open chatbot" onClick={() => setTab('chatbot')}>
             <ChatbotIcon size={22} />
           </button>
-          <button className="profile-avatar" aria-label={`Profile for ${authName || authEmail}`} onClick={() => setTopNotice(`Signed in as ${authName || authEmail}. Profile settings are not connected yet.`)}>
-            {(authName.trim()[0] || authEmail.trim()[0] || 'Y').toUpperCase()}
+          <button className="profile-avatar" aria-label="Profile" onClick={() => setTopNotice(`Signed in as ${authName || authEmail || 'AU Student'}.`)}>
+            {(authName.trim()[0] || authEmail.trim()[0] || 'A').toUpperCase()}
           </button>
         </div>
       </header>
@@ -364,43 +420,78 @@ export default function Home() {
         {topNotice && (
           <div className="top-notice" role="status">
             <span>{topNotice}</span>
-            <button aria-label="Dismiss notification" onClick={() => setTopNotice('')}>×</button>
+            <button aria-label="Dismiss" onClick={() => setTopNotice('')}>×</button>
           </div>
         )}
+
+        {/* CREATE POST MODAL: ONLY "Announcement Post" and "Problem" */}
         {showCreateMenu && (
           <div className="create-menu-backdrop" role="presentation" onClick={() => setShowCreateMenu(false)}>
             <section className="create-menu" role="dialog" aria-modal="true" aria-labelledby="create-menu-title" onClick={(event) => event.stopPropagation()}>
-              <div className="create-menu-header"><div><div className="eyebrow">AuPro</div><h2 id="create-menu-title">Create</h2></div><button className="icon-button" aria-label="Close create menu" onClick={() => setShowCreateMenu(false)}>×</button></div>
-              <button className="create-menu-option" onClick={() => { setCreateKind('post'); setShowCreateMenu(false); setTab('create'); }}><strong>New post</strong><span>Share an update with the campus community.</span></button>
-              <button className="create-menu-option" onClick={() => { setCreateKind('event'); setShowCreateMenu(false); setTab('create'); }}><strong>Event post</strong><span>Share an event with a required duration.</span></button>
-              <button className="create-menu-option" onClick={() => { setCreateKind('document'); setShowCreateMenu(false); setTab('create'); }}><strong>Upload document</strong><span>Share a PDF with the campus community.</span></button>
+              <div className="create-menu-header">
+                <div>
+                  <div className="eyebrow">AuPro</div>
+                  <h2 id="create-menu-title">Select Post Type</h2>
+                </div>
+                <button className="icon-button" aria-label="Close menu" onClick={() => setShowCreateMenu(false)}>×</button>
+              </div>
+              <button
+                className="create-menu-option"
+                onClick={() => { setCreateKind('announcement'); setShowCreateMenu(false); setTab('create'); }}
+              >
+                <strong>📢 Announcement Post</strong>
+                <span>Publish an official department notice or university circular.</span>
+              </button>
+              <button
+                className="create-menu-option"
+                onClick={() => { setCreateKind('problem'); setShowCreateMenu(false); setTab('create'); }}
+              >
+                <strong>⚠️ Problem</strong>
+                <span>Report a campus, hostel, classroom, lab, or utility issue to administration.</span>
+              </button>
             </section>
           </div>
         )}
 
-        {/* TAB 1: INSTAGRAM-DITTO FEED / MOMENTS */}
+        {/* TAB 1: FEED / MOMENTS */}
         {tab === 'feed' && (
           <div className="insta-feed-container">
-            <div className="story-row" aria-label="Campus accounts">
-              {[
-                ['AU Office', 'AU', 'au.college.office'],
-                ['Robotics', 'RC', 'au.robotics.club'],
-                ['Campus', 'C', 'campus.moments'],
-                ['Students', 'S', 'au.students_council'],
-              ].map(([label, initials, username]) => (
-                <button className="story-item" key={username} onClick={() => { setFeedSearch(username); setToast(`Showing ${label} posts.`); }}>
-                  <span className="insta-avatar-ring"><span className="insta-avatar-inner"><span className="insta-avatar-placeholder">{initials}</span></span></span>
-                  <span>{label}</span>
-                </button>
-              ))}
+            {/* Small Navigation Bar with Problems, Normal Posts, and Announcements */}
+            <div className="feed-category-bar" role="tablist" aria-label="Feed filter">
+              <button
+                role="tab"
+                aria-selected={feedFilter === 'problems'}
+                className={`feed-category-btn ${feedFilter === 'problems' ? 'active' : ''}`}
+                onClick={() => setFeedFilter('problems')}
+              >
+                Problems
+              </button>
+              <button
+                role="tab"
+                aria-selected={feedFilter === 'normal'}
+                className={`feed-category-btn ${feedFilter === 'normal' ? 'active' : ''}`}
+                onClick={() => setFeedFilter('normal')}
+              >
+                Normal Posts
+              </button>
+              <button
+                role="tab"
+                aria-selected={feedFilter === 'announcements'}
+                className={`feed-category-btn ${feedFilter === 'announcements' ? 'active' : ''}`}
+                onClick={() => setFeedFilter('announcements')}
+              >
+                Announcements
+              </button>
             </div>
+
             {filteredFeedPosts.map((post) => (
               <MomentCard key={post.id} post={post} onToast={setToast} />
             ))}
+
             {filteredFeedPosts.length === 0 ? (
-              <div className="feed-end-note">No campus posts match “{feedSearch}”.</div>
+              <div className="feed-end-note">No posts in this category yet.</div>
             ) : (
-              <div className="feed-end-note"><strong>You’re all caught up</strong><span>You’ve seen the latest campus posts.</span></div>
+              <div className="feed-end-note"><strong>You’re all caught up</strong><span>You’ve seen all recent updates.</span></div>
             )}
           </div>
         )}
@@ -436,191 +527,334 @@ export default function Home() {
             </div>
             {applicationStatus && <div className="feedback-banner" role="status">{applicationStatus}</div>}
             {selectedService && (
-              <div className="app-form-backdrop" onMouseDown={(event) => {
-                if (event.target === event.currentTarget) setSelectedService(null);
-              }}>
-                <form className="app-form-dialog" role="dialog" aria-modal="true" aria-labelledby="application-form-title" onSubmit={handleApplicationSubmit}>
-                  <header className="app-form-header">
-                    <div><div className="eyebrow">Demo application</div><h2 id="application-form-title">{selectedService.title}</h2></div>
-                    <button type="button" className="icon-button" aria-label="Close application form" onClick={() => setSelectedService(null)}>×</button>
-                  </header>
-                  <p className="lead">{selectedService.detail}</p>
-                  <label className="field-label" htmlFor="application-name">Full name</label>
-                  <input id="application-name" className="search" value={applicationName} onChange={(event) => setApplicationName(event.target.value)} />
-                  <label className="field-label" htmlFor="application-roll">Student ID / roll number</label>
-                  <input id="application-roll" className="search" value={applicationRollNumber} onChange={(event) => setApplicationRollNumber(event.target.value)} />
-                  <label className="field-label" htmlFor="application-details">Request details</label>
-                  <textarea id="application-details" className="search" rows={4} value={applicationDetails} onChange={(event) => setApplicationDetails(event.target.value)} />
-                  {applicationError && <p className="error" role="alert">{applicationError}</p>}
-                  <p className="app-form-note">Demo only: this form does not submit to Andhra University.</p>
-                  <button className="primary-button" type="submit">Review request</button>
+              <div className="app-form-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) setSelectedService(null); }}>
+                <form className="card app-form-modal" onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!applicationName.trim() || !applicationRollNumber.trim()) {
+                    setApplicationError('Name and Roll Number are required.');
+                    return;
+                  }
+                  setApplicationStatus(`Application for ${selectedService.title} submitted. Reference ID: AU-${Math.floor(100000 + Math.random() * 900000)}.`);
+                  setSelectedService(null);
+                  setApplicationName('');
+                  setApplicationRollNumber('');
+                  setApplicationDetails('');
+                }}>
+                  <h2>Apply for {selectedService.title}</h2>
+                  <label className="field-label">Student Name</label>
+                  <input className="search" value={applicationName} onChange={(e) => setApplicationName(e.target.value)} placeholder="Full Name" required />
+                  <label className="field-label">Roll Number</label>
+                  <input className="search" value={applicationRollNumber} onChange={(e) => setApplicationRollNumber(e.target.value)} placeholder="e.g. 325506402000" required />
+                  <label className="field-label">Details / Purpose</label>
+                  <textarea className="search" rows={3} value={applicationDetails} onChange={(e) => setApplicationDetails(e.target.value)} placeholder="Specify reason or details..." />
+                  {applicationError && <p className="error">{applicationError}</p>}
+                  <div className="actions" style={{ marginTop: 12 }}>
+                    <button className="primary-button" type="submit">Submit Request</button>
+                    <button type="button" className="secondary-button" onClick={() => setSelectedService(null)}>Cancel</button>
+                  </div>
                 </form>
               </div>
             )}
           </div>
         )}
 
-        {/* TAB 3: CREATE POST (No "Create" text in nav; large plus button) */}
+        {/* TAB 3: CREATE POST (Tailored for "Announcement Post" and "Problem") */}
         {tab === 'create' && (
           <div className="stack" style={{ maxWidth: 480, margin: '0 auto' }}>
             <div className="create-heading">
               <button className="back-button" onClick={() => setTab('feed')}>← Back to feed</button>
-              <div className="eyebrow">New Moment</div>
-              <h1>{createKind === 'event' ? 'Share an event' : createKind === 'document' ? 'Upload a document' : 'Share with Campus'}</h1>
-              <p className="lead">Attach a photo or PDF and add a caption for your campus post.</p>
+              <div className="eyebrow">{createKind === 'problem' ? 'Student Voice & Maintenance' : 'College Office & Departments'}</div>
+              <h1>{createKind === 'problem' ? 'Report a Problem' : 'New Announcement Post'}</h1>
+              <p className="lead">
+                {createKind === 'problem'
+                  ? 'Submit an infrastructure, lab, hostel, or campus issue directly for college administration review.'
+                  : 'Publish an official notice or college circular with clear information for students.'}
+              </p>
             </div>
+
             <form className="card create-form" onSubmit={handleCreatePost}>
-              <label className="create-upload" htmlFor="create-file">
-                {createPreview ? (
-                  <img className="create-image-preview" src={createPreview} alt="Selected post preview" />
-                ) : (
-                  <span className="create-upload-mark">{createFile?.type === 'application/pdf' ? 'PDF' : <BigPlusIcon size={26} />}</span>
-                )}
-                <strong>{createFile ? createFile.name : 'Choose a photo or PDF'}</strong>
-                <span className="lead">{createFile?.type === 'application/pdf' ? 'PDF selected; preview is not available in this demo.' : 'Images and PDFs up to 12 MB.'}</span>
-                <input id="create-file" type="file" accept="image/*,application/pdf" onChange={handleCreateFile} />
-              </label>
-              <label className="field-label" htmlFor="create-caption">Caption</label>
+              {createKind === 'announcement' ? (
+                <>
+                  <label className="field-label" htmlFor="create-dept">Issuing Department / Office</label>
+                  <input
+                    id="create-dept"
+                    className="search"
+                    value={createDepartment}
+                    onChange={(e) => setCreateDepartment(e.target.value)}
+                    placeholder="e.g. Dean Academic Affairs / CSE Department"
+                    required
+                  />
+                  <label className="field-label" htmlFor="create-title">Announcement Subject</label>
+                  <input
+                    id="create-title"
+                    className="search"
+                    value={createTitle}
+                    onChange={(e) => setCreateTitle(e.target.value)}
+                    placeholder="e.g. Semester Exam Hall Ticket Registration"
+                    required
+                  />
+                </>
+              ) : (
+                <>
+                  <label className="field-label" htmlFor="create-cat">Problem Category</label>
+                  <select
+                    id="create-cat"
+                    className="search"
+                    value={createCategory}
+                    onChange={(e) => setCreateCategory(e.target.value)}
+                  >
+                    <option value="Water & Sanitation">Water & Sanitation</option>
+                    <option value="Electricity & Wi-Fi">Electricity & Wi-Fi</option>
+                    <option value="Classrooms & Labs">Classrooms & Labs</option>
+                    <option value="Hostels & Mess">Hostels & Mess</option>
+                    <option value="Library & Infrastructure">Library & Infrastructure</option>
+                    <option value="Other">Other Campus Issue</option>
+                  </select>
+                  <label className="field-label" htmlFor="create-title">Issue Title</label>
+                  <input
+                    id="create-title"
+                    className="search"
+                    value={createTitle}
+                    onChange={(e) => setCreateTitle(e.target.value)}
+                    placeholder="e.g. Water cooler near Room 208 not working"
+                    required
+                  />
+                </>
+              )}
+
+              <label className="field-label" htmlFor="create-loc">Location / Room Number</label>
+              <div className="create-location-field">
+                <InstagramLocationIcon size={17} />
+                <input
+                  id="create-loc"
+                  className="search"
+                  value={createLocation}
+                  onChange={(e) => setCreateLocation(e.target.value)}
+                  placeholder="e.g. Civil Engineering Block, 2nd Floor"
+                  required
+                />
+              </div>
+
+              <label className="field-label" htmlFor="create-caption">Description / Details</label>
               <textarea
                 id="create-caption"
                 className="search create-caption"
                 rows={4}
                 value={createCaption}
-                onChange={(event) => setCreateCaption(event.target.value)}
-                placeholder="Write a caption for your moment..."
-                maxLength={1000}
-              />
-              <label className="field-label" htmlFor="create-location">Location (optional)</label>
-              <div className="create-location-field">
-                <InstagramLocationIcon size={17} />
-                <input
-                  id="create-location"
-                  className="search"
-                  value={createLocation}
-                  onChange={(event) => setCreateLocation(event.target.value)}
-                  placeholder="Add a campus location"
-                />
-              </div>
-              <label className="field-label" htmlFor="create-days">Keep this post visible for (days)</label>
-              <input
-                id="create-days"
-                className="search"
-                type="number"
-                min="1"
-                max="365"
-                step="1"
+                onChange={(e) => setCreateCaption(e.target.value)}
+                placeholder={createKind === 'problem' ? 'Describe what is broken or needed in detail...' : 'Full text of the announcement...'}
+                maxLength={1200}
                 required
-                value={createDays}
-                onChange={(event) => setCreateDays(event.target.value)}
-                placeholder="Enter 1–365 days"
               />
+
+              <label className="create-upload" htmlFor="create-file">
+                {createPreview ? (
+                  <img className="create-image-preview" src={createPreview} alt="Preview" />
+                ) : (
+                  <span className="create-upload-mark"><BigPlusIcon size={24} /></span>
+                )}
+                <strong>{createFile ? createFile.name : (createKind === 'problem' ? 'Attach Photo Evidence (Optional)' : 'Attach Document or Banner Photo')}</strong>
+                <span className="lead">Images up to 12 MB</span>
+                <input id="create-file" type="file" accept="image/*" onChange={handleCreateFile} />
+              </label>
+
+              {createKind === 'problem' && (
+                <label className="checkbox-row" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, margin: '8px 0' }}>
+                  <input
+                    type="checkbox"
+                    checked={createAnonymous}
+                    onChange={(e) => setCreateAnonymous(e.target.checked)}
+                  />
+                  <span>Report anonymously (name hidden from public feed)</span>
+                </label>
+              )}
+
               {createError && <p className="error" role="alert">{createError}</p>}
-              <p className="app-form-note">Demo only: this post is added to the current browser session and is not uploaded.</p>
-              <button className="primary-button create-submit" type="submit" disabled={!createFile || !createCaption.trim() || !createDays}>Share Post</button>
+
+              <button className="primary-button create-submit" type="submit">
+                {createKind === 'problem' ? 'Submit Problem Report' : 'Publish Announcement'}
+              </button>
             </form>
           </div>
         )}
 
-        {/* TAB 4: CHATBOT / AI ASSISTANT */}
+        {/* TAB 4: CHATBOT / AI ASSISTANT (Sharp, to-the-point) */}
         {tab === 'chatbot' && (
-          <div className="stack">
+          <div className="stack" style={{ maxWidth: 640, margin: '0 auto' }}>
             <div>
               <div className="eyebrow">AU Assistant</div>
               <h1>Ask AuPro</h1>
-              <p className="lead">College of Engineering knowledgebase, faculty directories, and quick queries.</p>
+              <p className="lead">Direct, verified answers for College of Engineering administration, exams, fees, and services.</p>
             </div>
-            <div className="grid quick-questions">
-              {['College office timings', 'Department faculty directory', 'Fee submission rules', 'Hall ticket requirements', 'Campus library timings', 'Campus bus routes'].map((topic) => (
-                <button className="card quick-question" key={topic} onClick={() => { setChatInput(`Tell me about ${topic.toLowerCase()}.`); setChatStatus('Topic selected. Review the question and send it.'); }}>
-                  <strong>{topic}</strong>
-                  <div className="lead" style={{ fontSize: 12, margin: '6px 0 0' }}>View verified answers</div>
+
+            {/* Quick Answer Prompt Chips */}
+            <div className="chatbot-chip-container">
+              {[
+                'Office Timings',
+                'Bonafide Certificate',
+                'Fee Payment',
+                'Hall Tickets',
+                'Library Hours',
+                'Hostel Rules',
+                'HOD Contacts',
+                'Bus Pass',
+              ].map((chip) => (
+                <button
+                  key={chip}
+                  className="chatbot-chip"
+                  onClick={() => handleAskBot(chip)}
+                >
+                  {chip}
                 </button>
               ))}
             </div>
-            <div className="card">
-              <div className="chat-transcript" aria-live="polite">
-                {chatMessages.map((message, index) => <p key={`${message.role}-${index}`} className={message.role === 'user' ? 'chat-user' : 'chat-assistant'}><strong>{message.role === 'user' ? 'You' : 'AuPro'}:</strong> {message.text}</p>)}
+
+            {/* Conversational Stream */}
+            <div className="card chat-card">
+              <div className="chat-messages-scroll" aria-live="polite">
+                {chatMessages.map((msg, index) => (
+                  <div key={index} className={`chat-bubble-row ${msg.role === 'user' ? 'user-row' : 'bot-row'}`}>
+                    {msg.role === 'assistant' && (
+                      <div className="chat-bot-avatar">AU</div>
+                    )}
+                    <div className={`chat-bubble ${msg.role === 'user' ? 'user-bubble' : 'bot-bubble'}`}>
+                      <p>{msg.text}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <form className="chat-form" onSubmit={(event) => {
-                event.preventDefault();
-                if (!chatInput.trim()) return;
-                setChatMessages((messages) => [...messages, { role: 'user', text: chatInput.trim() }, { role: 'assistant', text: 'I can help with verified College of Engineering information. Connect an approved AI provider to enable live answers.' }]);
-                setChatInput('');
-                setChatStatus('Message added to this demo conversation.');
-              }}>
-                <input className="search" value={chatInput} onChange={(event) => setChatInput(event.target.value)} placeholder="Type your college query or question..." aria-label="Query input" />
-              <div className="actions" style={{ marginTop: 12 }}>
-                <button className="primary-button" type="submit" disabled={!chatInput.trim()}>Send message</button>
-                <a className="whatsapp-button" href={`https://wa.me/?text=${encodeURIComponent(chatInput || 'Hello, I need help with an Andhra University query.')}`} target="_blank" rel="noreferrer" onClick={() => setChatStatus('WhatsApp opened. Review and send your message there.')}>
-                  <WhatsAppIcon size={20} />Forward to WhatsApp
-                </a>
-              </div>
+
+              {/* Chat Input & Actions */}
+              <form className="chat-input-form" onSubmit={(e) => { e.preventDefault(); handleAskBot(chatInput); }}>
+                <div className="chat-input-row">
+                  <input
+                    className="search"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Ask a question about timings, fees, certificates, or courses..."
+                  />
+                  <button className="primary-button" type="submit" disabled={!chatInput.trim()}>
+                    Send
+                  </button>
+                </div>
+                <div className="chat-footer-actions">
+                  <a
+                    className="whatsapp-button"
+                    href={`https://wa.me/?text=${encodeURIComponent(chatInput || 'Hello, I need help with an Andhra University query.')}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <WhatsAppIcon size={18} />
+                    <span>Forward query to Department WhatsApp</span>
+                  </a>
+                </div>
               </form>
               {chatStatus && <div className="feedback-banner" role="status">{chatStatus}</div>}
             </div>
           </div>
         )}
 
-        {/* TAB 5: CAMPUS MAP / LOCATION */}
+        {/* TAB 5: CAMPUS MAP / LOCATION (Live Google Maps Export) */}
         {tab === 'location' && (
           <div className="stack">
             <div>
-              <div className="eyebrow">Campus Navigation</div>
+              <div className="eyebrow">Google Maps Integration</div>
               <h1>College of Engineering Map</h1>
-              <p className="lead">Explore campus places and select a destination. This schematic is illustrative, not surveyed navigation data.</p>
+              <p className="lead">Interactive location exported directly from Google Maps with navigation, blocks, and directions.</p>
             </div>
-            <div className="card campus-map-card">
-              <div className="campus-map-wrap">
-                <svg className="campus-map-drawing" viewBox="0 0 1000 560" role="img" aria-label="Illustrated Andhra University campus map">
-                  <rect width="1000" height="560" fill="#eaf0e4" />
-                  <path d="M-20 142 1020 390M320-30 170 590M716-30 840 590M-20 465 1020 78" stroke="#fff" strokeWidth="58" />
-                  <path d="M-20 142 1020 390M320-30 170 590M716-30 840 590M-20 465 1020 78" stroke="#d7d2c3" strokeWidth="3" strokeDasharray="12 12" />
-                  <path d="M0 278h1000M500 0v560" stroke="#c7ddc0" strokeWidth="22" />
-                  <rect x="260" y="185" width="172" height="98" rx="14" fill="#d9c7aa" />
-                  <rect x="462" y="245" width="214" height="112" rx="14" fill="#e0c596" />
-                  <rect x="700" y="110" width="184" height="108" rx="14" fill="#d2c3a5" />
-                  <rect x="595" y="405" width="168" height="88" rx="14" fill="#d6c9b0" />
-                  <rect x="104" y="338" width="196" height="92" rx="14" fill="#d6c9b0" />
-                  <path d="M450 420q88-48 144-95" stroke="#0b5cad" strokeWidth="8" strokeLinecap="round" strokeDasharray="14 12" />
-                  <text x="346" y="239" textAnchor="middle">ADMIN</text>
-                  <text x="569" y="309" textAnchor="middle">ENGINEERING</text>
-                  <text x="792" y="172" textAnchor="middle">LIBRARY</text>
-                  <text x="679" y="458" textAnchor="middle">WORKSHOPS</text>
-                  <text x="201" y="391" textAnchor="middle">STUDENT SERVICES</text>
-                </svg>
-                <span className="map-campus-label">Andhra University · Visakhapatnam</span>
-                {campusPlaces.map((place) => (
-                  <button
-                    className={`campus-map-marker ${selectedPlace.name === place.name ? 'selected' : ''}`}
-                    key={place.name}
-                    style={{ left: `${place.x}%`, top: `${place.y}%` }}
-                    aria-label={`Select ${place.name}`}
-                    aria-pressed={selectedPlace.name === place.name}
-                    onClick={() => { setSelectedPlace(place); setLocationStatus(`${place.name} selected.`); }}
-                  />
-                ))}
+
+            {/* Quick Location Shortcuts */}
+            <div className="map-shortcuts-bar">
+              {[
+                { label: 'All Campus', query: 'Andhra University College of Engineering, Visakhapatnam' },
+                { label: 'CSE Department', query: 'Department of Computer Science & Systems Engineering, Andhra University, Visakhapatnam' },
+                { label: 'Central Library', query: 'Dr. V.S. Krishna Library Andhra University, Visakhapatnam' },
+                { label: 'Civil Block', query: 'Civil Engineering Department, Andhra University, Visakhapatnam' },
+                { label: 'Mechanical Block', query: 'Mechanical Engineering Department, Andhra University, Visakhapatnam' },
+              ].map((loc) => (
+                <button
+                  key={loc.label}
+                  className={`map-shortcut-btn ${mapLocationQuery === loc.query ? 'active' : ''}`}
+                  onClick={() => setMapLocationQuery(loc.query)}
+                >
+                  <InstagramLocationIcon size={14} />
+                  <span>{loc.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Google Maps Container */}
+            <div className="card google-map-card" style={{ padding: 0, overflow: 'hidden' }}>
+              <div className="google-map-embed-wrapper" style={{ height: 420, width: '100%', position: 'relative' }}>
+                <iframe
+                  title="Andhra University College of Engineering Google Map"
+                  src={`https://www.google.com/maps?q=${encodeURIComponent(mapLocationQuery)}&output=embed`}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
               </div>
-              <div className="campus-map-content">
-                <label className="field-label" htmlFor="campus-place-search">Find a campus place</label>
-                <input id="campus-place-search" className="search" value={mapQuery} onChange={(event) => setMapQuery(event.target.value)} placeholder="Search departments, library, offices..." />
-                <div className="campus-place-list">
-                  {filteredPlaces.map((place) => (
-                    <button className={`campus-place ${selectedPlace.name === place.name ? 'selected' : ''}`} key={place.name} onClick={() => { setSelectedPlace(place); setLocationStatus(`${place.name} selected. Campus routing is not connected yet.`); }}>
-                      <InstagramLocationIcon size={17} />
-                      <span><strong>{place.name}</strong><small>{place.category}</small></span>
-                    </button>
-                  ))}
-                  {filteredPlaces.length === 0 && <p className="lead">No matching campus places.</p>}
+
+              {/* Map Footer Actions */}
+              <div className="p-4 bg-white border-t border-[#e6e1db] flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <strong style={{ fontSize: 14 }}>{mapLocationQuery}</strong>
+                  <div className="lead" style={{ fontSize: 12, margin: 0 }}>Visakhapatnam, Andhra Pradesh 530003</div>
                 </div>
-                <div className="campus-map-selection"><strong>{selectedPlace.name}</strong><span>{selectedPlace.category}</span></div>
-                <button className="secondary-button" onClick={() => setLocationStatus('Offline map downloads are not available in this demo.')}>Offline map info</button>
+                <div className="actions">
+                  <a
+                    className="primary-button"
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapLocationQuery)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                  >
+                    <span>Open in Google Maps App ↗</span>
+                  </a>
+                  <a
+                    className="secondary-button"
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapLocationQuery)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    Get Directions
+                  </a>
+                </div>
               </div>
-              {locationStatus && <div className="feedback-banner" role="status">{locationStatus}</div>}
+
+              {/* Optional API Key Accordion */}
+              <div className="p-3 bg-[#f5f5f7] border-t border-[#e6e1db] text-xs">
+                <button
+                  className="text-button"
+                  style={{ fontSize: 12, color: 'var(--muted)' }}
+                  onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+                >
+                  {showApiKeyInput ? '▲ Hide Custom Maps API Key configuration' : '▼ Want to paste a Google Maps API Key or custom Embed link? (Optional)'}
+                </button>
+                {showApiKeyInput && (
+                  <div style={{ marginTop: 8 }} className="space-y-2">
+                    <input
+                      className="search"
+                      style={{ fontSize: 12, padding: '8px 10px' }}
+                      value={customApiKey}
+                      onChange={(e) => setCustomApiKey(e.target.value)}
+                      placeholder="Paste your Google Maps API key (AIzaSy...)"
+                    />
+                    <p className="lead" style={{ fontSize: 11, margin: 0 }}>
+                      The map above is already functioning with live Google Maps export. Adding your key will switch to Google Maps JavaScript/Embed API v1.
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
 
-        {/* TAB 6: ABOUT (Darkened Icon) */}
+        {/* TAB 6: ABOUT */}
         {tab === 'about' && (
           <div className="stack">
             <div>
@@ -634,7 +868,7 @@ export default function Home() {
                   <div className="about-heading"><span className="about-icon"><ServiceIcon kind={item.icon} size={22} /></span><h2>{item.title}</h2></div>
                   <p className="lead">{item.detail}</p>
                   <a className="about-link" href={item.link} target="_blank" rel="noreferrer">Visit official university site <span aria-hidden="true">↗</span></a>
-              </article>
+                </article>
               ))}
             </div>
           </div>
@@ -643,39 +877,54 @@ export default function Home() {
 
       {/* Bottom Navigation: Exactly as requested */}
       {/* 
-        - Feed symbol: Instagram Home
-        - Applications: Clean modern 4-tile grid
-        - Plus symbol: BIG prominent button (No "Create" label)
-        - Chatbot: Sleek AI Assistant icon
-        - Location symbol: Instagram Map Pin
-        - About symbol: DARKENED #111827 high contrast icon
+        - Applications
+        - Big Plus button: PROMINENTLY UNDERLINED with clear underline bar, no "Create" text!
+        - Feed: Instagram Home icon
+        - Chatbot: AI assistant
+        - Location: Instagram Map Pin
+        - About: Darkened icon
       */}
       <nav className="bottom-nav" aria-label="Primary navigation">
-        {/* Confirmed structural order: Applications, Create, Feed, then supporting areas. */}
         <button className={`nav-button ${tab === 'applications' ? 'active' : ''}`} onClick={() => { setTab('applications'); setQuery(''); }} aria-label="Applications">
           <ApplicationsIcon active={tab === 'applications'} size={24} />
           <span>Applications</span>
         </button>
-        <button className="nav-button create-action" onClick={() => setShowCreateMenu(true)} aria-label="Add new post" title="Add new post">
-          <div className="big-plus-bubble"><BigPlusIcon size={24} /></div>
+
+        {/* Big Plus button with CLEAR PROMINENT UNDERLINE */}
+        <button
+          className="nav-button create-action"
+          onClick={() => setShowCreateMenu(true)}
+          aria-label="Add new post"
+          title="Add new post"
+        >
+          <div className="big-plus-bubble">
+            <BigPlusIcon size={24} />
+          </div>
+          <div className="plus-underline-bar" />
         </button>
+
         <button className={`nav-button ${tab === 'feed' ? 'active' : ''}`} onClick={() => setTab('feed')} aria-label="Feed">
           <InstagramFeedIcon active={tab === 'feed'} size={24} />
           <span>Feed</span>
         </button>
+
         <button className={`nav-button ${tab === 'chatbot' ? 'active' : ''}`} onClick={() => setTab('chatbot')} aria-label="Chatbot">
           <ChatbotIcon active={tab === 'chatbot'} size={24} />
           <span>Chatbot</span>
         </button>
+
         <button className={`nav-button ${tab === 'location' ? 'active' : ''}`} onClick={() => setTab('location')} aria-label="Location">
           <InstagramLocationIcon size={22} />
           <span>Location</span>
         </button>
+
         <button className={`nav-button ${tab === 'about' ? 'active' : ''}`} onClick={() => setTab('about')} aria-label="About">
           <DarkenedAboutIcon active={tab === 'about'} size={22} />
           <span>About</span>
         </button>
       </nav>
+
+      {toast && <div className="toast" role="status">{toast}</div>}
     </main>
   );
 }

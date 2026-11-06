@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { InstagramLocationIcon } from './icons';
+import { validateTextContent, validateImageSafety } from './content_moderation';
 
 export interface ThreadsPostData {
   category: 'normal' | 'problem' | 'announcement';
@@ -57,10 +58,9 @@ export function ThreadsComposer({
   onClose,
   onSubmit,
 }: ThreadsComposerProps) {
-  const [kind, setKind] = useState<'normal' | 'problem' | 'announcement'>(initialKind);
+  const [kind, setKind] = useState<'normal' | 'problem' | 'announcement'>(initialKind === 'announcement' ? 'problem' : initialKind);
   const [caption, setCaption] = useState('');
   const [department, setDepartment] = useState('CSE Department');
-  const [problemCategory, setProblemCategory] = useState('Water & Sanitation');
   const [location, setLocation] = useState('AU College of Engineering');
   const [showLocationInput, setShowLocationInput] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -86,16 +86,15 @@ export function ThreadsComposer({
 
   const isAuthorized = checkIsAuthorizedForAnnouncement();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      setError('Please choose an image file (PNG, JPG, WebP).');
-      return;
-    }
-    if (file.size > 12 * 1024 * 1024) {
-      setError('Image must be under 12 MB.');
+    setError('');
+    const imageSafetyCheck = await validateImageSafety(file);
+    if (!imageSafetyCheck.isValid) {
+      setError(imageSafetyCheck.reason || 'Photo rejected: Inappropriate or invalid image.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
 
@@ -125,8 +124,9 @@ export function ThreadsComposer({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (kind === 'announcement' && !isAuthorized) {
-      setError('You are not authorized to publish Announcements with this email ID. Please choose Normal Post or Problem.');
+    // 1. Announcements temporarily blocked per university policy
+    if (kind === 'announcement') {
+      setError('Official Announcement posting is temporarily locked by university administration.');
       return;
     }
 
@@ -135,15 +135,17 @@ export function ThreadsComposer({
       return;
     }
 
+    // 2. Strict content moderation (bad words, profanity, vulgarity, abuse)
+    const textCheck = validateTextContent(`${caption} ${location}`);
+    if (!textCheck.isValid) {
+      setError(textCheck.reason || 'Post blocked: Inappropriate language detected.');
+      return;
+    }
+
     onSubmit({
       category: kind,
-      department: kind === 'announcement' ? department : undefined,
-      title:
-        kind === 'problem'
-          ? `${problemCategory} Issue`
-          : kind === 'announcement'
-          ? `${department} Circular`
-          : undefined,
+      department: undefined,
+      title: kind === 'problem' ? 'Campus Problem Report' : undefined,
       location: location.trim() || 'College of Engineering, AU Campus',
       caption: caption.trim(),
       imageUrl: imagePreview || selectedGif || undefined,
@@ -155,7 +157,7 @@ export function ThreadsComposer({
 
   const canPost =
     (caption.trim().length > 0 || imagePreview !== null || selectedGif !== null) &&
-    (kind !== 'announcement' || isAuthorized);
+    kind !== 'announcement';
 
   return (
     <div
@@ -193,10 +195,13 @@ export function ThreadsComposer({
             <button
               type="button"
               className={`threads-type-pill ${kind === 'announcement' ? 'active announcement' : ''}`}
-              onClick={() => { setKind('announcement'); setError(''); }}
-              title="Restricted to authorized university staff emails"
+              onClick={() => {
+                setError('Official Announcement posting is temporarily locked by university administration.');
+              }}
+              title="Official Announcements are temporarily locked by university administration"
+              style={{ opacity: 0.65 }}
             >
-              📢 Announcement
+              🔒 Announcement (Blocked)
             </button>
           </div>
 
@@ -258,24 +263,6 @@ export function ThreadsComposer({
                     <option value="Mechanical Dept">Mechanical Dept</option>
                     <option value="Central Library">Central Library</option>
                     <option value="Principal Office">Principal Office</option>
-                  </select>
-                </div>
-              )}
-
-              {kind === 'problem' && (
-                <div className="threads-meta-row">
-                  <span className="threads-meta-label">Category:</span>
-                  <select
-                    className="threads-select"
-                    value={problemCategory}
-                    onChange={(e) => setProblemCategory(e.target.value)}
-                  >
-                    <option value="Water & Sanitation">Water & Sanitation</option>
-                    <option value="Electricity & Wi-Fi">Electricity & Wi-Fi</option>
-                    <option value="Classrooms & Labs">Classrooms & Labs</option>
-                    <option value="Hostels & Mess">Hostels & Mess</option>
-                    <option value="Library & Infrastructure">Library & Infrastructure</option>
-                    <option value="Other">Other Campus Issue</option>
                   </select>
                 </div>
               )}

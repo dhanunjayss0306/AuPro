@@ -28,6 +28,7 @@ import { IntroCinematic } from './IntroCinematic';
 import { ThreadsComposer, ThreadsPostData } from './ThreadsComposer';
 import { getGoogleOAuthUrl, isValidCollegeEmail, supabaseSignIn, supabaseSignUp } from './auth';
 import { auVectorDB } from './vector_search';
+import { validateTextContent, validateImageSafety } from './content_moderation';
 
 type Tab = 'applications' | 'create' | 'feed' | 'chatbot' | 'location' | 'about';
 type AuthMode = 'landing' | 'email-login' | 'signup' | 'otp';
@@ -484,13 +485,24 @@ export default function Home() {
     );
   });
 
-  const handleCreateFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCreateFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
     setCreateFile(file);
+    setCreateError('');
     if (!file) {
       setCreatePreview(null);
       return;
     }
+
+    // Automated Media Content Moderation & Safety Guard
+    const safetyCheck = await validateImageSafety(file);
+    if (!safetyCheck.isValid) {
+      setCreateError(safetyCheck.reason || 'Photo rejected: Inappropriate or invalid image.');
+      setCreateFile(null);
+      setCreatePreview(null);
+      return;
+    }
+
     if (file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = () => setCreatePreview(reader.result as string);
@@ -501,6 +513,13 @@ export default function Home() {
   };
 
   const handleThreadsPost = (data: ThreadsPostData) => {
+    // Content Moderation check
+    const textCheck = validateTextContent(`${data.caption} ${data.title || ''} ${data.location}`);
+    if (!textCheck.isValid) {
+      setToast(textCheck.reason || 'Post blocked: Inappropriate language detected.');
+      return;
+    }
+
     const newPost: MomentPost = {
       id: `${Date.now()}`,
       username: data.isAnonymous ? 'anonymous.au' : (authName ? authName.toLowerCase().replace(/\s+/g, '_') : 'au.student'),
@@ -509,7 +528,7 @@ export default function Home() {
       category: data.category,
       location: data.location,
       imageUrl: data.imageUrl,
-      imageCaption: data.title || (data.category === 'problem' ? 'Problem Report' : 'Official Announcement'),
+      imageCaption: data.title || (data.category === 'problem' ? 'Problem Report' : 'Official Notice'),
       likesCount: 1,
       repostsCount: 0,
       caption: data.caption,
@@ -522,7 +541,7 @@ export default function Home() {
     setFeedPosts((posts) => [newPost, ...posts]);
     setFeedFilter(data.category === 'problem' ? 'problems' : data.category === 'announcement' ? 'announcements' : 'normal');
     setShowThreadsComposer(false);
-    setToast(data.category === 'problem' ? 'Problem reported to campus administration.' : 'Announcement published to AuPro feed.');
+    setToast(data.category === 'problem' ? 'Problem reported to campus administration.' : 'Post published to AuPro feed.');
     setTab('feed');
   };
 
@@ -530,8 +549,21 @@ export default function Home() {
     event.preventDefault();
     setCreateError('');
 
+    // 1. Announcements blocked per university administration
+    if (createKind === 'announcement') {
+      setCreateError('Official Announcement posting is temporarily locked by university administration.');
+      return;
+    }
+
     if (!createCaption.trim()) {
       setCreateError('Please provide details for the post.');
+      return;
+    }
+
+    // 2. Automated Bad Words & Profanity Filter
+    const textCheck = validateTextContent(`${createTitle} ${createCaption} ${createLocation}`);
+    if (!textCheck.isValid) {
+      setCreateError(textCheck.reason || 'Post blocked: Inappropriate language detected.');
       return;
     }
 
@@ -541,11 +573,11 @@ export default function Home() {
         ? (createAnonymous ? 'anonymous.student' : (authName ? authName.toLowerCase().replace(/\s+/g, '_') : 'au.student'))
         : (createDepartment ? createDepartment.toLowerCase().replace(/\s+/g, '.') : 'au.college.office'),
       avatarText: createKind === 'problem' ? (createAnonymous ? '?' : 'S') : 'AU',
-      isOfficial: createKind === 'announcement',
+      isOfficial: false,
       category: createKind,
-      location: createLocation.trim() || 'College of Engineering (A), Visakhapatnam',
+      location: createLocation.trim() || 'College of Engineering, Visakhapatnam',
       imageUrl: createPreview || undefined,
-      imageCaption: createTitle || (createKind === 'problem' ? `Problem: ${createCategory}` : 'Official Announcement'),
+      imageCaption: createTitle || 'Campus Problem Report',
       likesCount: 1,
       repostsCount: 0,
       likedBy: undefined,
@@ -557,7 +589,7 @@ export default function Home() {
     };
 
     setFeedPosts((posts) => [newPost, ...posts]);
-    setFeedFilter(createKind === 'problem' ? 'problems' : 'announcements');
+    setFeedFilter('problems');
     setCreateTitle('');
     setCreateDepartment('');
     setCreateCaption('');
@@ -565,7 +597,7 @@ export default function Home() {
     setCreateFile(null);
     setCreatePreview(null);
     setCreateDays('30');
-    setToast(createKind === 'problem' ? 'Problem reported to campus administration.' : 'Announcement published to feed.');
+    setToast('Problem reported to campus administration.');
     setTab('feed');
   };
 
@@ -867,17 +899,20 @@ export default function Home() {
               </div>
               <button
                 className="create-menu-option"
-                onClick={() => { setCreateKind('announcement'); setShowCreateMenu(false); setTab('create'); }}
+                style={{ opacity: 0.65 }}
+                onClick={() => {
+                  setToast('Official Announcement posting is temporarily locked by administration.');
+                }}
               >
-                <strong>📢 Announcement Post</strong>
-                <span>Publish an official department notice or university circular.</span>
+                <strong>🔒 Announcement Post (Blocked)</strong>
+                <span>Official circulars are temporarily restricted to university admin.</span>
               </button>
               <button
                 className="create-menu-option"
                 onClick={() => { setCreateKind('problem'); setShowCreateMenu(false); setTab('create'); }}
               >
-                <strong>⚠️ Problem</strong>
-                <span>Report a campus, hostel, classroom, lab, or utility issue to administration.</span>
+                <strong>⚠️ Report Campus Problem</strong>
+                <span>Report an infrastructure, lab, classroom, or hostel issue directly to administration.</span>
               </button>
             </section>
           </div>
@@ -1118,43 +1153,15 @@ export default function Home() {
 
             <form className="card create-form" onSubmit={handleCreatePost}>
               {createKind === 'announcement' ? (
-                <>
-                  <label className="field-label" htmlFor="create-dept">Issuing Department / Office</label>
-                  <input
-                    id="create-dept"
-                    className="search"
-                    value={createDepartment}
-                    onChange={(e) => setCreateDepartment(e.target.value)}
-                    placeholder="e.g. Dean Academic Affairs / CSE Department"
-                    required
-                  />
-                  <label className="field-label" htmlFor="create-title">Announcement Subject</label>
-                  <input
-                    id="create-title"
-                    className="search"
-                    value={createTitle}
-                    onChange={(e) => setCreateTitle(e.target.value)}
-                    placeholder="e.g. Semester Exam Hall Ticket Registration"
-                    required
-                  />
-                </>
+                <div style={{ background: '#fef2f2', border: '1px solid #fee2e2', borderRadius: 10, padding: 14, color: '#991b1b', fontSize: 13, lineHeight: 1.5, marginBottom: 8 }}>
+                  <strong>🔒 Announcements Temporarily Blocked</strong>
+                  <p style={{ margin: '4px 0 0 0', fontSize: 12 }}>
+                    Official announcement publishing is currently locked by university administration. Please report your campus concern as a <strong>Problem</strong>.
+                  </p>
+                </div>
               ) : (
                 <>
-                  <label className="field-label" htmlFor="create-cat">Problem Category</label>
-                  <select
-                    id="create-cat"
-                    className="search"
-                    value={createCategory}
-                    onChange={(e) => setCreateCategory(e.target.value)}
-                  >
-                    <option value="Water & Sanitation">Water & Sanitation</option>
-                    <option value="Electricity & Wi-Fi">Electricity & Wi-Fi</option>
-                    <option value="Classrooms & Labs">Classrooms & Labs</option>
-                    <option value="Hostels & Mess">Hostels & Mess</option>
-                    <option value="Library & Infrastructure">Library & Infrastructure</option>
-                    <option value="Other">Other Campus Issue</option>
-                  </select>
-                  <label className="field-label" htmlFor="create-title">Issue Title</label>
+                  <label className="field-label" htmlFor="create-title">Problem Title / Issue *</label>
                   <input
                     id="create-title"
                     className="search"
@@ -1864,7 +1871,7 @@ export default function Home() {
         <button
           className="nav-button create-action"
           onClick={() => {
-            setThreadsInitialKind('announcement');
+            setThreadsInitialKind('problem');
             setShowThreadsComposer(true);
           }}
           aria-label="Add new post"

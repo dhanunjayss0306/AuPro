@@ -50,6 +50,16 @@ export function isValidCollegeEmail(email: string): boolean {
 }
 
 /**
+ * Supabase Config (Recommended Backend)
+ * Add these values in your Vercel Project Settings > Environment Variables
+ * or in .env.local for local development.
+ */
+export const supabaseClientConfig = {
+  url: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+};
+
+/**
  * Firebase Config
  * Add these values in your Vercel Project Settings > Environment Variables
  * or in .env.local for local development.

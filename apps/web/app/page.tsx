@@ -197,6 +197,53 @@ export default function Home() {
     }
   }, []);
 
+  // Handle return from Google OAuth (Supabase sends back #access_token=... in URL)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token')) {
+      try {
+        const params = new URLSearchParams(hash.replace(/^#/, ''));
+        const accessToken = params.get('access_token');
+        if (accessToken) {
+          const base64Url = accessToken.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(
+            atob(base64)
+              .split('')
+              .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+              .join('')
+          );
+          const payload = JSON.parse(jsonPayload);
+          const email = (payload.email || '').toLowerCase().trim();
+
+          // Enforce university email boundary
+          if (!email.endsWith('@andhrauniversity.edu.in')) {
+            setAuthError(`Access restricted: ${email} is not a verified @andhrauniversity.edu.in account.`);
+            setSignedIn(false);
+            window.history.replaceState(null, '', window.location.pathname);
+            return;
+          }
+
+          const fullName = payload.user_metadata?.full_name || payload.user_metadata?.name || 'AU Student';
+          const username = (payload.user_metadata?.user_name || email.split('@')[0] || 'au.student').replace(/\s+/g, '_');
+
+          setAuthEmail(email);
+          setAuthName(fullName);
+          setAuthUsername(username);
+          setSignedIn(true);
+          setShowIntro(false);
+          setToast(`Welcome back, ${fullName}!`);
+
+          // Clean URL
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      } catch (err) {
+        console.error('Failed to parse OAuth return:', err);
+      }
+    }
+  }, []);
+
   const [tab, setTab] = useState<Tab>('feed');
   const [signedIn, setSignedIn] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>('landing');

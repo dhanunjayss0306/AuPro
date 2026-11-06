@@ -103,7 +103,7 @@ export interface StudentProfile {
 export function getGoogleOAuthUrl(redirectTo?: string): string {
   const baseUrl = supabaseClientConfig.url || 'https://mxcspycyejbexzifrauw.supabase.co';
   const target = redirectTo || (typeof window !== 'undefined' ? window.location.origin : '');
-  return `${baseUrl}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(target)}&hd=andhrauniversity.edu.in`;
+  return `${baseUrl}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(target)}&prompt=select_account`;
 }
 
 export async function supabaseSignUp(data: {

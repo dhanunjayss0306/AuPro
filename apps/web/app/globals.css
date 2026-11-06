@@ -1987,3 +1987,39 @@ textarea, select { font: inherit; }
     max-height: 90vh;
   }
 }
+
+.threads-type-pill.active.normal {
+  background: #1f2937;
+  color: #ffffff;
+}
+
+.threads-badge.badge-normal {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.threads-avatar.avatar-problem {
+  background: #dc2626;
+}
+
+.threads-avatar.avatar-announcement {
+  background: #0284c7;
+}
+
+.threads-permission-warning {
+  margin: 8px 0 10px;
+  padding: 10px 12px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  line-height: 1.4;
+}
+.threads-permission-warning strong {
+  color: #78350f;
+  font-weight: 700;
+}

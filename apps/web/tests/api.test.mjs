@@ -31,9 +31,10 @@ test('UI requirements: page.tsx matches user specifications', async () => {
   assert.ok(pageContent.includes('IntroCinematic'), 'Must import and use IntroCinematic');
   assert.ok(pageContent.includes('aupro_intro_seen'), 'Must use session storage guard for intro');
 
-  // 4. Threads composer integrated
+  // 4. Threads composer integrated with email passing
   assert.ok(pageContent.includes('ThreadsComposer'), 'Must import and use ThreadsComposer');
   assert.ok(pageContent.includes('handleThreadsPost'), 'Must handle posting from Threads composer');
+  assert.ok(pageContent.includes('userEmail={authEmail}'), 'Must pass user email to composer for announcement authorization');
 
   // 5. No "Search campus posts" in topbar/feed
   assert.ok(!pageContent.includes('placeholder="Search campus"'), 'Must NOT have "Search campus" search bar');
@@ -57,9 +58,10 @@ test('IntroCinematic has streaming-service style animation, skip button, and red
   assert.ok(introContent.includes('intro-subtitle'), 'Must have collegiate subtitle');
 });
 
-test('ThreadsComposer has Threads app posting layout: avatar on left, handle, photo/GIF, music, and post button', async () => {
+test('ThreadsComposer has Threads posting layout with 3 categories and Announcement authorization', async () => {
   const composerContent = await readFile(new URL('../app/ThreadsComposer.tsx', import.meta.url), 'utf8');
 
+  // Layout elements
   assert.ok(composerContent.includes('threads-left-col'), 'Must have left column for profile picture');
   assert.ok(composerContent.includes('threads-line'), 'Must have vertical connecting thread line');
   assert.ok(composerContent.includes('threads-avatar'), 'Must have user profile avatar');
@@ -67,7 +69,23 @@ test('ThreadsComposer has Threads app posting layout: avatar on left, handle, ph
   assert.ok(composerContent.includes('threads-gif-icon'), 'Must have GIF attachment support');
   assert.ok(composerContent.includes('toggleAudio'), 'Must have music / audio support');
   assert.ok(composerContent.includes('threads-post-submit-btn'), 'Must have post button');
-  assert.ok(composerContent.includes('threads-type-pills'), 'Must have announcement and problem category selector');
+
+  // 3 categories
+  assert.ok(composerContent.includes('Normal Post'), 'Must support Normal Post option');
+  assert.ok(composerContent.includes('Problem'), 'Must support Problem option');
+  assert.ok(composerContent.includes('Announcement'), 'Must support Announcement option');
+
+  // Announcement email authorization check
+  assert.ok(composerContent.includes('AUTHORIZED_ANNOUNCEMENT_EMAILS'), 'Must have authorized announcement emails list');
+  assert.ok(composerContent.includes('checkIsAuthorizedForAnnouncement'), 'Must have email authorization function');
+});
+
+test('Auth module validates college domain and announcement authorization', async () => {
+  const authContent = await readFile(new URL('../app/auth.ts', import.meta.url), 'utf8');
+
+  assert.ok(authContent.includes('isValidCollegeEmail'), 'Must export college email validator');
+  assert.ok(authContent.includes('isAnnouncementAuthorized'), 'Must export announcement authorization checker');
+  assert.ok(authContent.includes('AUTHORIZED_ANNOUNCEMENT_EMAILS'), 'Must list authorized announcement emails');
 });
 
 test('MomentCard has Instagram interactions and category badges', async () => {

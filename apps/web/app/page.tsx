@@ -979,6 +979,7 @@ export default function Home() {
           initialKind={threadsInitialKind}
           userName={authName || 'AU Student'}
           userHandle={authName ? authName.toLowerCase().replace(/\s+/g, '_') : 'au.student'}
+          userEmail={authEmail}
           onClose={() => setShowThreadsComposer(false)}
           onSubmit={handleThreadsPost}
         />

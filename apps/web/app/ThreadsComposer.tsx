@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 import { InstagramLocationIcon } from './icons';
 
 export interface ThreadsPostData {
-  category: 'announcement' | 'problem' | 'normal';
+  category: 'normal' | 'problem' | 'announcement';
   title?: string;
   department?: string;
   location: string;
@@ -15,10 +15,28 @@ export interface ThreadsPostData {
   isAnonymous?: boolean;
 }
 
+// Authorized university email list for publishing official Announcements.
+// You can add your specific university / department email IDs here.
+export const AUTHORIZED_ANNOUNCEMENT_EMAILS = [
+  'admin@andhrauniversity.edu.in',
+  'office@andhrauniversity.edu.in',
+  'principal.aucoe@andhrauniversity.edu.in',
+  'dean.academic@andhrauniversity.edu.in',
+  'dean_student_affairs@andhrauniversity.edu.in',
+  'hod.cse@andhrauniversity.edu.in',
+  'hod.ece@andhrauniversity.edu.in',
+  'hod.civil@andhrauniversity.edu.in',
+  'hod.mech@andhrauniversity.edu.in',
+  'examcell@andhrauniversity.edu.in',
+  'library@andhrauniversity.edu.in',
+];
+
 interface ThreadsComposerProps {
-  initialKind?: 'announcement' | 'problem';
+  initialKind?: 'normal' | 'problem' | 'announcement';
   userName?: string;
   userHandle?: string;
+  userEmail?: string;
+  authorizedEmails?: string[];
   onClose: () => void;
   onSubmit: (post: ThreadsPostData) => void;
 }
@@ -31,13 +49,15 @@ const SAMPLE_CAMPUS_GIFS = [
 ];
 
 export function ThreadsComposer({
-  initialKind = 'announcement',
+  initialKind = 'normal',
   userName = 'AU Student',
   userHandle = 'au.student',
+  userEmail = '',
+  authorizedEmails = [],
   onClose,
   onSubmit,
 }: ThreadsComposerProps) {
-  const [kind, setKind] = useState<'announcement' | 'problem'>(initialKind);
+  const [kind, setKind] = useState<'normal' | 'problem' | 'announcement'>(initialKind);
   const [caption, setCaption] = useState('');
   const [department, setDepartment] = useState('CSE Department');
   const [problemCategory, setProblemCategory] = useState('Water & Sanitation');
@@ -51,6 +71,20 @@ export function ThreadsComposer({
   const [error, setError] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Check whether current user's email is authorized to publish an official Announcement
+  const checkIsAuthorizedForAnnouncement = (): boolean => {
+    if (!userEmail) return false;
+    const cleanEmail = userEmail.toLowerCase().trim();
+    const allAllowed = [...AUTHORIZED_ANNOUNCEMENT_EMAILS, ...authorizedEmails.map((e) => e.toLowerCase().trim())];
+    
+    // Check exact email match or official university staff prefix
+    if (allAllowed.includes(cleanEmail)) return true;
+    if (cleanEmail.startsWith('admin') || cleanEmail.startsWith('dean') || cleanEmail.startsWith('hod') || cleanEmail.startsWith('office')) return true;
+    return false;
+  };
+
+  const isAuthorized = checkIsAuthorizedForAnnouncement();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -68,7 +102,7 @@ export function ThreadsComposer({
     const reader = new FileReader();
     reader.onload = () => {
       setImagePreview(reader.result as string);
-      setSelectedGif(null); // clear GIF if file uploaded
+      setSelectedGif(null);
       setError('');
     };
     reader.readAsDataURL(file);
@@ -90,6 +124,12 @@ export function ThreadsComposer({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (kind === 'announcement' && !isAuthorized) {
+      setError('You are not authorized to publish Announcements with this email ID. Please choose Normal Post or Problem.');
+      return;
+    }
+
     if (!caption.trim() && !imagePreview && !selectedGif) {
       setError('Please write some details or attach media before posting.');
       return;
@@ -98,7 +138,12 @@ export function ThreadsComposer({
     onSubmit({
       category: kind,
       department: kind === 'announcement' ? department : undefined,
-      title: kind === 'problem' ? `${problemCategory} Issue` : `${department} Circular`,
+      title:
+        kind === 'problem'
+          ? `${problemCategory} Issue`
+          : kind === 'announcement'
+          ? `${department} Circular`
+          : undefined,
       location: location.trim() || 'College of Engineering, AU Campus',
       caption: caption.trim(),
       imageUrl: imagePreview || selectedGif || undefined,
@@ -108,7 +153,9 @@ export function ThreadsComposer({
     });
   };
 
-  const canPost = caption.trim().length > 0 || imagePreview !== null || selectedGif !== null;
+  const canPost =
+    (caption.trim().length > 0 || imagePreview !== null || selectedGif !== null) &&
+    (kind !== 'announcement' || isAuthorized);
 
   return (
     <div
@@ -121,30 +168,39 @@ export function ThreadsComposer({
       }}
     >
       <div className="threads-composer-card">
-        {/* Header: Cancel, Title / Type Selector */}
+        {/* Header: Cancel, 3-Option Type Selector (Normal, Problem, Announcement) */}
         <header className="threads-composer-header">
           <button type="button" onClick={onClose} className="threads-cancel-btn">
             Cancel
           </button>
           
+          {/* THREE OPTIONS: Normal Post, Problem, Announcement */}
           <div className="threads-type-pills" role="tablist" aria-label="Post category">
             <button
               type="button"
-              className={`threads-type-pill ${kind === 'announcement' ? 'active announcement' : ''}`}
-              onClick={() => setKind('announcement')}
+              className={`threads-type-pill ${kind === 'normal' ? 'active normal' : ''}`}
+              onClick={() => { setKind('normal'); setError(''); }}
             >
-              📢 Announcement
+              📝 Normal Post
             </button>
             <button
               type="button"
               className={`threads-type-pill ${kind === 'problem' ? 'active problem' : ''}`}
-              onClick={() => setKind('problem')}
+              onClick={() => { setKind('problem'); setError(''); }}
             >
               ⚠️ Problem
             </button>
+            <button
+              type="button"
+              className={`threads-type-pill ${kind === 'announcement' ? 'active announcement' : ''}`}
+              onClick={() => { setKind('announcement'); setError(''); }}
+              title="Restricted to authorized university staff emails"
+            >
+              📢 Announcement
+            </button>
           </div>
 
-          <div style={{ width: 48 }} />
+          <div style={{ width: 44 }} />
         </header>
 
         {/* Main Body: Two-column Threads structure */}
@@ -152,7 +208,7 @@ export function ThreadsComposer({
           <div className="threads-body-row">
             {/* Left Column: Avatar + Connecting Vertical Thread Line */}
             <div className="threads-left-col">
-              <div className="threads-avatar">
+              <div className={`threads-avatar ${kind === 'problem' ? 'avatar-problem' : kind === 'announcement' ? 'avatar-announcement' : ''}`}>
                 {isAnonymous && kind === 'problem' ? '?' : (userName[0] || 'A').toUpperCase()}
               </div>
               <div className="threads-line" />
@@ -171,13 +227,23 @@ export function ThreadsComposer({
                 <span className="threads-handle">
                   {isAnonymous && kind === 'problem' ? '@anonymous.au' : `@${userHandle}`}
                 </span>
-                <span className={`threads-badge ${kind === 'problem' ? 'badge-problem' : 'badge-announcement'}`}>
-                  {kind === 'problem' ? 'Report' : 'Official Notice'}
+                <span className={`threads-badge badge-${kind}`}>
+                  {kind === 'problem' ? 'Problem Report' : kind === 'announcement' ? 'Official Notice' : 'Normal Post'}
                 </span>
               </div>
 
+              {/* Announcement Authorization Warning if email not authorized */}
+              {kind === 'announcement' && !isAuthorized && (
+                <div className="threads-permission-warning">
+                  <strong>🔒 Staff-Only Restriction</strong>
+                  <span>
+                    Official Announcements are restricted to verified university department & office email IDs ({userEmail || 'student account'}). You can submit your post as a <strong>Normal Post</strong> or report an issue under <strong>Problem</strong>.
+                  </span>
+                </div>
+              )}
+
               {/* Specific metadata fields depending on type */}
-              {kind === 'announcement' ? (
+              {kind === 'announcement' && isAuthorized && (
                 <div className="threads-meta-row">
                   <span className="threads-meta-label">Dept:</span>
                   <select
@@ -194,7 +260,9 @@ export function ThreadsComposer({
                     <option value="Principal Office">Principal Office</option>
                   </select>
                 </div>
-              ) : (
+              )}
+
+              {kind === 'problem' && (
                 <div className="threads-meta-row">
                   <span className="threads-meta-label">Category:</span>
                   <select
@@ -244,7 +312,9 @@ export function ThreadsComposer({
                 placeholder={
                   kind === 'problem'
                     ? "What's the issue? Describe what's broken or needs repair..."
-                    : "What's new? Post an official announcement or circular..."
+                    : kind === 'announcement'
+                    ? "What's new? Post an official department circular or exam schedule..."
+                    : "What's on your mind? Share campus moments, hackathons, or questions..."
                 }
                 autoFocus
               />

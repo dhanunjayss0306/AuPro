@@ -952,25 +952,23 @@ export default function Home() {
                 }
               }} className="stack" style={{ gap: 14 }}>
                 <div style={{ textAlign: 'center', padding: '6px 0' }}>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: 22, background: '#eff6ff', color: '#1e40af', fontSize: 20, marginBottom: 8 }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: 22, background: 'var(--teal)', color: 'var(--secondary)', fontSize: 20, marginBottom: 8 }}>
                     🛡️
                   </div>
-                  <h3 style={{ margin: '0 0 4px 0', fontSize: 17, fontWeight: 700, color: 'var(--text)' }}>Verify College Identity</h3>
+                  <h3 style={{ margin: '0 0 4px 0', fontSize: 17, fontWeight: 700, color: 'var(--ink)' }}>Verify College Identity</h3>
                   <p className="lead" style={{ fontSize: 13, margin: 0, color: 'var(--muted)' }}>
                     A 6-digit security code was dispatched to:
                   </p>
-                  <div style={{ display: 'inline-block', background: '#f1f5f9', padding: '4px 10px', borderRadius: 6, marginTop: 6, fontSize: 12, fontWeight: 600, color: '#1e3a8a' }}>
+                  <div className="otp-target-pill">
                     {authEmail} • Roll No: {authRollNo || '—'}
                   </div>
                 </div>
 
-                {authOtpProviderStatus === 'setup_required' && authOtpDevCode && (
-                  <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 10, padding: 12, fontSize: 12, lineHeight: 1.5, color: '#92400e' }}>
-                    <strong>⚙️ Setup Notice:</strong> Email provider (Resend/SMTP) is not yet connected in Vercel. For testing right now, your one-time code is:
-                    <div style={{ fontFamily: 'monospace', fontSize: 22, fontWeight: 800, letterSpacing: 4, color: '#1e3a8a', padding: '6px 0', textAlign: 'center' }}>
-                      {authOtpDevCode}
-                    </div>
-                    <div style={{ fontSize: 11, color: '#b45309' }}>Enter this 6-digit code below to complete verification. (To dispatch real emails directly into university inboxes, add <code>RESEND_API_KEY</code> in Vercel).</div>
+                {authOtpDevCode && (
+                  <div style={{ textAlign: 'center', margin: '2px 0 6px 0' }}>
+                    <span style={{ fontSize: 11, color: 'var(--muted)', background: 'var(--hover-subtle)', border: '1px solid var(--border)', padding: '4px 10px', borderRadius: 8, fontFamily: 'monospace' }}>
+                      Test code: <strong style={{ color: 'var(--primary)', letterSpacing: 2 }}>{authOtpDevCode}</strong>
+                    </span>
                   </div>
                 )}
 
@@ -1231,11 +1229,11 @@ export default function Home() {
             ))}
 
             {filteredFeedPosts.length === 0 ? (
-              <div className="card" style={{ textAlign: 'center', padding: '36px 20px', margin: '16px 0', border: '1px dashed #d1d5db', background: '#fafafa' }}>
-                <div style={{ fontSize: 28, marginBottom: 8 }}>
+              <div className="card feed-empty-card">
+                <div style={{ fontSize: 32, marginBottom: 10 }}>
                   {feedFilter === 'problems' ? '⚠️' : feedFilter === 'announcements' ? '📢' : '📝'}
                 </div>
-                <h3 style={{ margin: '0 0 6px 0', fontSize: 16, color: '#111827' }}>
+                <h3>
                   {feedFilter === 'problems' ? 'No Active Problems Reported' : feedFilter === 'announcements' ? 'No Official Announcements Yet' : 'No Posts in Feed Yet'}
                 </h3>
                 <p className="lead" style={{ fontSize: 13, margin: '0 0 16px 0' }}>
@@ -1556,12 +1554,12 @@ export default function Home() {
               <form className="chat-input-form" onSubmit={(e) => { e.preventDefault(); handleAskBot(chatInput); }}>
                 <div className="chat-input-row">
                   <input
-                    className="search"
+                    className="search chat-input-field"
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     placeholder="Ask a question about timings, fees, certificates, or courses..."
                   />
-                  <button className="primary-button" type="submit" disabled={!chatInput.trim()}>
+                  <button className="primary-button chat-send-btn" type="submit" disabled={!chatInput.trim()}>
                     Send
                   </button>
                 </div>
@@ -1675,7 +1673,7 @@ export default function Home() {
                           </div>
                         ))}
                         {filteredLandmarks.length === 0 && (
-                          <div style={{ padding: '12px 16px', fontSize: 13, color: '#5f6368' }}>
+                          <div style={{ padding: '12px 16px', fontSize: 13, color: 'var(--muted)' }}>
                             No matching AU landmark. Press Enter to search on Map.
                           </div>
                         )}
@@ -1799,7 +1797,7 @@ export default function Home() {
 
                   {/* Quick Start Preset Chips */}
                   <div className="gmaps-preset-pills">
-                    <span style={{ fontSize: 11, color: '#5f6368', alignSelf: 'center', whiteSpace: 'nowrap' }}>Start:</span>
+                    <span style={{ fontSize: 11, color: 'var(--muted)', alignSelf: 'center', whiteSpace: 'nowrap' }}>Start:</span>
                     {[
                       'Your location',
                       'AU Main Gate',

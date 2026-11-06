@@ -98,6 +98,21 @@ export default function Home() {
     const submitAuth = () => {
       setError('');
       const email = authEmail.trim().toLowerCase();
+      if (authMode === 'signup-name') {
+        if (!authName.trim()) { setError('Enter your full name to continue.'); return; }
+        setAuthMode('signup-password');
+        return;
+      }
+      if (authMode === 'signup-password') {
+        if (authPassword.length < 8) { setError('Use a password with at least 8 characters.'); return; }
+        setSignedIn(true);
+        return;
+      }
+      if (authMode === 'otp') {
+        if (!authOtp || authOtp.length < 4) { setError('Enter the OTP sent to your college email.'); return; }
+        setSignedIn(true);
+        return;
+      }
       if (!email.endsWith('@andhrauniversity.edu.in')) {
         setError('Use your Andhra University email ending in @andhrauniversity.edu.in.');
         return;
@@ -107,15 +122,6 @@ export default function Home() {
         setSignedIn(true);
       } else if (authMode === 'signup-email') {
         setAuthMode('signup-name');
-      } else if (authMode === 'signup-name') {
-        if (!authName.trim()) { setError('Enter your full name to continue.'); return; }
-        setAuthMode('signup-password');
-      } else if (authMode === 'signup-password') {
-        if (authPassword.length < 8) { setError('Use a password with at least 8 characters.'); return; }
-        setSignedIn(true);
-      } else if (authMode === 'otp') {
-        if (authOtp.length < 4) { setError('Enter the OTP sent to your college email.'); return; }
-        setSignedIn(true);
       }
     };
 
@@ -132,7 +138,7 @@ export default function Home() {
               <div className="auth-divider"><span>or</span></div>
               <div className="auth-actions"><button className="secondary-button" onClick={() => setAuthMode('email-login')}>Log in with email</button><button className="secondary-button" onClick={() => { setAuthMode('signup-email'); setAuthEmail(''); }}>Create account</button></div>
             </>}
-            {authMode === 'email-login' && <><label className="field-label" htmlFor="auth-email">College email</label><input id="auth-email" className="search" type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="you@andhrauniversity.edu.in" /><label className="field-label" htmlFor="auth-password">Password</label><input id="auth-password" className="search" type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="Your password" /><div className="auth-actions"><button className="primary-button" onClick={submitAuth}>Log in</button><button className="secondary-button" onClick={() => setAuthMode('otp')}>Use email OTP</button></div></>}
+            {authMode === 'email-login' && <><label className="field-label" htmlFor="auth-email">College email</label><input id="auth-email" className="search" type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="you@andhrauniversity.edu.in" /><label className="field-label" htmlFor="auth-password">Password</label><input id="auth-password" className="search" type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="Your password" /><div className="auth-actions"><button className="primary-button" onClick={submitAuth}>Log in</button><button className="secondary-button" onClick={() => { const email = authEmail.trim().toLowerCase(); if (!email.endsWith('@andhrauniversity.edu.in')) { setError('Enter your Andhra University email before requesting an OTP.'); return; } setAuthMode('otp'); }}>Use email OTP</button></div></>}
             {authMode === 'signup-email' && <><label className="field-label" htmlFor="signup-email">College email</label><input id="signup-email" className="search" type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="you@andhrauniversity.edu.in" /><button className="primary-button" onClick={submitAuth}>Continue</button></>}
             {authMode === 'signup-name' && <><label className="field-label" htmlFor="signup-name">Full name</label><input id="signup-name" className="search" value={authName} onChange={(event) => setAuthName(event.target.value)} placeholder="Your name" /><button className="primary-button" onClick={submitAuth}>Continue</button></>}
             {authMode === 'signup-password' && <><label className="field-label" htmlFor="signup-password">Password</label><input id="signup-password" className="search" type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="At least 8 characters" /><button className="primary-button" onClick={submitAuth}>Create account</button></>}

@@ -197,9 +197,44 @@ export default function Home() {
     }
   }, []);
 
+  // Restore existing user session from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('aupro_session');
+      if (saved) {
+        const user = JSON.parse(saved);
+        if (user && user.email) {
+          setAuthEmail(user.email);
+          setAuthName(user.name || 'AU Student');
+          setAuthUsername(user.username || 'au.student');
+          if (user.rollNo) setAuthRollNo(user.rollNo);
+          if (user.dept) setAuthDept(user.dept);
+          if (user.year) setAuthYear(user.year);
+          if (user.phone) setAuthPhone(user.phone);
+          if (user.bio) setAuthBio(user.bio);
+          setSignedIn(true);
+          setShowIntro(false);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to restore session', e);
+    }
+  }, []);
+
   // Handle return from Google OAuth (Supabase sends back #access_token=... in URL)
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    // Check for query errors
+    const searchParams = new URLSearchParams(window.location.search);
+    const oauthError = searchParams.get('error_description') || searchParams.get('error');
+    if (oauthError) {
+      setAuthError(`Authentication error: ${decodeURIComponent(oauthError)}`);
+      window.history.replaceState(null, '', window.location.pathname);
+      return;
+    }
+
+    // Check for access token in hash
     const hash = window.location.hash;
     if (hash && hash.includes('access_token')) {
       try {
@@ -235,6 +270,20 @@ export default function Home() {
           setShowIntro(false);
           setToast(`Welcome back, ${fullName}!`);
 
+          // Persist session to localStorage
+          try {
+            localStorage.setItem(
+              'aupro_session',
+              JSON.stringify({
+                email,
+                name: fullName,
+                username,
+                dept: authDept,
+                year: authYear,
+              })
+            );
+          } catch {}
+
           // Clean URL
           window.history.replaceState(null, '', window.location.pathname);
         }
@@ -242,7 +291,7 @@ export default function Home() {
         console.error('Failed to parse OAuth return:', err);
       }
     }
-  }, []);
+  }, [authDept, authYear]);
 
   const [tab, setTab] = useState<Tab>('feed');
   const [signedIn, setSignedIn] = useState(false);
@@ -308,6 +357,9 @@ export default function Home() {
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
 
   const handleSignOut = () => {
+    try {
+      localStorage.removeItem('aupro_session');
+    } catch {}
     setSignedIn(false);
     setAuthMode('landing');
     setAuthPassword('');

@@ -7,6 +7,8 @@ const routes = [
   '../app/api/applications/route.ts',
   '../app/api/faq/route.ts',
   '../app/api/places/route.ts',
+  '../app/api/auth/send-otp/route.ts',
+  '../app/api/auth/verify-otp/route.ts',
 ];
 
 test('API route source files exist', async () => {
@@ -90,6 +92,23 @@ test('Auth module validates college domain and announcement authorization', asyn
   assert.ok(authContent.includes('isValidCollegeEmail'), 'Must export college email validator');
   assert.ok(authContent.includes('isAnnouncementAuthorized'), 'Must export announcement authorization checker');
   assert.ok(authContent.includes('AUTHORIZED_ANNOUNCEMENT_EMAILS'), 'Must list authorized announcement emails');
+  assert.ok(authContent.includes('sendUniversityOtp'), 'Must export sendUniversityOtp');
+  assert.ok(authContent.includes('verifyUniversityOtp'), 'Must export verifyUniversityOtp');
+  assert.ok(authContent.includes('saveRegisteredUser'), 'Must export saveRegisteredUser');
+});
+
+test('OTP verification security: No skip button and mandatory 6-digit verification', async () => {
+  const pageContent = await readFile(new URL('../app/page.tsx', import.meta.url), 'utf8');
+
+  // Must NOT have any skip button
+  assert.ok(!pageContent.includes('Direct Sign In (Skip OTP)'), 'Must NOT contain Skip OTP backdoor');
+  assert.ok(!pageContent.includes('Skip OTP'), 'Must NOT allow skipping OTP');
+
+  // Must enforce OTP verification
+  assert.ok(pageContent.includes('sendUniversityOtp'), 'Must invoke sendUniversityOtp');
+  assert.ok(pageContent.includes('verifyUniversityOtp'), 'Must invoke verifyUniversityOtp');
+  assert.ok(pageContent.includes('authOtpCountdown'), 'Must have countdown timer for resending OTP');
+  assert.ok(pageContent.includes('maxLength={6}'), 'Must require 6-digit OTP code');
 });
 
 test('MomentCard has Instagram interactions and category badges', async () => {

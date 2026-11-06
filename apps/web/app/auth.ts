@@ -2,10 +2,11 @@
  * AuPro Authentication & Cloudflare Integration Service
  * 
  * Supports:
- * 1. Firebase Authentication (Google Sign-In + Email/Password)
+ * 1. Firebase / Supabase Authentication (Google Sign-In + Email/Password)
  * 2. Andhra University Domain Restriction (@andhrauniversity.edu.in)
- * 3. Role-based Announcement Authorizations
- * 4. Cloudflare R2 Media Storage Uploads
+ * 3. Cryptographic One-Time OTP Verification (/api/auth/send-otp & /api/auth/verify-otp)
+ * 4. Role-based Announcement Authorizations
+ * 5. Cloudflare R2 Media Storage Uploads
  */
 
 export interface AuUser {
@@ -19,7 +20,6 @@ export interface AuUser {
 }
 
 // Configurable list of official Andhra University emails authorized to publish Announcements.
-// Additional authorized emails can be configured here or in environment variables.
 export const AUTHORIZED_ANNOUNCEMENT_EMAILS = [
   'admin@andhrauniversity.edu.in',
   'office@andhrauniversity.edu.in',
@@ -50,43 +50,20 @@ export function isValidCollegeEmail(email: string): boolean {
 }
 
 /**
- * Supabase Config (Recommended Backend)
- * Add these values in your Vercel Project Settings > Environment Variables
- * or in .env.local for local development.
+ * Supabase Config
  */
 export const supabaseClientConfig = {
-  url: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  url: process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mxcspycyejbexzifrauw.supabase.co',
   anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
 };
 
 /**
- * Firebase Config
- * Add these values in your Vercel Project Settings > Environment Variables
- * or in .env.local for local development.
- */
-export const firebaseClientConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '',
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '',
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || '',
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '',
-};
-
-/**
- * Storage Config (100% Free - No Credit Card Needed)
- * Default: Supabase Storage (1 GB free built directly into your Supabase project)
- * Optional: Cloudflare R2 (only if you ever want to add a card later)
+ * Storage Config
  */
 export const storageConfig = {
   provider: (process.env.NEXT_PUBLIC_STORAGE_PROVIDER || 'supabase') as 'supabase' | 'r2',
   supabaseBucket: process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET || 'media',
   r2PublicBaseUrl: process.env.NEXT_PUBLIC_CLOUDFLARE_R2_PUBLIC_URL || '',
-};
-
-/**
- * Cloudflare R2 Config (Optional - Requires card verification on Cloudflare)
- */
-export const cloudflareR2Config = {
-  publicBaseUrl: process.env.NEXT_PUBLIC_CLOUDFLARE_R2_PUBLIC_URL || '',
 };
 
 export interface StudentProfile {
@@ -98,12 +75,87 @@ export interface StudentProfile {
   year: string;
   phone: string;
   bio?: string;
+  isVerified?: boolean;
+  verifiedAt?: string;
+  password?: string;
 }
 
 export function getGoogleOAuthUrl(redirectTo?: string): string {
   const baseUrl = supabaseClientConfig.url || 'https://mxcspycyejbexzifrauw.supabase.co';
   const target = redirectTo || (typeof window !== 'undefined' ? window.location.origin : '');
   return `${baseUrl}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(target)}&prompt=select_account`;
+}
+
+/**
+ * Request a 6-digit cryptographic OTP code to verify official college email.
+ */
+export async function sendUniversityOtp(email: string, fullName: string, rollNo: string) {
+  const cleanEmail = email.toLowerCase().trim();
+  if (!isValidCollegeEmail(cleanEmail)) {
+    throw new Error('Only official @andhrauniversity.edu.in emails are permitted.');
+  }
+
+  const res = await fetch('/api/auth/send-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: cleanEmail, fullName, rollNo }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || 'Failed to dispatch verification code.');
+  }
+  return data;
+}
+
+/**
+ * Verify 6-digit OTP code against server cryptographic token.
+ */
+export async function verifyUniversityOtp(email: string, otp: string, token: string) {
+  const res = await fetch('/api/auth/verify-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email.toLowerCase().trim(), otp: otp.trim(), token }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || 'Invalid verification code.');
+  }
+  return data;
+}
+
+/**
+ * Client Registry of Verified Students (Local + Supabase sync)
+ */
+export function getRegisteredUsers(): Record<string, StudentProfile> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem('aupro_registered_users');
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveRegisteredUser(profile: StudentProfile) {
+  if (typeof window === 'undefined') return;
+  try {
+    const users = getRegisteredUsers();
+    users[profile.email.toLowerCase().trim()] = {
+      ...profile,
+      isVerified: true,
+      verifiedAt: profile.verifiedAt || new Date().toISOString(),
+    };
+    localStorage.setItem('aupro_registered_users', JSON.stringify(users));
+  } catch (e) {
+    console.error('Failed to save registered user:', e);
+  }
+}
+
+export function findRegisteredUser(email: string): StudentProfile | null {
+  const users = getRegisteredUsers();
+  return users[email.toLowerCase().trim()] || null;
 }
 
 export async function supabaseSignUp(data: {

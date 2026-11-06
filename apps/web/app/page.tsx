@@ -26,7 +26,16 @@ import {
 import { MomentCard, MomentPost } from './MomentCard';
 import { IntroCinematic } from './IntroCinematic';
 import { ThreadsComposer, ThreadsPostData } from './ThreadsComposer';
-import { getGoogleOAuthUrl, isValidCollegeEmail, supabaseSignIn, supabaseSignUp } from './auth';
+import {
+  getGoogleOAuthUrl,
+  isValidCollegeEmail,
+  supabaseSignIn,
+  supabaseSignUp,
+  sendUniversityOtp,
+  verifyUniversityOtp,
+  findRegisteredUser,
+  saveRegisteredUser,
+} from './auth';
 import { auVectorDB } from './vector_search';
 import { validateTextContent, validateImageSafety } from './content_moderation';
 
@@ -260,6 +269,11 @@ export default function Home() {
   const [authPassword, setAuthPassword] = useState('');
   const [authConfirmPassword, setAuthConfirmPassword] = useState('');
   const [authOtp, setAuthOtp] = useState('');
+  const [authOtpToken, setAuthOtpToken] = useState('');
+  const [authOtpDevCode, setAuthOtpDevCode] = useState('');
+  const [authOtpProviderStatus, setAuthOtpProviderStatus] = useState<'delivered' | 'setup_required' | ''>('');
+  const [authOtpCountdown, setAuthOtpCountdown] = useState(0);
+  const [isOtpLoading, setIsOtpLoading] = useState(false);
   const [authError, setAuthError] = useState('');
 
   // Topbar Profile Quick Menu
@@ -359,6 +373,15 @@ export default function Home() {
     }
   }, []);
 
+  // Countdown timer for OTP resend
+  useEffect(() => {
+    if (authOtpCountdown <= 0) return;
+    const timer = setInterval(() => {
+      setAuthOtpCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [authOtpCountdown]);
+
   // Handle return from Google OAuth (Supabase sends back #access_token=... in URL)
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -441,6 +464,10 @@ export default function Home() {
     setAuthMode('landing');
     setAuthPassword('');
     setAuthOtp('');
+    setAuthOtpToken('');
+    setAuthOtpDevCode('');
+    setAuthOtpProviderStatus('');
+    setAuthOtpCountdown(0);
     setShowProfileMenu(false);
     setToast('Signed out of AuPro.');
   };
@@ -661,27 +688,57 @@ export default function Home() {
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 setAuthError('');
+                const clean = authEmail.toLowerCase().trim();
+                const existing = findRegisteredUser(clean);
+
+                if (existing) {
+                  if (existing.password && existing.password !== authPassword) {
+                    setAuthError('Incorrect password. Please verify and try again.');
+                    return;
+                  }
+                  // Password matches! Log them in
+                  try {
+                    localStorage.setItem('aupro_session', JSON.stringify(existing));
+                  } catch {}
+                  setAuthName(existing.name || 'AU Student');
+                  setAuthUsername(existing.username || 'au.student');
+                  setAuthRollNo(existing.rollNo || '');
+                  setAuthDept(existing.department || authDept);
+                  setAuthYear(existing.year || authYear);
+                  setAuthPhone(existing.phone || '');
+                  if (existing.bio) setAuthBio(existing.bio);
+                  setSignedIn(true);
+                  setShowIntro(false);
+                  setToast(`Welcome back, ${existing.name}!`);
+                  return;
+                }
+
+                // If not found in local registry, check Supabase
                 try {
-                  await supabaseSignIn(authEmail, authPassword);
-                } catch {}
-                try {
-                  localStorage.setItem(
-                    'aupro_session',
-                    JSON.stringify({
-                      email: authEmail,
+                  const res = await supabaseSignIn(clean, authPassword);
+                  if (res && res.session) {
+                    const sessionData = {
+                      email: clean,
                       name: authName || 'AU Student',
                       username: authUsername || 'au.student',
-                      rollNo: authRollNo || '321101234',
+                      rollNo: authRollNo || '',
                       dept: authDept,
                       year: authYear,
                       phone: authPhone,
                       bio: authBio,
-                    })
-                  );
-                } catch {}
-                setSignedIn(true);
-                setShowIntro(false);
-                setToast('Signed in successfully.');
+                      isVerified: true,
+                    };
+                    localStorage.setItem('aupro_session', JSON.stringify(sessionData));
+                    setSignedIn(true);
+                    setShowIntro(false);
+                    setToast('Signed in successfully.');
+                    return;
+                  }
+                } catch (err: any) {
+                  console.warn('Supabase signin attempt:', err);
+                }
+
+                setAuthError('No verified student account found for this university email. Please click "Create student account" below to complete one-time OTP verification.');
               }} className="stack">
                 <div>
                   <label className="field-label" style={{ fontSize: 12 }}>College Email</label>
@@ -703,8 +760,9 @@ export default function Home() {
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 setAuthError('');
-                if (!authEmail.toLowerCase().trim().endsWith('@andhrauniversity.edu.in')) {
-                  setAuthError('Only verified @andhrauniversity.edu.in college emails are accepted.');
+                const clean = authEmail.toLowerCase().trim();
+                if (!clean.endsWith('@andhrauniversity.edu.in')) {
+                  setAuthError('Registration is strictly restricted to official @andhrauniversity.edu.in college email addresses.');
                   return;
                 }
                 if (authPassword.length < 6) {
@@ -715,41 +773,26 @@ export default function Home() {
                   setAuthError('Passwords do not match.');
                   return;
                 }
-                try {
-                  await supabaseSignUp({
-                    email: authEmail,
-                    password: authPassword,
-                    fullName: authName,
-                    username: authUsername,
-                    rollNo: authRollNo,
-                    department: authDept,
-                    year: authYear,
-                    phone: authPhone,
-                  });
-                } catch (err: any) {
-                  console.warn('Signup notice:', err);
+                if (findRegisteredUser(clean)) {
+                  setAuthError('This university email is already registered and verified. Please sign in with your password or use Google Sign-In.');
+                  return;
                 }
 
-                // Immediately activate student session without waiting for quarantined OTP
+                setIsOtpLoading(true);
                 try {
-                  localStorage.setItem(
-                    'aupro_session',
-                    JSON.stringify({
-                      email: authEmail,
-                      name: authName,
-                      username: authUsername,
-                      rollNo: authRollNo,
-                      dept: authDept,
-                      year: authYear,
-                      phone: authPhone,
-                      bio: authBio,
-                    })
-                  );
-                } catch {}
-
-                setSignedIn(true);
-                setShowIntro(false);
-                setToast(`Welcome to AuPro, ${authName || 'Student'}! Account created successfully.`);
+                  const data = await sendUniversityOtp(clean, authName, authRollNo);
+                  setAuthOtpToken(data.token || '');
+                  setAuthOtpDevCode(data.devCode || '');
+                  setAuthOtpProviderStatus(data.providerStatus || 'delivered');
+                  setAuthOtpCountdown(60);
+                  setAuthOtp('');
+                  setAuthMode('otp');
+                  setToast(`Verification code sent to ${clean}`);
+                } catch (err: any) {
+                  setAuthError(err?.message || 'Failed to dispatch verification code. Please check your email.');
+                } finally {
+                  setIsOtpLoading(false);
+                }
               }} className="stack" style={{ gap: 12 }}>
                 <div>
                   <label className="field-label" style={{ fontSize: 12 }}>Full Name *</label>
@@ -813,7 +856,9 @@ export default function Home() {
                   </div>
                 </div>
 
-                <button className="primary-button" type="submit" style={{ marginTop: 6 }}>Create Account & Continue</button>
+                <button className="primary-button" type="submit" style={{ marginTop: 6 }} disabled={isOtpLoading}>
+                  {isOtpLoading ? 'Sending Verification Code...' : 'Verify Email & Create Account →'}
+                </button>
                 <div style={{ textAlign: 'center' }}>
                   <button type="button" className="text-button" onClick={() => setAuthMode('landing')}>← Back to Sign In</button>
                 </div>
@@ -821,36 +866,164 @@ export default function Home() {
             )}
 
             {authMode === 'otp' && (
-              <form onSubmit={(e) => { e.preventDefault(); setSignedIn(true); setToast('Welcome to AuPro!'); }} className="stack">
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: 12, fontSize: 12, lineHeight: 1.5, color: '#475569' }}>
-                  <p style={{ margin: '0 0 6px 0' }}>
-                    A verification request was initiated for <strong>{authEmail}</strong>.
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                setAuthError('');
+                if (authOtp.trim().length !== 6) {
+                  setAuthError('Please enter the complete 6-digit numeric verification code.');
+                  return;
+                }
+                setIsOtpLoading(true);
+                try {
+                  await verifyUniversityOtp(authEmail, authOtp.trim(), authOtpToken);
+
+                  // Registration officially verified!
+                  const studentProfile = {
+                    email: authEmail.toLowerCase().trim(),
+                    name: authName,
+                    username: authUsername,
+                    rollNo: authRollNo,
+                    department: authDept,
+                    year: authYear,
+                    phone: authPhone,
+                    bio: authBio,
+                    password: authPassword,
+                    isVerified: true,
+                    verifiedAt: new Date().toISOString(),
+                  };
+
+                  saveRegisteredUser(studentProfile);
+                  localStorage.setItem('aupro_session', JSON.stringify(studentProfile));
+
+                  try {
+                    await supabaseSignUp({
+                      email: authEmail,
+                      password: authPassword,
+                      fullName: authName,
+                      username: authUsername,
+                      rollNo: authRollNo,
+                      department: authDept,
+                      year: authYear,
+                      phone: authPhone,
+                    });
+                  } catch {}
+
+                  setSignedIn(true);
+                  setShowIntro(false);
+                  setToast(`Welcome to AuPro, ${authName || 'Student'}! Official email verified successfully.`);
+                } catch (err: any) {
+                  setAuthError(err?.message || 'Invalid or expired verification code. Please request a new code.');
+                } finally {
+                  setIsOtpLoading(false);
+                }
+              }} className="stack" style={{ gap: 14 }}>
+                <div style={{ textAlign: 'center', padding: '6px 0' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: 22, background: '#eff6ff', color: '#1e40af', fontSize: 20, marginBottom: 8 }}>
+                    🛡️
+                  </div>
+                  <h3 style={{ margin: '0 0 4px 0', fontSize: 17, fontWeight: 700, color: 'var(--text)' }}>Verify College Identity</h3>
+                  <p className="lead" style={{ fontSize: 13, margin: 0, color: 'var(--muted)' }}>
+                    A 6-digit security code was dispatched to:
                   </p>
-                  <p style={{ margin: 0, fontSize: 11, color: '#64748b' }}>
-                    <strong>Why did OTP not arrive?</strong> University mail servers frequently quarantine automated emails from shared servers. If <strong>&quot;Confirm email&quot;</strong> is toggled <em>OFF</em> in your Supabase dashboard (<strong>Authentication → Providers → Email</strong>), you can sign in directly below without waiting for an OTP.
-                  </p>
+                  <div style={{ display: 'inline-block', background: '#f1f5f9', padding: '4px 10px', borderRadius: 6, marginTop: 6, fontSize: 12, fontWeight: 600, color: '#1e3a8a' }}>
+                    {authEmail} • Roll No: {authRollNo || '—'}
+                  </div>
                 </div>
+
+                {authOtpProviderStatus === 'setup_required' && authOtpDevCode && (
+                  <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 10, padding: 12, fontSize: 12, lineHeight: 1.5, color: '#92400e' }}>
+                    <strong>⚙️ Setup Notice:</strong> Email provider (Resend/SMTP) is not yet connected in Vercel. For testing right now, your one-time code is:
+                    <div style={{ fontFamily: 'monospace', fontSize: 22, fontWeight: 800, letterSpacing: 4, color: '#1e3a8a', padding: '6px 0', textAlign: 'center' }}>
+                      {authOtpDevCode}
+                    </div>
+                    <div style={{ fontSize: 11, color: '#b45309' }}>Enter this 6-digit code below to complete verification. (To dispatch real emails directly into university inboxes, add <code>RESEND_API_KEY</code> in Vercel).</div>
+                  </div>
+                )}
 
                 <div>
-                  <label className="field-label" style={{ fontSize: 12 }}>Enter OTP (if received)</label>
-                  <input className="search" type="text" placeholder="6-digit code (e.g. 123456)" value={authOtp} onChange={(e) => setAuthOtp(e.target.value)} maxLength={6} />
+                  <label className="field-label" style={{ fontSize: 12, textAlign: 'center', display: 'block', marginBottom: 8 }}>
+                    Enter 6-Digit Verification Code *
+                  </label>
+                  <input
+                    className="search"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    placeholder="••••••"
+                    value={authOtp}
+                    onChange={(e) => setAuthOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    maxLength={6}
+                    autoFocus
+                    style={{
+                      textAlign: 'center',
+                      fontSize: 24,
+                      fontWeight: 700,
+                      letterSpacing: 8,
+                      padding: '12px 16px',
+                      color: 'var(--primary)',
+                      border: '2px solid var(--border)',
+                      borderRadius: 10,
+                    }}
+                    required
+                  />
                 </div>
 
-                <button className="primary-button" type="submit">Verify & Enter AuPro</button>
-
                 <button
-                  type="button"
-                  className="secondary-button"
-                  style={{ background: '#f0fdf4', borderColor: '#bbf7d0', color: '#166534', fontWeight: 600 }}
-                  onClick={() => {
-                    setSignedIn(true);
-                    setToast('Signed in successfully.');
+                  className="primary-button"
+                  type="submit"
+                  disabled={authOtp.trim().length !== 6 || isOtpLoading}
+                  style={{
+                    padding: '12px 18px',
+                    fontSize: 14,
+                    fontWeight: 700,
+                    opacity: authOtp.trim().length === 6 ? 1 : 0.65,
+                    cursor: authOtp.trim().length === 6 ? 'pointer' : 'not-allowed',
                   }}
                 >
-                  ✓ Direct Sign In (Skip OTP)
+                  {isOtpLoading ? 'Verifying...' : '✓ Verify Code & Activate Account'}
                 </button>
 
-                <button type="button" className="text-button" onClick={() => setAuthMode('signup')}>← Back to registration</button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, fontSize: 12 }}>
+                  <button
+                    type="button"
+                    className="text-button"
+                    onClick={() => {
+                      setAuthError('');
+                      setAuthMode('signup');
+                    }}
+                    style={{ color: 'var(--muted)', fontSize: 12 }}
+                  >
+                    ← Edit registration details
+                  </button>
+
+                  <button
+                    type="button"
+                    className="text-button"
+                    disabled={authOtpCountdown > 0 || isOtpLoading}
+                    onClick={async () => {
+                      setAuthError('');
+                      setIsOtpLoading(true);
+                      try {
+                        const data = await sendUniversityOtp(authEmail, authName, authRollNo);
+                        setAuthOtpToken(data.token || '');
+                        setAuthOtpDevCode(data.devCode || '');
+                        setAuthOtpCountdown(60);
+                        setToast(`New verification code sent to ${authEmail}`);
+                      } catch (err: any) {
+                        setAuthError(err?.message || 'Failed to resend code.');
+                      } finally {
+                        setIsOtpLoading(false);
+                      }
+                    }}
+                    style={{
+                      color: authOtpCountdown > 0 ? 'var(--muted)' : 'var(--primary)',
+                      fontWeight: 600,
+                      cursor: authOtpCountdown > 0 ? 'default' : 'pointer',
+                    }}
+                  >
+                    {authOtpCountdown > 0 ? `Resend Code (${authOtpCountdown}s)` : 'Resend Code'}
+                  </button>
+                </div>
               </form>
             )}
 
@@ -1763,6 +1936,10 @@ export default function Home() {
                       <div className="profile-email-badge">
                         <span>✉️</span>
                         <span>{authEmail || 'student@andhrauniversity.edu.in'}</span>
+                      </div>
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', padding: '3px 8px', borderRadius: 6, fontSize: 11, fontWeight: 600, marginTop: 4 }}>
+                        <span>✓</span>
+                        <span>Official Student Identity Verified</span>
                       </div>
                     </div>
                   </div>

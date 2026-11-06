@@ -1,0 +1,4 @@
+project_id = "aupro-local"
+
+[functions.health]
+verify_jwt = false

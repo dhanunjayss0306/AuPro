@@ -70,6 +70,11 @@ const services = [
 export default function Home() {
   const [tab, setTab] = useState<Tab>('feed');
   const [signedIn, setSignedIn] = useState(false);
+  const [authMode, setAuthMode] = useState<AuthMode>('landing');
+  const [authEmail, setAuthEmail] = useState('');
+  const [authName, setAuthName] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authOtp, setAuthOtp] = useState('');
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
   const [showCreateMenu, setShowCreateMenu] = useState(false);
@@ -90,26 +95,50 @@ export default function Home() {
   }, [signedIn]);
 
   if (!signedIn) {
+    const submitAuth = () => {
+      setError('');
+      const email = authEmail.trim().toLowerCase();
+      if (!email.endsWith('@andhrauniversity.edu.in')) {
+        setError('Use your Andhra University email ending in @andhrauniversity.edu.in.');
+        return;
+      }
+      if (authMode === 'email-login') {
+        if (!authPassword) { setError('Enter your password or choose email OTP.'); return; }
+        setSignedIn(true);
+      } else if (authMode === 'signup-email') {
+        setAuthMode('signup-name');
+      } else if (authMode === 'signup-name') {
+        if (!authName.trim()) { setError('Enter your full name to continue.'); return; }
+        setAuthMode('signup-password');
+      } else if (authMode === 'signup-password') {
+        if (authPassword.length < 8) { setError('Use a password with at least 8 characters.'); return; }
+        setSignedIn(true);
+      } else if (authMode === 'otp') {
+        if (authOtp.length < 4) { setError('Enter the OTP sent to your college email.'); return; }
+        setSignedIn(true);
+      }
+    };
+
     return (
       <main className="shell">
-        <section className="content" style={{ paddingTop: '16vh' }}>
-          <div className="card" style={{ maxWidth: 460, margin: '0 auto', textAlign: 'center', padding: '36px 28px' }}>
+        <section className="content" style={{ paddingTop: '12vh' }}>
+          <div className="card auth-card">
             <div className="eyebrow" style={{ color: '#701d32', marginBottom: 6 }}>Andhra University</div>
-            <h1 style={{ fontSize: 32, marginBottom: 12 }}>Welcome to AuPro</h1>
-            <p className="lead" style={{ fontSize: 14, marginBottom: 26 }}>
-              Campus moments, verified college applications, student helpdesk, and interactive engineering campus map.
-            </p>
+            <h1 style={{ fontSize: 32, marginBottom: 12 }}>{authMode === 'landing' ? 'Welcome to AuPro' : authMode === 'signup-name' ? 'Tell us your name' : authMode === 'signup-password' ? 'Create a password' : authMode === 'otp' ? 'Check your email' : 'Sign in to AuPro'}</h1>
+            <p className="lead" style={{ fontSize: 14, marginBottom: 22 }}>{authMode === 'landing' ? 'Campus moments, applications, verified information, and the engineering campus map.' : 'Use only your Andhra University college email.'}</p>
             {error && <div className="error" role="alert" style={{ marginBottom: 18 }}>{error}</div>}
-            <button
-              className="primary-button"
-              style={{ width: '100%', padding: '14px', fontSize: 15, background: '#111827', borderColor: '#111827' }}
-              onClick={() => { setError(''); setSignedIn(true); }}
-            >
-              Continue with Google
-            </button>
-            <p className="lead" style={{ fontSize: 12, marginTop: 16, marginBottom: 0 }}>
-              Only verified <strong>@andhrauniversity.edu.in</strong> accounts are authorized.
-            </p>
+            {authMode === 'landing' && <>
+              <button className="google-button" onClick={() => { setError(''); setSignedIn(true); }}><span className="google-mark">G</span> Continue with Google</button>
+              <div className="auth-divider"><span>or</span></div>
+              <div className="auth-actions"><button className="secondary-button" onClick={() => setAuthMode('email-login')}>Log in with email</button><button className="secondary-button" onClick={() => { setAuthMode('signup-email'); setAuthEmail(''); }}>Create account</button></div>
+            </>}
+            {authMode === 'email-login' && <><label className="field-label" htmlFor="auth-email">College email</label><input id="auth-email" className="search" type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="you@andhrauniversity.edu.in" /><label className="field-label" htmlFor="auth-password">Password</label><input id="auth-password" className="search" type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="Your password" /><div className="auth-actions"><button className="primary-button" onClick={submitAuth}>Log in</button><button className="secondary-button" onClick={() => setAuthMode('otp')}>Use email OTP</button></div></>}
+            {authMode === 'signup-email' && <><label className="field-label" htmlFor="signup-email">College email</label><input id="signup-email" className="search" type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="you@andhrauniversity.edu.in" /><button className="primary-button" onClick={submitAuth}>Continue</button></>}
+            {authMode === 'signup-name' && <><label className="field-label" htmlFor="signup-name">Full name</label><input id="signup-name" className="search" value={authName} onChange={(event) => setAuthName(event.target.value)} placeholder="Your name" /><button className="primary-button" onClick={submitAuth}>Continue</button></>}
+            {authMode === 'signup-password' && <><label className="field-label" htmlFor="signup-password">Password</label><input id="signup-password" className="search" type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="At least 8 characters" /><button className="primary-button" onClick={submitAuth}>Create account</button></>}
+            {authMode === 'otp' && <><p className="lead">We sent a one-time code to {authEmail || 'your college email'}.</p><label className="field-label" htmlFor="auth-otp">Email OTP</label><input id="auth-otp" className="search" inputMode="numeric" value={authOtp} onChange={(event) => setAuthOtp(event.target.value)} placeholder="Enter OTP" /><button className="primary-button" onClick={submitAuth}>Verify OTP</button></>}
+            {authMode !== 'landing' && <button className="text-button" onClick={() => { setAuthMode('landing'); setError(''); }}>Back to sign-in choices</button>}
+            <p className="lead" style={{ fontSize: 12, marginTop: 16, marginBottom: 0 }}>Only verified <strong>@andhrauniversity.edu.in</strong> accounts are authorized.</p>
           </div>
         </section>
       </main>

@@ -14,6 +14,14 @@ import {
   ChatbotIcon,
   DarkenedAboutIcon,
   BigPlusIcon,
+  GoogleMapsPinIcon,
+  DirectionsDiamondIcon,
+  LayersIcon,
+  CrosshairGpsIcon,
+  SwapRouteIcon,
+  WalkIcon,
+  CarIcon,
+  TransitBusIcon,
 } from './icons';
 import { MomentCard, MomentPost } from './MomentCard';
 import { IntroCinematic } from './IntroCinematic';
@@ -127,6 +135,36 @@ const campusLandmarks: CampusLandmark[] = [
     timings: '7:30 AM – 7:30 PM',
     ext: 'Ext: 501',
   },
+  {
+    id: 'main-gate',
+    name: 'AU Engineering Main Gate & Arch',
+    category: 'Campus Gate',
+    code: 'AU-GATE1',
+    query: 'Andhra University Engineering Main Gate, Visakhapatnam',
+    description: 'Main campus gate connecting to Siripuram Junction and Maddilapalem road.',
+    timings: 'Open 24 Hours',
+    ext: 'Security Post 1',
+  },
+  {
+    id: 'eee-dept',
+    name: 'Dept. of Electrical & Electronics Engg (EEE)',
+    category: 'Department',
+    code: 'EEE-BLK',
+    query: 'Electrical Engineering Department, Andhra University, Visakhapatnam',
+    description: 'Power Systems Lab, Control Systems Centre, and High Voltage Laboratory.',
+    timings: '9:00 AM – 5:00 PM',
+    ext: 'Ext: 350',
+  },
+  {
+    id: 'sports-ground',
+    name: 'AU Sports Grounds & University Gymnasium',
+    category: 'Amenities',
+    code: 'AU-SPORTS',
+    query: 'Andhra University Sports Ground, Visakhapatnam',
+    description: 'Track and field grounds, cricket/football grounds, indoor badminton, and gym.',
+    timings: '6:00 AM – 7:00 PM',
+    ext: 'Physical Ed: Ext 601',
+  },
 ];
 
 const initialPosts: MomentPost[] = [];
@@ -212,10 +250,19 @@ export default function Home() {
   const [clickedApplyId, setClickedApplyId] = useState<string | null>(null);
   const [applicationPurpose, setApplicationPurpose] = useState('');
 
-  // Maps In-App Directions & Fullscreen State
+  // Google Maps State (Authentic Google Maps UI)
+  const [mapLocationQuery, setMapLocationQuery] = useState('Andhra University College of Engineering, Visakhapatnam');
+  const [selectedLandmark, setSelectedLandmark] = useState<CampusLandmark | null>(campusLandmarks[0]);
+  const [mapLayer, setMapLayer] = useState<'m' | 'k'>('m');
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
+  const [mapSearchInput, setMapSearchInput] = useState('');
+  const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
+  const [mapCategory, setMapCategory] = useState<'all' | 'departments' | 'admin' | 'library' | 'hostels' | 'canteen' | 'gates'>('all');
+  const [showPlaceSheet, setShowPlaceSheet] = useState(true);
   const [showDirections, setShowDirections] = useState(false);
-  const [directionsStart, setDirectionsStart] = useState('My Location');
+  const [directionsStart, setDirectionsStart] = useState('Your location');
+  const [directionsEnd, setDirectionsEnd] = useState('AU College of Engineering (Main & Admin Block)');
+  const [transportMode, setTransportMode] = useState<'w' | 'm' | 'd' | 'r'>('w');
 
   // About tab sub-navigation & settings
   const [aboutSubTab, setAboutSubTab] = useState<'profile' | 'college'>('profile');
@@ -256,13 +303,6 @@ export default function Home() {
   const [chatInput, setChatInput] = useState('');
   const [chatStatus, setChatStatus] = useState('');
   const [topNotice, setTopNotice] = useState('');
-
-  // Google Maps State (Interactive In-App Environment)
-  const [mapLocationQuery, setMapLocationQuery] = useState('Andhra University College of Engineering, Visakhapatnam');
-  const [selectedLandmark, setSelectedLandmark] = useState<CampusLandmark>(campusLandmarks[0]);
-  const [mapLayer, setMapLayer] = useState<'m' | 'k'>('m');
-  const [customApiKey, setCustomApiKey] = useState('');
-  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
 
   useEffect(() => {
     try {
@@ -433,6 +473,16 @@ export default function Home() {
   const filteredServices = services.filter((service) =>
     service.title.toLowerCase().includes(query.toLowerCase())
   );
+
+  const filteredLandmarks = campusLandmarks.filter((loc) => {
+    if (!mapSearchInput.trim()) return true;
+    const s = mapSearchInput.toLowerCase();
+    return (
+      loc.name.toLowerCase().includes(s) ||
+      loc.category.toLowerCase().includes(s) ||
+      loc.code.toLowerCase().includes(s)
+    );
+  });
 
   const handleCreateFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -796,7 +846,7 @@ export default function Home() {
       )}
 
       {/* Main Content Area */}
-      <section className="content">
+      <section className={`content ${tab === 'location' ? 'content-map' : ''}`}>
         {topNotice && (
           <div className="top-notice" role="status">
             <span>{topNotice}</span>
@@ -1248,156 +1298,368 @@ export default function Home() {
           </div>
         )}
 
-        {/* TAB 5: CAMPUS MAP / LOCATION (In-App Interactive Environment + Fullscreen & Directions) */}
+        {/* TAB 5: CAMPUS MAP / LOCATION (Authentic Google Maps Edge-to-Edge Experience) */}
         {tab === 'location' && (
-          <div className="stack">
-            <div>
-              <div className="eyebrow">College of Engineering Campus Map</div>
-              <h1>Campus Navigation &amp; Blocks</h1>
-              <p className="lead">Interactive in-app navigation for academic departments, central library, exam cell, and hostels.</p>
-            </div>
+          <div className={`gmaps-container maps-environment-wrapper ${isMapFullscreen ? 'fullscreen' : ''}`}>
+            {/* The Google Maps Embedded Background Canvas */}
+            <iframe
+              className="gmaps-iframe"
+              title="Google Maps Andhra University"
+              src={
+                showDirections
+                  ? `https://www.google.com/maps?saddr=${encodeURIComponent(directionsStart === 'Your location' ? 'Andhra University Visakhapatnam' : directionsStart)}&daddr=${encodeURIComponent(directionsEnd || selectedLandmark?.query || 'AU College of Engineering')}&dirflg=${transportMode === 'm' ? 'w' : transportMode}&output=embed`
+                  : `https://www.google.com/maps?q=${encodeURIComponent(mapLocationQuery)}&t=${mapLayer}&z=17&output=embed`
+              }
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
 
-            <div className={`maps-environment-wrapper ${isMapFullscreen ? 'fullscreen' : ''}`}>
-              {/* Layer Switcher & Fullscreen / Directions Controls */}
-              <div className="maps-layer-selector">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                  <InstagramLocationIcon size={16} />
-                  <strong style={{ fontSize: 13, color: '#1e293b' }}>{selectedLandmark.name}</strong>
-                  <span style={{ fontSize: 11, color: '#701d32', fontWeight: 600 }}>({selectedLandmark.code})</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                  <button
-                    className="maps-fullscreen-toggle"
-                    style={{
-                      background: showDirections ? '#701d32' : '#ffffff',
-                      color: showDirections ? '#ffffff' : '#701d32',
-                      borderColor: '#701d32',
-                    }}
-                    onClick={() => setShowDirections((prev) => !prev)}
-                  >
-                    🧭 {showDirections ? 'Hide Directions' : 'Directions'}
-                  </button>
-                  <button
-                    className="maps-fullscreen-toggle"
-                    onClick={() => setIsMapFullscreen((prev) => !prev)}
-                  >
-                    {isMapFullscreen ? '✕ Exit Fullscreen' : '⛶ Open in Full Screen'}
-                  </button>
-                  <div className="maps-layer-pill-group">
-                    <button
-                      className={`maps-layer-pill ${mapLayer === 'm' ? 'active' : ''}`}
-                      onClick={() => setMapLayer('m')}
-                    >
-                      Street Map
-                    </button>
-                    <button
-                      className={`maps-layer-pill ${mapLayer === 'k' ? 'active' : ''}`}
-                      onClick={() => setMapLayer('k')}
-                    >
-                      Satellite
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* In-App Directions Panel */}
-              {showDirections && (
-                <div className="directions-panel">
-                  <div className="directions-row">
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#1e293b', minWidth: 44 }}>From:</span>
+            {/* Floating Top Bar: Search Bar or Directions Header */}
+            <div className="gmaps-top-overlay">
+              {!showDirections ? (
+                <>
+                  {/* Google Maps Search Bar Card */}
+                  <div className="gmaps-search-card">
+                    <div className="gmaps-search-icon">
+                      <GoogleMapsPinIcon size={20} />
+                    </div>
                     <input
-                      className="directions-input"
-                      value={directionsStart}
-                      onChange={(e) => setDirectionsStart(e.target.value)}
-                      placeholder="Enter starting point (e.g. Sivaji Hostel, Main Gate)..."
+                      className="gmaps-search-input"
+                      placeholder="Search here"
+                      value={mapSearchInput}
+                      onChange={(e) => {
+                        setMapSearchInput(e.target.value);
+                        setShowSearchSuggestions(true);
+                      }}
+                      onFocus={() => setShowSearchSuggestions(true)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && mapSearchInput.trim()) {
+                          setShowSearchSuggestions(false);
+                          setMapLocationQuery(`${mapSearchInput.trim()}, Andhra University, Visakhapatnam`);
+                        }
+                      }}
                     />
+                    {mapSearchInput && (
+                      <button
+                        className="gmaps-search-clear"
+                        onClick={() => {
+                          setMapSearchInput('');
+                          setShowSearchSuggestions(false);
+                        }}
+                        aria-label="Clear search"
+                      >
+                        ×
+                      </button>
+                    )}
+                    <div className="gmaps-search-divider" />
+                    <button
+                      className="gmaps-directions-btn"
+                      title="Directions"
+                      aria-label="Directions"
+                      onClick={() => {
+                        setShowDirections(true);
+                        setShowPlaceSheet(false);
+                        if (selectedLandmark) {
+                          setDirectionsEnd(selectedLandmark.name);
+                        }
+                      }}
+                    >
+                      <DirectionsDiamondIcon size={20} />
+                    </button>
+
+                    {/* Search Auto-suggestions Dropdown */}
+                    {showSearchSuggestions && (
+                      <div className="gmaps-suggestions-dropdown">
+                        {filteredLandmarks.slice(0, 8).map((loc) => (
+                          <div
+                            key={loc.id}
+                            className="gmaps-suggestion-item"
+                            onClick={() => {
+                              setSelectedLandmark(loc);
+                              setMapLocationQuery(loc.query);
+                              setMapSearchInput(loc.name);
+                              setShowSearchSuggestions(false);
+                              setShowPlaceSheet(true);
+                            }}
+                          >
+                            <GoogleMapsPinIcon size={18} />
+                            <div className="gmaps-suggestion-info">
+                              <strong>{loc.name}</strong>
+                              <span>{loc.category} • {loc.code}</span>
+                            </div>
+                          </div>
+                        ))}
+                        {filteredLandmarks.length === 0 && (
+                          <div style={{ padding: '12px 16px', fontSize: 13, color: '#5f6368' }}>
+                            No matching AU landmark. Press Enter to search on Map.
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <div className="directions-row">
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#701d32', minWidth: 44 }}>To:</span>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>
-                      {selectedLandmark.name} (AU College of Engineering)
-                    </span>
-                  </div>
-                  <div className="directions-preset-pills">
-                    <span style={{ fontSize: 11, color: 'var(--muted)', alignSelf: 'center' }}>Quick start points:</span>
+
+                  {/* Google Maps Category Filter Chips */}
+                  <div className="gmaps-chips-scroll">
                     {[
-                      'My Location',
+                      { id: 'all', label: 'All Places' },
+                      { id: 'departments', label: '🏢 Departments' },
+                      { id: 'admin', label: '🏛️ Administration' },
+                      { id: 'library', label: '📚 Library' },
+                      { id: 'hostels', label: '🛏️ Hostels' },
+                      { id: 'canteen', label: '🍽️ Canteen' },
+                      { id: 'gates', label: '🚪 Campus Gates' },
+                    ].map((chip) => (
+                      <button
+                        key={chip.id}
+                        className={`gmaps-chip ${mapCategory === chip.id ? 'active' : ''}`}
+                        onClick={() => {
+                          setMapCategory(chip.id as any);
+                          const target = campusLandmarks.find((l) => {
+                            if (chip.id === 'all') return true;
+                            if (chip.id === 'departments') return l.category === 'Department';
+                            if (chip.id === 'admin') return l.category === 'Administration';
+                            if (chip.id === 'library') return l.category === 'Library';
+                            if (chip.id === 'hostels') return l.category === 'Hostel';
+                            if (chip.id === 'canteen') return l.category === 'Amenities';
+                            if (chip.id === 'gates') return l.category === 'Campus Gate';
+                            return true;
+                          });
+                          if (target) {
+                            setSelectedLandmark(target);
+                            setMapLocationQuery(target.query);
+                            setShowPlaceSheet(true);
+                          }
+                        }}
+                      >
+                        {chip.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                /* Google Maps Directions Navigation Drawer Card */
+                <div className="gmaps-directions-card">
+                  <div className="gmaps-transit-row">
+                    <button
+                      className="gmaps-back-btn"
+                      onClick={() => setShowDirections(false)}
+                      aria-label="Back to Map"
+                    >
+                      ←
+                    </button>
+                    <div className="gmaps-transit-modes">
+                      <button
+                        className={`gmaps-transit-btn ${transportMode === 'w' ? 'active' : ''}`}
+                        onClick={() => setTransportMode('w')}
+                      >
+                        <WalkIcon size={16} />
+                        <span>Walk</span>
+                      </button>
+                      <button
+                        className={`gmaps-transit-btn ${transportMode === 'm' ? 'active' : ''}`}
+                        onClick={() => setTransportMode('m')}
+                      >
+                        <span>🏍️</span>
+                        <span>Bike</span>
+                      </button>
+                      <button
+                        className={`gmaps-transit-btn ${transportMode === 'd' ? 'active' : ''}`}
+                        onClick={() => setTransportMode('d')}
+                      >
+                        <CarIcon size={16} />
+                        <span>Drive</span>
+                      </button>
+                      <button
+                        className={`gmaps-transit-btn ${transportMode === 'r' ? 'active' : ''}`}
+                        onClick={() => setTransportMode('r')}
+                      >
+                        <TransitBusIcon size={16} />
+                        <span>Bus</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="gmaps-route-inputs">
+                    <div className="gmaps-route-pins">
+                      <div className="gmaps-pin-circle" />
+                      <div style={{ width: 2, height: 16, background: '#dadce0' }} />
+                      <div className="gmaps-pin-dot" />
+                    </div>
+                    <div className="gmaps-route-fields">
+                      <input
+                        className="gmaps-route-field"
+                        value={directionsStart}
+                        onChange={(e) => setDirectionsStart(e.target.value)}
+                        placeholder="Choose start location"
+                      />
+                      <input
+                        className="gmaps-route-field"
+                        value={directionsEnd}
+                        onChange={(e) => setDirectionsEnd(e.target.value)}
+                        placeholder="Choose destination"
+                      />
+                    </div>
+                    <button
+                      className="gmaps-swap-btn"
+                      title="Swap start and destination"
+                      onClick={() => {
+                        const temp = directionsStart;
+                        setDirectionsStart(directionsEnd);
+                        setDirectionsEnd(temp);
+                      }}
+                    >
+                      <SwapRouteIcon size={16} />
+                    </button>
+                  </div>
+
+                  {/* Quick Start Preset Chips */}
+                  <div className="gmaps-preset-pills">
+                    <span style={{ fontSize: 11, color: '#5f6368', alignSelf: 'center', whiteSpace: 'nowrap' }}>Start:</span>
+                    {[
+                      'Your location',
                       'AU Main Gate',
                       'Siripuram Junction',
-                      'Sivaji Hostel Block',
-                      'RTC Complex Visakhapatnam',
-                    ].map((loc) => (
+                      'Sivaji Hostel',
+                      'RTC Complex',
+                    ].map((preset) => (
                       <button
-                        key={loc}
-                        type="button"
-                        className={`directions-pill ${directionsStart === loc ? 'active' : ''}`}
-                        onClick={() => setDirectionsStart(loc)}
+                        key={preset}
+                        className={`gmaps-preset-pill ${directionsStart === preset ? 'active' : ''}`}
+                        onClick={() => setDirectionsStart(preset)}
                       >
-                        {loc}
+                        {preset}
                       </button>
                     ))}
                   </div>
                 </div>
               )}
-
-              {/* Embedded Maps Canvas (Kept entirely inside the app) */}
-              <div className="maps-canvas-box">
-                <iframe
-                  title="Andhra University College of Engineering In-App Map"
-                  src={
-                    showDirections
-                      ? `https://www.google.com/maps?saddr=${encodeURIComponent(directionsStart === 'My Location' ? 'Visakhapatnam' : directionsStart)}&daddr=${encodeURIComponent(selectedLandmark.query)}&output=embed`
-                      : `https://www.google.com/maps?q=${encodeURIComponent(selectedLandmark.query)}&t=${mapLayer}&z=17&output=embed`
-                  }
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                />
-              </div>
-
-              {/* In-App Selected Landmark Details */}
-              <div style={{ padding: '14px 18px', background: '#ffffff', borderTop: '1px solid var(--border-light)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
-                  <div>
-                    <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#701d32', letterSpacing: '0.05em' }}>
-                      {selectedLandmark.category} · {selectedLandmark.code}
-                    </span>
-                    <h3 style={{ margin: '2px 0 4px 0', fontSize: 16 }}>{selectedLandmark.name}</h3>
-                    <p className="lead" style={{ margin: 0, fontSize: 13 }}>{selectedLandmark.description}</p>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: '#166534' }}>● Open: {selectedLandmark.timings}</div>
-                    <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{selectedLandmark.ext}</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Interactive Campus Landmarks Selector (No external redirects) */}
-              <div className="maps-landmarks-section">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: '#111827' }}>AU Campus Blocks &amp; Landmarks</span>
-                  <span style={{ fontSize: 11, color: 'var(--muted)' }}>Tap to navigate in-app</span>
-                </div>
-                <div className="maps-landmarks-grid">
-                  {campusLandmarks.map((loc) => (
-                    <button
-                      key={loc.id}
-                      className={`maps-landmark-card ${selectedLandmark.id === loc.id ? 'active' : ''}`}
-                      onClick={() => {
-                        setSelectedLandmark(loc);
-                        setMapLocationQuery(loc.query);
-                      }}
-                    >
-                      <strong>{loc.name}</strong>
-                      <span>{loc.category} · {loc.code}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
+
+            {/* Floating Action Buttons (Right side: Layers, GPS, Fullscreen) */}
+            <div className="gmaps-fab-column">
+              <button
+                className="gmaps-fab-btn"
+                title={mapLayer === 'm' ? 'Switch to Satellite View' : 'Switch to Street Map'}
+                onClick={() => setMapLayer((prev) => (prev === 'm' ? 'k' : 'm'))}
+              >
+                <LayersIcon size={20} />
+              </button>
+              <button
+                className="gmaps-fab-btn"
+                title="Center on AU Engineering Campus"
+                onClick={() => {
+                  setMapLocationQuery('Andhra University College of Engineering, Visakhapatnam');
+                  setSelectedLandmark(campusLandmarks[0]);
+                  setShowPlaceSheet(true);
+                  setToast('Centered on AU College of Engineering.');
+                }}
+              >
+                <CrosshairGpsIcon size={20} />
+              </button>
+              <button
+                className="gmaps-fab-btn"
+                title={isMapFullscreen ? 'Exit Fullscreen' : 'Open in Fullscreen'}
+                onClick={() => setIsMapFullscreen((prev) => !prev)}
+              >
+                {isMapFullscreen ? '✕' : '⛶'}
+              </button>
+            </div>
+
+            {/* Google Maps Bottom Place Sheet (When landmark selected and directions not active) */}
+            {showPlaceSheet && selectedLandmark && !showDirections && (
+              <div className="gmaps-place-sheet">
+                <div className="gmaps-sheet-header">
+                  <div>
+                    <h3>{selectedLandmark.name}</h3>
+                    <div className="gmaps-sheet-rating">
+                      <strong>★ 4.7</strong>
+                      <span>(1,420) • {selectedLandmark.category} • {selectedLandmark.code}</span>
+                    </div>
+                  </div>
+                  <button
+                    className="gmaps-sheet-close"
+                    onClick={() => setShowPlaceSheet(false)}
+                    aria-label="Close"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* Google Maps Action Pills */}
+                <div className="gmaps-sheet-actions">
+                  <button
+                    className="gmaps-action-pill primary"
+                    onClick={() => {
+                      setShowDirections(true);
+                      setDirectionsEnd(selectedLandmark.name);
+                    }}
+                  >
+                    <DirectionsDiamondIcon size={16} />
+                    <span>Directions</span>
+                  </button>
+                  <button
+                    className="gmaps-action-pill"
+                    onClick={() => {
+                      if (navigator.clipboard) {
+                        navigator.clipboard.writeText(selectedLandmark.query);
+                        setToast('Copied campus landmark location!');
+                      }
+                    }}
+                  >
+                    <span>📋</span>
+                    <span>Copy Info</span>
+                  </button>
+                  <button
+                    className="gmaps-action-pill"
+                    onClick={() => setIsMapFullscreen((prev) => !prev)}
+                  >
+                    <span>⛶</span>
+                    <span>{isMapFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</span>
+                  </button>
+                </div>
+
+                {/* Place Details */}
+                <div className="gmaps-sheet-details">
+                  <div className="gmaps-sheet-detail-row">
+                    <span>📍</span>
+                    <span>Andhra University College of Engineering, Visakhapatnam, Andhra Pradesh 530003</span>
+                  </div>
+                  <div className="gmaps-sheet-detail-row">
+                    <span>🕒</span>
+                    <span>Open • {selectedLandmark.timings}</span>
+                  </div>
+                  <div className="gmaps-sheet-detail-row">
+                    <span>ℹ️</span>
+                    <span>{selectedLandmark.description} ({selectedLandmark.ext})</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Directions Trip Summary Bottom Sheet */}
+            {showDirections && (
+              <div className="gmaps-trip-sheet">
+                <div>
+                  <div className="gmaps-trip-time">
+                    {transportMode === 'w' ? '4 min' : transportMode === 'm' ? '2 min' : transportMode === 'd' ? '3 min' : '5 min'}
+                  </div>
+                  <div className="gmaps-trip-meta">
+                    {transportMode === 'w' ? '350 m • via AU North Campus Ave' : 'Fastest route inside AU campus'}
+                  </div>
+                </div>
+                <button
+                  className="gmaps-trip-start-btn"
+                  onClick={() => {
+                    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(directionsStart === 'Your location' ? 'Andhra University Visakhapatnam' : directionsStart)}&destination=${encodeURIComponent(directionsEnd)}&travelmode=${transportMode === 'w' ? 'walking' : transportMode === 'd' ? 'driving' : 'transit'}`;
+                    window.open(mapsUrl, '_blank');
+                  }}
+                >
+                  <span>Start</span>
+                  <span style={{ fontSize: 16 }}>➔</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
 

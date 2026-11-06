@@ -182,3 +182,93 @@ export function BigPlusIcon({ size = 28 }: { size?: number }) {
     </svg>
   );
 }
+
+
+// 12. Google Maps Exact UI Icons
+export function GoogleMapsPinIcon({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#ea4335" />
+      <circle cx="12" cy="9" r="2.8" fill="#ffffff" />
+    </svg>
+  );
+}
+
+export function DirectionsDiamondIcon({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="3" width="18" height="18" rx="4" transform="rotate(45 12 12)" fill="#1a73e8" />
+      <path d="M13.5 8.5v3h-3a1 1 0 0 0-1 1v3" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="m11.5 6.5 3 2-3 2" fill="#ffffff" />
+    </svg>
+  );
+}
+
+export function LayersIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+      <polyline points="2 17 12 22 22 17" />
+      <polyline points="2 12 12 17 22 12" />
+    </svg>
+  );
+}
+
+export function CrosshairGpsIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="7" />
+      <line x1="12" y1="2" x2="12" y2="5" />
+      <line x1="12" y1="19" x2="12" y2="22" />
+      <line x1="2" y1="12" x2="5" y2="12" />
+      <line x1="19" y1="12" x2="22" y2="12" />
+      <circle cx="12" cy="12" r="2" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function SwapRouteIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="7 10 7 4 11 4" />
+      <polyline points="4 7 7 4 10 7" />
+      <polyline points="17 14 17 20 13 20" />
+      <polyline points="20 17 17 20 14 17" />
+    </svg>
+  );
+}
+
+export function WalkIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="13" cy="4" r="2" />
+      <path d="M7 21l3-7 2 2v6" />
+      <path d="M12 13l2-4 3 2v6" />
+      <path d="M9 10l3-2 3 2" />
+    </svg>
+  );
+}
+
+export function CarIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="10" width="20" height="8" rx="2" />
+      <path d="M5 10l2-5h10l2 5" />
+      <circle cx="7" cy="15" r="1.5" fill="currentColor" />
+      <circle cx="17" cy="15" r="1.5" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function TransitBusIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4" y="3" width="16" height="15" rx="3" />
+      <line x1="4" y1="10" x2="20" y2="10" />
+      <circle cx="8" cy="14" r="1" fill="currentColor" />
+      <circle cx="16" cy="14" r="1" fill="currentColor" />
+      <line x1="6" y1="18" x2="6" y2="21" />
+      <line x1="18" y1="18" x2="18" y2="21" />
+    </svg>
+  );
+}

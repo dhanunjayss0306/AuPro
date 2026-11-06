@@ -15,6 +15,8 @@ import {
   BigPlusIcon,
 } from './icons';
 import { MomentCard, MomentPost } from './MomentCard';
+import { IntroCinematic } from './IntroCinematic';
+import { ThreadsComposer, ThreadsPostData } from './ThreadsComposer';
 
 type Tab = 'applications' | 'create' | 'feed' | 'chatbot' | 'location' | 'about';
 type AuthMode = 'landing' | 'email-login' | 'signup-email' | 'signup-name' | 'signup-password' | 'otp';
@@ -170,6 +172,21 @@ const verifiedBotKnowledge: { keywords: string[]; answer: string }[] = [
 ];
 
 export default function Home() {
+  const [showIntro, setShowIntro] = useState(true);
+  const [showThreadsComposer, setShowThreadsComposer] = useState(false);
+  const [threadsInitialKind, setThreadsInitialKind] = useState<'announcement' | 'problem'>('announcement');
+
+  useEffect(() => {
+    try {
+      const seen = sessionStorage.getItem('aupro_intro_seen');
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (seen === 'true' || prefersReduced) {
+        setShowIntro(false);
+      }
+    } catch {
+      setShowIntro(false);
+    }
+  }, []);
   const [tab, setTab] = useState<Tab>('feed');
   const [signedIn, setSignedIn] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>('landing');
@@ -249,6 +266,32 @@ export default function Home() {
     setCreatePreview(null);
   };
 
+  const handleThreadsPost = (data: ThreadsPostData) => {
+    const newPost: MomentPost = {
+      id: `${Date.now()}`,
+      username: data.isAnonymous ? 'anonymous.au' : (authName ? authName.toLowerCase().replace(/\s+/g, '_') : 'au.student'),
+      avatarText: data.isAnonymous ? '?' : (authName[0] || 'A').toUpperCase(),
+      isOfficial: data.category === 'announcement',
+      category: data.category,
+      location: data.location,
+      imageUrl: data.imageUrl,
+      imageCaption: data.title || (data.category === 'problem' ? 'Problem Report' : 'Official Announcement'),
+      likesCount: 1,
+      repostsCount: 0,
+      caption: data.caption,
+      commentsCount: 0,
+      comments: [],
+      timeAgo: 'JUST NOW',
+      durationDays: 30,
+    };
+
+    setFeedPosts((posts) => [newPost, ...posts]);
+    setFeedFilter(data.category === 'problem' ? 'problems' : data.category === 'announcement' ? 'announcements' : 'normal');
+    setShowThreadsComposer(false);
+    setToast(data.category === 'problem' ? 'Problem reported to campus administration.' : 'Announcement published to AuPro feed.');
+    setTab('feed');
+  };
+
   const handleCreatePost = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setCreateError('');
@@ -312,6 +355,10 @@ export default function Home() {
     setChatInput('');
     setChatStatus('Answer updated.');
   };
+
+  if (showIntro) {
+    return <IntroCinematic onComplete={() => setShowIntro(false)} />;
+  }
 
   if (!signedIn) {
     return (
@@ -893,7 +940,10 @@ export default function Home() {
         {/* Big Plus button with CLEAR PROMINENT UNDERLINE */}
         <button
           className="nav-button create-action"
-          onClick={() => setShowCreateMenu(true)}
+          onClick={() => {
+            setThreadsInitialKind('announcement');
+            setShowThreadsComposer(true);
+          }}
           aria-label="Add new post"
           title="Add new post"
         >
@@ -923,6 +973,16 @@ export default function Home() {
           <span>About</span>
         </button>
       </nav>
+
+      {showThreadsComposer && (
+        <ThreadsComposer
+          initialKind={threadsInitialKind}
+          userName={authName || 'AU Student'}
+          userHandle={authName ? authName.toLowerCase().replace(/\s+/g, '_') : 'au.student'}
+          onClose={() => setShowThreadsComposer(false)}
+          onSubmit={handleThreadsPost}
+        />
+      )}
 
       {toast && <div className="toast" role="status">{toast}</div>}
     </main>

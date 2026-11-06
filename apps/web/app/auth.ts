@@ -72,7 +72,18 @@ export const firebaseClientConfig = {
 };
 
 /**
- * Cloudflare R2 Config for Post Attachments (Images, PDFs)
+ * Storage Config (100% Free - No Credit Card Needed)
+ * Default: Supabase Storage (1 GB free built directly into your Supabase project)
+ * Optional: Cloudflare R2 (only if you ever want to add a card later)
+ */
+export const storageConfig = {
+  provider: (process.env.NEXT_PUBLIC_STORAGE_PROVIDER || 'supabase') as 'supabase' | 'r2',
+  supabaseBucket: process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET || 'media',
+  r2PublicBaseUrl: process.env.NEXT_PUBLIC_CLOUDFLARE_R2_PUBLIC_URL || '',
+};
+
+/**
+ * Cloudflare R2 Config (Optional - Requires card verification on Cloudflare)
  */
 export const cloudflareR2Config = {
   publicBaseUrl: process.env.NEXT_PUBLIC_CLOUDFLARE_R2_PUBLIC_URL || '',

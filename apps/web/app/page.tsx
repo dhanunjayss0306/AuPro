@@ -14,6 +14,7 @@ import {
 import { MomentCard, MomentPost } from './MomentCard';
 
 type Tab = 'applications' | 'create' | 'feed' | 'chatbot' | 'location' | 'about';
+type AuthMode = 'landing' | 'email-login' | 'signup-email' | 'signup-name' | 'signup-password' | 'otp';
 
 const samplePosts: MomentPost[] = [
   {
@@ -258,7 +259,7 @@ export default function Home() {
             </div>
             <div className="grid">
               {['College office timings', 'Department faculty directory', 'Fee submission rules', 'Hall ticket requirements', 'Campus library timings'].map((topic) => (
-                <button className="card" key={topic} style={{ textAlign: 'left' }}>
+                <button className="card" key={topic} style={{ textAlign: 'left' }} onClick={() => { setChatInput(`Tell me about ${topic.toLowerCase()}.`); setChatStatus('Topic selected. Review the question and send it.'); }}>
                   <strong>{topic}</strong>
                   <div className="lead" style={{ fontSize: 12, margin: '6px 0 0' }}>View verified answers</div>
                 </button>

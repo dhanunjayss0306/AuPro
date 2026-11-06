@@ -137,7 +137,11 @@ async function sendViaResend(email: string, name: string, otp: string, rollNo: s
     if (!res.ok) {
       const errJson = await res.json().catch(() => ({}));
       console.error('Resend dispatch failed with status', res.status, errJson);
-      return { success: false, error: errJson.message || `Resend HTTP error ${res.status}` };
+      let errMsg = errJson.message || `Resend HTTP error ${res.status}`;
+      if (typeof errMsg === 'string' && (errMsg.includes('only send testing emails') || errMsg.includes('verify a domain') || errMsg.includes('testing emails to your own email address'))) {
+        errMsg = `Resend Sandbox Restriction: Free 'onboarding@resend.dev' can only deliver to the account owner's email address. To deliver to all university student emails, add and verify your custom domain in the Resend dashboard (or use Brevo / SMTP).`;
+      }
+      return { success: false, error: errMsg };
     }
 
     return { success: true };

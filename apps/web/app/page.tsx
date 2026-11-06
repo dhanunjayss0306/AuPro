@@ -274,6 +274,7 @@ export default function Home() {
   const [authOtpToken, setAuthOtpToken] = useState('');
   const [authOtpDevCode, setAuthOtpDevCode] = useState('');
   const [authOtpProviderStatus, setAuthOtpProviderStatus] = useState<'delivered' | 'setup_required' | ''>('');
+  const [authOtpProviderError, setAuthOtpProviderError] = useState('');
   const [authOtpCountdown, setAuthOtpCountdown] = useState(0);
   const [isOtpLoading, setIsOtpLoading] = useState(false);
   const [authError, setAuthError] = useState('');
@@ -910,10 +911,15 @@ export default function Home() {
                   setAuthOtpToken(data.token || '');
                   setAuthOtpDevCode(data.devCode || '');
                   setAuthOtpProviderStatus(data.providerStatus || 'delivered');
+                  setAuthOtpProviderError(data.providerError || '');
                   setAuthOtpCountdown(60);
                   setAuthOtp('');
                   setAuthMode('otp');
-                  setToast(`Verification code sent to ${clean}`);
+                  if (data.providerError) {
+                    setToast('Verification code generated (see diagnostic note)');
+                  } else {
+                    setToast(`Verification code sent to ${clean}`);
+                  }
                 } catch (err: any) {
                   setAuthError(err?.message || 'Failed to dispatch verification code. Please check your email.');
                 } finally {
@@ -1056,10 +1062,27 @@ export default function Home() {
                   </div>
                 </div>
 
+                {authOtpProviderError && (
+                  <div style={{
+                    background: 'rgba(239, 68, 68, 0.08)',
+                    border: '1px solid rgba(239, 68, 68, 0.25)',
+                    borderRadius: 8,
+                    padding: '10px 14px',
+                    fontSize: 12,
+                    color: 'var(--ink)',
+                    lineHeight: 1.45,
+                    margin: '6px 0 10px 0',
+                    textAlign: 'left',
+                  }}>
+                    <strong style={{ color: '#ef4444', display: 'block', marginBottom: 2 }}>⚠️ Email Dispatch Diagnostic:</strong>
+                    <span>{authOtpProviderError}</span>
+                  </div>
+                )}
+
                 {authOtpDevCode && (
-                  <div style={{ textAlign: 'center', margin: '2px 0 6px 0' }}>
-                    <span style={{ fontSize: 11, color: 'var(--muted)', background: 'var(--hover-subtle)', border: '1px solid var(--border)', padding: '4px 10px', borderRadius: 8, fontFamily: 'monospace' }}>
-                      Test code: <strong style={{ color: 'var(--primary)', letterSpacing: 2 }}>{authOtpDevCode}</strong>
+                  <div style={{ textAlign: 'center', margin: '4px 0 10px 0' }}>
+                    <span style={{ fontSize: 12, color: 'var(--muted)', background: 'var(--hover-subtle)', border: '1px solid var(--border)', padding: '6px 14px', borderRadius: 8, fontFamily: 'monospace', display: 'inline-block' }}>
+                      Verification code: <strong style={{ color: 'var(--primary)', letterSpacing: 2, fontSize: 13 }}>{authOtpDevCode}</strong>
                     </span>
                   </div>
                 )}
@@ -1131,8 +1154,13 @@ export default function Home() {
                         const data = await sendUniversityOtp(authEmail, authName, authRollNo);
                         setAuthOtpToken(data.token || '');
                         setAuthOtpDevCode(data.devCode || '');
+                        setAuthOtpProviderError(data.providerError || '');
                         setAuthOtpCountdown(60);
-                        setToast(`New verification code sent to ${authEmail}`);
+                        if (data.providerError) {
+                          setToast('New verification code generated (see diagnostic note)');
+                        } else {
+                          setToast(`New verification code sent to ${authEmail}`);
+                        }
                       } catch (err: any) {
                         setAuthError(err?.message || 'Failed to resend code.');
                       } finally {

@@ -34,7 +34,7 @@
   --teal: #172554;
   --ink: #f8fafc;
   --text-main: #f1f5f9;
-  --muted: #94a3b8;
+  --muted: #cbd5e1;
   --border: #1f293d;
   --border-light: #283548;
   --hover-subtle: #1e293b;
@@ -3677,12 +3677,13 @@ textarea, select { font: inherit; }
 .dark .chat-bubble.bot-bubble {
   background: #1e293b !important;
   border: 1px solid #334155 !important;
-  color: #f8fafc !important;
+  color: #ffffff !important;
 }
 
 [data-theme='dark'] .chat-bubble.bot-bubble p,
 .dark .chat-bubble.bot-bubble p {
-  color: #f8fafc !important;
+  color: #ffffff !important;
+  font-weight: 400 !important;
 }
 
 [data-theme='dark'] .chat-bubble.user-bubble,
@@ -3753,17 +3754,20 @@ textarea, select { font: inherit; }
 [data-theme='dark'] .feed-empty-card,
 .dark .feed-empty-card {
   background: #111827 !important;
-  border: 1px dashed #243044 !important;
+  border: 1px dashed #334155 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
 }
 
 [data-theme='dark'] .feed-empty-card h3,
 .dark .feed-empty-card h3 {
-  color: #f8fafc !important;
+  color: #ffffff !important;
+  font-size: 17px !important;
 }
 
 [data-theme='dark'] .feed-empty-card .lead,
 .dark .feed-empty-card .lead {
-  color: #94a3b8 !important;
+  color: #e2e8f0 !important;
+  font-size: 13.5px !important;
 }
 
 [data-theme='dark'] .insta-card,
@@ -3779,12 +3783,12 @@ textarea, select { font: inherit; }
 
 [data-theme='dark'] .insta-location,
 .dark .insta-location {
-  color: #94a3b8 !important;
+  color: #e2e8f0 !important;
 }
 
 [data-theme='dark'] .insta-more-btn,
 .dark .insta-more-btn {
-  color: #94a3b8 !important;
+  color: #e2e8f0 !important;
 }
 
 [data-theme='dark'] .insta-action-btn,
@@ -3796,37 +3800,37 @@ textarea, select { font: inherit; }
 .dark .insta-likes-text,
 [data-theme='dark'] .insta-likes-text strong,
 .dark .insta-likes-text strong {
-  color: #f8fafc !important;
+  color: #ffffff !important;
 }
 
 [data-theme='dark'] .insta-repost-count,
 .dark .insta-repost-count {
-  color: #94a3b8 !important;
+  color: #cbd5e1 !important;
 }
 
 [data-theme='dark'] .insta-caption-body,
 .dark .insta-caption-body {
-  color: #e2e8f0 !important;
+  color: #f1f5f9 !important;
 }
 
 [data-theme='dark'] .insta-comments-link,
 .dark .insta-comments-link {
-  color: #94a3b8 !important;
+  color: #93c5fd !important;
 }
 
 [data-theme='dark'] .insta-comment-preview,
 .dark .insta-comment-preview {
-  color: #cbd5e1 !important;
+  color: #e2e8f0 !important;
 }
 
 [data-theme='dark'] .insta-comment-preview .insta-username,
 .dark .insta-comment-preview .insta-username {
-  color: #f8fafc !important;
+  color: #ffffff !important;
 }
 
 [data-theme='dark'] .insta-timestamp,
 .dark .insta-timestamp {
-  color: #64748b !important;
+  color: #cbd5e1 !important;
 }
 
 [data-theme='dark'] .feed-end-note,
@@ -3836,12 +3840,12 @@ textarea, select { font: inherit; }
 
 [data-theme='dark'] .feed-end-note strong,
 .dark .feed-end-note strong {
-  color: #f8fafc !important;
+  color: #ffffff !important;
 }
 
 [data-theme='dark'] .feed-end-note span,
 .dark .feed-end-note span {
-  color: #94a3b8 !important;
+  color: #e2e8f0 !important;
 }
 
 /* Comments Modal Dark Mode */
@@ -3910,30 +3914,31 @@ textarea, select { font: inherit; }
    ======================================================== */
 [data-theme='dark'] .gmaps-place-sheet,
 .dark .gmaps-place-sheet {
-  background: #111827 !important;
+  background: #0f172a !important;
   border: 1px solid #243044 !important;
-  color: #f8fafc !important;
+  color: #ffffff !important;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6) !important;
 }
 
 [data-theme='dark'] .gmaps-sheet-header h3,
 .dark .gmaps-sheet-header h3 {
-  color: #f8fafc !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
 }
 
 [data-theme='dark'] .gmaps-sheet-close,
 .dark .gmaps-sheet-close {
-  color: #cbd5e1 !important;
+  color: #ffffff !important;
 }
 
 [data-theme='dark'] .gmaps-sheet-rating,
 .dark .gmaps-sheet-rating {
-  color: #cbd5e1 !important;
+  color: #ffffff !important;
 }
 
 [data-theme='dark'] .gmaps-sheet-rating span,
 .dark .gmaps-sheet-rating span {
-  color: #cbd5e1 !important;
+  color: #e2e8f0 !important;
 }
 
 [data-theme='dark'] .gmaps-sheet-rating strong,
@@ -3944,14 +3949,15 @@ textarea, select { font: inherit; }
 [data-theme='dark'] .gmaps-sheet-details,
 .dark .gmaps-sheet-details {
   border-top: 1px solid #1f293d !important;
-  color: #f8fafc !important;
+  color: #ffffff !important;
 }
 
 [data-theme='dark'] .gmaps-sheet-detail-row,
 .dark .gmaps-sheet-detail-row,
 [data-theme='dark'] .gmaps-sheet-detail-row span,
 .dark .gmaps-sheet-detail-row span {
-  color: #f8fafc !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
 }
 
 /* Trip Sheet Dark Mode */
@@ -3964,12 +3970,13 @@ textarea, select { font: inherit; }
 
 [data-theme='dark'] .gmaps-trip-time,
 .dark .gmaps-trip-time {
-  color: #22c55e !important;
+  color: #38bdf8 !important;
+  font-weight: 700 !important;
 }
 
 [data-theme='dark'] .gmaps-trip-meta,
 .dark .gmaps-trip-meta {
-  color: #cbd5e1 !important;
+  color: #f1f5f9 !important;
 }
 
 [data-theme='dark'] .gmaps-action-pill,

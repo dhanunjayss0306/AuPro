@@ -51,6 +51,18 @@ export function InstagramShareIcon({ size = 24 }: { size?: number }) {
   );
 }
 
+// Repost icon for the AuPro feed
+export function RepostIcon({ active = false, size = 24 }: { active?: boolean; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.5" : "2"} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M17 3l4 4-4 4" />
+      <path d="M3 7h14a4 4 0 0 1 4 4v1" />
+      <path d="M7 21l-4-4 4-4" />
+      <path d="M21 17H7a4 4 0 0 1-4-4v-1" />
+    </svg>
+  );
+}
+
 // 5. Exact Instagram Bookmark / Save Icon
 export function InstagramSaveIcon({ filled = false, size = 24 }: { filled?: boolean; size?: number }) {
   if (filled) {

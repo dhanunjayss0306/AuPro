@@ -6,6 +6,7 @@ import {
   InstagramCommentIcon,
   InstagramShareIcon,
   InstagramSaveIcon,
+  RepostIcon,
   InstagramMoreIcon,
   InstagramLocationIcon,
 } from './icons';
@@ -29,7 +30,11 @@ export interface MomentPost {
 export function MomentCard({ post }: { post: MomentPost }) {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [reposted, setReposted] = useState(false);
   const [likes, setLikes] = useState(post.likesCount);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [comment, setComment] = useState('');
+  const [commentSent, setCommentSent] = useState(false);
   const [showHeartAnim, setShowHeartAnim] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [reportSuccess, setReportSuccess] = useState(false);
@@ -132,11 +137,17 @@ export function MomentCard({ post }: { post: MomentPost }) {
           >
             <InstagramLikeIcon filled={liked} size={24} />
           </button>
-          <button className="insta-action-btn" aria-label="Comment">
+          <button className="insta-action-btn" aria-label="Comment" onClick={() => setCommentsOpen((open) => !open)}>
             <InstagramCommentIcon size={24} />
           </button>
-          <button className="insta-action-btn" aria-label="Share">
+          <button className="insta-action-btn" aria-label="Share" onClick={() => {
+            if (navigator.share) navigator.share({ title: `AuPro post by ${post.username}`, text: post.caption, url: window.location.href }).catch(() => undefined);
+            else navigator.clipboard?.writeText(window.location.href);
+          }}>
             <InstagramShareIcon size={24} />
+          </button>
+          <button className={`insta-action-btn ${reposted ? 'reposted' : ''}`} aria-label={reposted ? 'Undo repost' : 'Repost'} onClick={() => setReposted((value) => !value)}>
+            <RepostIcon active={reposted} size={24} />
           </button>
         </div>
         <button
@@ -166,9 +177,20 @@ export function MomentCard({ post }: { post: MomentPost }) {
         </div>
 
         {post.commentsCount > 0 && (
-          <button className="insta-comments-link">
+          <button className="insta-comments-link" onClick={() => setCommentsOpen((open) => !open)}>
             View all {post.commentsCount} comments
           </button>
+        )}
+
+        {reposted && <div className="insta-feedback">Reposted to your AuPro feed.</div>}
+        {commentsOpen && (
+          <div className="insta-comments-panel">
+            {commentSent && <div className="insta-feedback">Comment added.</div>}
+            <div className="insta-comment-row">
+              <input className="search" value={comment} onChange={(event) => setComment(event.target.value)} placeholder="Write a comment..." aria-label="Write a comment" />
+              <button className="secondary-button" disabled={!comment.trim()} onClick={() => { setCommentSent(true); setComment(''); }}>Post</button>
+            </div>
+          </div>
         )}
 
         <time className="insta-timestamp">{post.timeAgo}</time>

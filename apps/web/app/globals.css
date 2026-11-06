@@ -117,6 +117,13 @@ h2 { font-size: 19px; font-weight: 700; letter-spacing: -.02em; color: var(--ink
 }
 .search:focus { border-color: #a8a8a8; }
 .error { border: 1px solid #fecaca; border-radius: 10px; background: #fff1f2; color: var(--error); padding: 12px; font-size: 13px; }
+.notice-banner, .feedback-banner { width: 100%; border: 1px solid #cfe2ea; border-radius: 10px; background: var(--teal); color: var(--secondary); padding: 11px 13px; text-align: left; font-size: 13px; }
+.notice-banner { cursor: pointer; }
+.feedback-banner { margin-top: 10px; }
+.chat-transcript { display: grid; gap: 8px; margin-bottom: 12px; }
+.chat-transcript p { margin: 0; border-radius: 10px; padding: 9px 11px; font-size: 13px; line-height: 1.45; }
+.chat-user { background: var(--teal); }
+.chat-assistant { background: #f5f1ec; }
 
 /* ========================================================
    INSTAGRAM-DITTO MOMENTS & FEED POSTS
@@ -329,6 +336,12 @@ h2 { font-size: 19px; font-weight: 700; letter-spacing: -.02em; color: var(--ink
 }
 .insta-action-btn:hover { opacity: 0.65; }
 .insta-action-btn:active { transform: scale(1.2); }
+.insta-action-btn.reposted { color: var(--secondary); }
+.insta-comments-panel { margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--border-light); }
+.insta-comment-row { display: flex; gap: 8px; align-items: center; }
+.insta-comment-row .search { flex: 1; min-width: 0; }
+.insta-comment-row .secondary-button { padding: 9px 12px; }
+.insta-feedback { color: var(--secondary); font-size: 12px; font-weight: 600; margin: 6px 0; }
 
 .insta-details {
   padding: 0 14px 14px;

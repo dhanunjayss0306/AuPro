@@ -72,6 +72,12 @@ export default function Home() {
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
   const [showCreateMenu, setShowCreateMenu] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant'; text: string }>>([]);
+  const [chatStatus, setChatStatus] = useState('');
+  const [applicationStatus, setApplicationStatus] = useState('');
+  const [locationStatus, setLocationStatus] = useState('');
+  const [topNotice, setTopNotice] = useState('');
 
   useEffect(() => {
     if (!signedIn) return;
@@ -122,12 +128,12 @@ export default function Home() {
           <span className="brand-badge">AU Eng</span>
         </div>
         <div className="topbar-actions">
-          <button className="icon-button" aria-label="Notifications">
+          <button className="icon-button" aria-label="Notifications" onClick={() => setTopNotice('No new notifications.') }>
             <InstagramLikeIcon size={24} />
           </button>
           <button
             className="icon-button"
-            aria-label="Direct Messages"
+            aria-label="Open chatbot"
             onClick={() => setTab('chatbot')}
           >
             <InstagramShareIcon size={22} />
@@ -137,6 +143,7 @@ export default function Home() {
 
       {/* Main Content Area */}
       <section className="content">
+        {topNotice && <button className="notice-banner" onClick={() => setTopNotice('')} role="status">{topNotice}</button>}
         {showCreateMenu && (
           <div className="create-menu-backdrop" role="presentation" onClick={() => setShowCreateMenu(false)}>
             <section className="create-menu" role="dialog" aria-modal="true" aria-labelledby="create-menu-title" onClick={(event) => event.stopPropagation()}>
@@ -182,10 +189,11 @@ export default function Home() {
                     <h2 style={{ margin: 0, fontSize: 16 }}>{service.title}</h2>
                   </div>
                   <p className="lead" style={{ fontSize: 13, marginBottom: 14 }}>{service.detail}</p>
-                  <button className="secondary-button" style={{ width: '100%' }}>Apply now</button>
+                  <button className="secondary-button" style={{ width: '100%' }} onClick={() => setApplicationStatus(`${service.title}: requirements opened. Form flow is ready for the next backend phase.`)}>Apply now</button>
                 </article>
               ))}
             </div>
+            {applicationStatus && <div className="feedback-banner" role="status">{applicationStatus}</div>}
           </div>
         )}
 
@@ -257,11 +265,15 @@ export default function Home() {
               ))}
             </div>
             <div className="card">
-              <input className="search" placeholder="Type your college query or question..." aria-label="Query input" />
-              <div className="actions" style={{ marginTop: 12 }}>
-                <button className="primary-button" style={{ background: '#111827', borderColor: '#111827' }}>Send message</button>
-                <button className="secondary-button">Forward to WhatsApp</button>
+              <div className="chat-transcript" aria-live="polite">
+                {chatMessages.map((message, index) => <p key={`${message.role}-${index}`} className={message.role === 'user' ? 'chat-user' : 'chat-assistant'}><strong>{message.role === 'user' ? 'You' : 'AuPro'}:</strong> {message.text}</p>)}
               </div>
+              <input className="search" value={chatInput} onChange={(event) => setChatInput(event.target.value)} placeholder="Type your college query or question..." aria-label="Query input" />
+              <div className="actions" style={{ marginTop: 12 }}>
+                <button className="primary-button" style={{ background: '#111827', borderColor: '#111827' }} disabled={!chatInput.trim()} onClick={() => { setChatMessages((messages) => [...messages, { role: 'user', text: chatInput }, { role: 'assistant', text: 'I will look for a verified College of Engineering answer. Connect an approved AI provider to enable live responses.' }]); setChatInput(''); setChatStatus('Message added to the conversation.'); }}>Send message</button>
+                <button className="secondary-button" onClick={() => { window.open('https://wa.me/?text=AuPro%20help%20request', '_blank', 'noopener,noreferrer'); setChatStatus('WhatsApp opened for a manual send.'); }}>Forward to WhatsApp</button>
+              </div>
+              {chatStatus && <div className="feedback-banner" role="status">{chatStatus}</div>}
             </div>
           </div>
         )}
@@ -281,9 +293,10 @@ export default function Home() {
                 <span className="lead" style={{ fontSize: 12, color: '#64748b' }}>North Campus, Visakhapatnam</span>
               </div>
               <div style={{ padding: 16, display: 'flex', gap: 10 }}>
-                <button className="primary-button" style={{ flex: 1, background: '#111827', borderColor: '#111827' }}>Find Department</button>
-                <button className="secondary-button" style={{ flex: 1 }}>Download Offline Map</button>
+                <button className="primary-button" style={{ flex: 1, background: '#111827', borderColor: '#111827' }} onClick={() => setLocationStatus('Search is ready. Verified campus places will appear after map data is imported.')}>Find Department</button>
+                <button className="secondary-button" style={{ flex: 1 }} onClick={() => setLocationStatus('Offline map download will be available after the verified campus region is published.')}>Download Offline Map</button>
               </div>
+              {locationStatus && <div className="feedback-banner" role="status">{locationStatus}</div>}
             </div>
           </div>
         )}

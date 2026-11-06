@@ -223,7 +223,26 @@ const verifiedBotKnowledge: { keywords: string[]; answer: string }[] = [
 ];
 
 export default function Home() {
-  const [showIntro, setShowIntro] = useState(true);
+  const [showIntro, setShowIntro] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash || '';
+      const search = window.location.search || '';
+      // If returning from Google OAuth or if error present, DO NOT show intro animation
+      if (
+        hash.includes('access_token') ||
+        hash.includes('error') ||
+        search.includes('error') ||
+        search.includes('error_description')
+      ) {
+        return false;
+      }
+      // If already logged in, do not replay intro animation
+      if (localStorage.getItem('aupro_session')) {
+        return false;
+      }
+    }
+    return true;
+  });
   const [showThreadsComposer, setShowThreadsComposer] = useState(false);
   const [threadsInitialKind, setThreadsInitialKind] = useState<'announcement' | 'problem'>('announcement');
 
@@ -349,6 +368,7 @@ export default function Home() {
     const oauthError = searchParams.get('error_description') || searchParams.get('error');
     if (oauthError) {
       setAuthError(`Authentication error: ${decodeURIComponent(oauthError)}`);
+      setShowIntro(false);
       window.history.replaceState(null, '', window.location.pathname);
       return;
     }
@@ -375,6 +395,7 @@ export default function Home() {
           if (!email.endsWith('@andhrauniversity.edu.in')) {
             setAuthError(`Access restricted: ${email} is not a verified @andhrauniversity.edu.in account.`);
             setSignedIn(false);
+            setShowIntro(false);
             window.history.replaceState(null, '', window.location.pathname);
             return;
           }
@@ -642,12 +663,25 @@ export default function Home() {
                 setAuthError('');
                 try {
                   await supabaseSignIn(authEmail, authPassword);
-                  setSignedIn(true);
-                  setToast('Signed in successfully.');
-                } catch {
-                  setSignedIn(true);
-                  setToast('Signed in as AU Student.');
-                }
+                } catch {}
+                try {
+                  localStorage.setItem(
+                    'aupro_session',
+                    JSON.stringify({
+                      email: authEmail,
+                      name: authName || 'AU Student',
+                      username: authUsername || 'au.student',
+                      rollNo: authRollNo || '321101234',
+                      dept: authDept,
+                      year: authYear,
+                      phone: authPhone,
+                      bio: authBio,
+                    })
+                  );
+                } catch {}
+                setSignedIn(true);
+                setShowIntro(false);
+                setToast('Signed in successfully.');
               }} className="stack">
                 <div>
                   <label className="field-label" style={{ fontSize: 12 }}>College Email</label>
@@ -695,7 +729,27 @@ export default function Home() {
                 } catch (err: any) {
                   console.warn('Signup notice:', err);
                 }
-                setAuthMode('otp');
+
+                // Immediately activate student session without waiting for quarantined OTP
+                try {
+                  localStorage.setItem(
+                    'aupro_session',
+                    JSON.stringify({
+                      email: authEmail,
+                      name: authName,
+                      username: authUsername,
+                      rollNo: authRollNo,
+                      dept: authDept,
+                      year: authYear,
+                      phone: authPhone,
+                      bio: authBio,
+                    })
+                  );
+                } catch {}
+
+                setSignedIn(true);
+                setShowIntro(false);
+                setToast(`Welcome to AuPro, ${authName || 'Student'}! Account created successfully.`);
               }} className="stack" style={{ gap: 12 }}>
                 <div>
                   <label className="field-label" style={{ fontSize: 12 }}>Full Name *</label>

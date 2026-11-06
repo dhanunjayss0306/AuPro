@@ -115,25 +115,36 @@ function getEmailHtml(name: string, otp: string, rollNo: string): string {
   `.trim();
 }
 
-async function sendViaResend(email: string, name: string, otp: string, rollNo: string): Promise<boolean> {
+async function sendViaResend(email: string, name: string, otp: string, rollNo: string): Promise<{ success: boolean; error?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return false;
+  if (!apiKey) return { success: false, error: 'RESEND_API_KEY is not configured.' };
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: process.env.EMAIL_FROM || 'AuPro Verification <verify@resend.dev>',
-      to: [email],
-      subject: `AuPro - Your AU Student Verification Code: ${otp}`,
-      html: getEmailHtml(name, otp, rollNo),
-    }),
-  });
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey.trim()}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: process.env.EMAIL_FROM || 'AuPro <onboarding@resend.dev>',
+        to: [email],
+        subject: `AuPro - Your AU Student Verification Code: ${otp}`,
+        html: getEmailHtml(name, otp, rollNo),
+      }),
+    });
 
-  return res.ok;
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => ({}));
+      console.error('Resend dispatch failed with status', res.status, errJson);
+      return { success: false, error: errJson.message || `Resend HTTP error ${res.status}` };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error('Resend fetch exception:', err);
+    return { success: false, error: err?.message || 'Network exception calling Resend' };
+  }
 }
 
 async function sendViaBrevo(email: string, name: string, otp: string, rollNo: string): Promise<boolean> {
@@ -207,13 +218,15 @@ export async function POST(req: Request) {
     const token = createVerificationToken(cleanEmail, otp, expiresAt);
 
     let delivered = false;
+    let dispatchError = '';
 
     // 1. Attempt sending via Resend if configured
     if (process.env.RESEND_API_KEY) {
-      try {
-        delivered = await sendViaResend(cleanEmail, fullName, otp, rollNo);
-      } catch (e) {
-        console.warn('Resend dispatch failed:', e);
+      const resendResult = await sendViaResend(cleanEmail, fullName, otp, rollNo);
+      if (resendResult.success) {
+        delivered = true;
+      } else {
+        dispatchError = resendResult.error || '';
       }
     }
 
@@ -237,14 +250,14 @@ export async function POST(req: Request) {
       });
     }
 
-    // If no external mail provider is configured yet in Vercel environment variables:
-    // Provide seamless diagnostic testing mode with the signed token so the user can test immediately
+    // If no external mail provider is configured yet or provider returned restriction:
     return NextResponse.json({
       success: true,
       token,
       email: cleanEmail,
       message: `Verification code generated.`,
       providerStatus: 'setup_required',
+      providerError: dispatchError || undefined,
       devCode: otp, // Enables immediate testing until the user adds RESEND_API_KEY in Vercel
     });
   } catch (err: any) {

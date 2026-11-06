@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://web-rust-one-pk6jjs5pbw.vercel.app/sitemap.xml

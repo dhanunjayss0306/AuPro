@@ -656,9 +656,8 @@ export default function Home() {
           <ApplicationsIcon active={tab === 'applications'} size={24} />
           <span>Applications</span>
         </button>
-        <button className="nav-button create-action" onClick={() => setShowCreateMenu(true)} aria-label="Create" title="Create">
+        <button className="nav-button create-action" onClick={() => setShowCreateMenu(true)} aria-label="Add new post" title="Add new post">
           <div className="big-plus-bubble"><BigPlusIcon size={24} /></div>
-          <span>Create</span>
         </button>
         <button className={`nav-button ${tab === 'feed' ? 'active' : ''}`} onClick={() => setTab('feed')} aria-label="Feed">
           <InstagramFeedIcon active={tab === 'feed'} size={24} />

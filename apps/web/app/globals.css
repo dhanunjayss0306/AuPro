@@ -1,16 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;800&display=swap');
 
 :root {
-  --bg: #fafafa;
+  --bg: #faf8f5;
   --surface: #ffffff;
   --primary: #701d32;
   --secondary: #0b5cad;
   --gold: #c69b45;
-  --ink: #111827;
-  --text-main: #262626;
-  --muted: #737373;
-  --border: #dbdbdb;
-  --border-light: #efefef;
+  --teal: #e6f4f6;
+  --ink: #1f2937;
+  --text-main: #1f2937;
+  --muted: #667085;
+  --border: #e6e1db;
+  --border-light: #eee9e2;
   --success: #16a34a;
   --warning: #f59e0b;
   --error: #ed4956;
@@ -21,7 +22,7 @@ html, body { margin: 0; min-height: 100%; }
 body {
   background: var(--bg);
   color: var(--text-main);
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -469,35 +470,56 @@ h2 { font-size: 19px; font-weight: 700; letter-spacing: -.02em; color: var(--ink
 .nav-button:hover { color: var(--ink); }
 .nav-button.active { color: var(--ink); font-weight: 700; }
 
-/* The Large Plus Action Button - No "Create" Text */
+/* Create is a plain center navigation action, not a floating control. */
 .nav-button.create-action {
   justify-content: center;
   padding: 0;
+  color: var(--primary);
 }
 
 .big-plus-bubble {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--ink);
-  color: #ffffff;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 14px rgba(17, 24, 39, 0.28);
-  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.15s ease;
-  margin-top: -14px;
-  border: 2px solid #ffffff;
+  box-shadow: none;
+  transition: transform 0.15s ease;
+  margin: 0;
+  border: 0;
 }
 
-.big-plus-bubble:hover {
-  background: #000000;
-  transform: scale(1.08);
+.big-plus-bubble:hover { transform: scale(1.12); }
+.big-plus-bubble:active { transform: scale(.94); }
+
+.create-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  align-items: end;
+  background: rgba(31, 41, 55, .28);
 }
 
-.big-plus-bubble:active {
-  transform: scale(0.92);
+.create-menu {
+  width: min(100%, 600px);
+  margin: 0 auto;
+  padding: 22px 18px 28px;
+  border: 1px solid var(--border);
+  border-bottom: 0;
+  border-radius: 22px 22px 0 0;
+  background: var(--surface);
+  box-shadow: 0 -16px 48px rgba(31, 41, 55, .14);
 }
+
+.create-menu-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+.create-menu-header h2 { margin: 0; }
+.create-menu-option { display: grid; gap: 3px; width: 100%; padding: 15px 2px; border: 0; border-top: 1px solid var(--border-light); background: transparent; color: var(--ink); text-align: left; }
+.create-menu-option:hover { color: var(--primary); }
+.create-menu-option span { color: var(--muted); font-size: 13px; }
 
 @media (min-width: 720px) {
   .insta-card { border-radius: 12px; }

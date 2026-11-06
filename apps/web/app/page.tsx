@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   InstagramFeedIcon,
   InstagramLikeIcon,
@@ -13,7 +13,7 @@ import {
 } from './icons';
 import { MomentCard, MomentPost } from './MomentCard';
 
-type Tab = 'feed' | 'applications' | 'create' | 'chatbot' | 'location' | 'about';
+type Tab = 'applications' | 'create' | 'feed' | 'chatbot' | 'location' | 'about';
 
 const samplePosts: MomentPost[] = [
   {
@@ -71,6 +71,16 @@ export default function Home() {
   const [signedIn, setSignedIn] = useState(false);
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
+  const [showCreateMenu, setShowCreateMenu] = useState(false);
+
+  useEffect(() => {
+    if (!signedIn) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setShowCreateMenu(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [signedIn]);
 
   if (!signedIn) {
     return (
@@ -127,6 +137,17 @@ export default function Home() {
 
       {/* Main Content Area */}
       <section className="content">
+        {showCreateMenu && (
+          <div className="create-menu-backdrop" role="presentation" onClick={() => setShowCreateMenu(false)}>
+            <section className="create-menu" role="dialog" aria-modal="true" aria-labelledby="create-menu-title" onClick={(event) => event.stopPropagation()}>
+              <div className="create-menu-header"><div><div className="eyebrow">AuPro</div><h2 id="create-menu-title">Create</h2></div><button className="icon-button" aria-label="Close create menu" onClick={() => setShowCreateMenu(false)}>×</button></div>
+              <button className="create-menu-option" onClick={() => { setShowCreateMenu(false); setTab('create'); }}><strong>New post</strong><span>Share an update with the campus community.</span></button>
+              <button className="create-menu-option" onClick={() => { setShowCreateMenu(false); setTab('create'); }}><strong>Event post</strong><span>Share an event with a required duration.</span></button>
+              <button className="create-menu-option" onClick={() => { setShowCreateMenu(false); setTab('create'); }}><strong>Upload document</strong><span>Attach an approved document to a post.</span></button>
+            </section>
+          </div>
+        )}
+
         {/* TAB 1: INSTAGRAM-DITTO FEED / MOMENTS */}
         {tab === 'feed' && (
           <div className="insta-feed-container">
@@ -295,68 +316,30 @@ export default function Home() {
         - About symbol: DARKENED #111827 high contrast icon
       */}
       <nav className="bottom-nav" aria-label="Primary navigation">
-        {/* 1. Feed */}
-        <button
-          className={`nav-button ${tab === 'feed' ? 'active' : ''}`}
-          onClick={() => setTab('feed')}
-          aria-label="Feed"
-        >
+        {/* Confirmed structural order: Applications, Create, Feed, then supporting areas. */}
+        <button className={`nav-button ${tab === 'applications' ? 'active' : ''}`} onClick={() => { setTab('applications'); setQuery(''); }} aria-label="Applications">
+          <ApplicationsIcon active={tab === 'applications'} size={24} />
+          <span>Applications</span>
+        </button>
+        <button className="nav-button create-action" onClick={() => setShowCreateMenu(true)} aria-label="Create" title="Create">
+          <div className="big-plus-bubble"><BigPlusIcon size={24} /></div>
+          <span>Create</span>
+        </button>
+        <button className={`nav-button ${tab === 'feed' ? 'active' : ''}`} onClick={() => setTab('feed')} aria-label="Feed">
           <InstagramFeedIcon active={tab === 'feed'} size={24} />
           <span>Feed</span>
         </button>
-
-        {/* 2. Applications */}
-        <button
-          className={`nav-button ${tab === 'applications' ? 'active' : ''}`}
-          onClick={() => { setTab('applications'); setQuery(''); }}
-          aria-label="Applications"
-        >
-          <ApplicationsIcon active={tab === 'applications'} size={24} />
-          <span>Services</span>
-        </button>
-
-        {/* 3. Big Plus Symbol - Notice: NO "Create" text */}
-        <button
-          className="nav-button create-action"
-          onClick={() => setTab('create')}
-          aria-label="New post"
-          title="Add new post"
-        >
-          <div className="big-plus-bubble">
-            <BigPlusIcon size={24} />
-          </div>
-        </button>
-
-        {/* 4. Chatbot */}
-        <button
-          className={`nav-button ${tab === 'chatbot' ? 'active' : ''}`}
-          onClick={() => setTab('chatbot')}
-          aria-label="Chatbot"
-        >
+        <button className={`nav-button ${tab === 'chatbot' ? 'active' : ''}`} onClick={() => setTab('chatbot')} aria-label="Chatbot">
           <ChatbotIcon active={tab === 'chatbot'} size={24} />
-          <span>AuPro AI</span>
+          <span>Chatbot</span>
         </button>
-
-        {/* 5. Location */}
-        <button
-          className={`nav-button ${tab === 'location' ? 'active' : ''}`}
-          onClick={() => setTab('location')}
-          aria-label="Campus Map"
-        >
+        <button className={`nav-button ${tab === 'location' ? 'active' : ''}`} onClick={() => setTab('location')} aria-label="Location">
           <InstagramLocationIcon size={22} />
-          <span>Map</span>
+          <span>Location</span>
         </button>
-
-        {/* 6. Darkened About Icon */}
-        <button
-          className={`nav-button ${tab === 'about' ? 'active' : ''}`}
-          onClick={() => setTab('about')}
-          aria-label="About"
-        >
+        <button className={`nav-button ${tab === 'about' ? 'active' : ''}`} onClick={() => setTab('about')} aria-label="About">
           <DarkenedAboutIcon active={tab === 'about'} size={22} />
-          <span style={{ color: tab === 'about' ? '#111827' : '#4b5563', fontWeight: tab === 'about' ? 700 : 500 }}>
-            About
-          </span>
+          <span>About</span>
         </button>
       </nav>
     </main>

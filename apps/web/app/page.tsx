@@ -212,7 +212,6 @@ export default function Home() {
   const [authConfirmPassword, setAuthConfirmPassword] = useState('');
   const [authOtp, setAuthOtp] = useState('');
   const [authError, setAuthError] = useState('');
-  const [showGoogleHelp, setShowGoogleHelp] = useState(false);
 
   // About tab sub-navigation & settings
   const [aboutSubTab, setAboutSubTab] = useState<'profile' | 'college'>('profile');
@@ -274,7 +273,7 @@ export default function Home() {
       const url = getGoogleOAuthUrl();
       window.location.href = url;
     } catch {
-      setShowGoogleHelp(true);
+      setAuthError('Unable to connect to Google OAuth.');
     }
   };
 
@@ -427,27 +426,6 @@ export default function Home() {
                 <button className="google-button" onClick={handleGoogleSignIn}>
                   <span className="google-mark">G</span> Continue with Google
                 </button>
-
-                <div style={{ textAlign: 'center', marginTop: 2 }}>
-                  <button
-                    type="button"
-                    className="text-button"
-                    style={{ fontSize: 11, color: 'var(--muted)', textDecoration: 'underline' }}
-                    onClick={() => setShowGoogleHelp(!showGoogleHelp)}
-                  >
-                    {showGoogleHelp ? '▲ Hide Google OAuth config guidance' : 'ℹ️ Using official @andhrauniversity.edu.in with Google?'}
-                  </button>
-                  {showGoogleHelp && (
-                    <div style={{ textAlign: 'left', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: 12, marginTop: 8, fontSize: 11, lineHeight: 1.5, color: '#334155' }}>
-                      <strong>Setting up Google Login in your Supabase project:</strong>
-                      <ol style={{ paddingLeft: 18, margin: '6px 0 0 0' }}>
-                        <li>Open your Supabase dashboard (<code>mxcspycyejbexzifrauw</code>).</li>
-                        <li>Go to <strong>Authentication</strong> → <strong>Providers</strong> → <strong>Google</strong> (Toggle ON).</li>
-                        <li>Enter your Google Cloud Client ID & Secret with authorized redirect: <code>https://mxcspycyejbexzifrauw.supabase.co/auth/v1/callback</code>.</li>
-                      </ol>
-                    </div>
-                  )}
-                </div>
 
                 <div className="auth-divider"><span>or with university credentials</span></div>
                 <div className="auth-actions">

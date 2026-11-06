@@ -1,0 +1,13 @@
+# AuPro - Andhra University Student Portal
+> Official student services, verified updates, campus maps, certificates, and academic portal for Andhra University College of Engineering (AUCOE).
+
+## Core Features
+- Student Announcements & Grievance Feed (Restricted to @andhrauniversity.edu.in)
+- Google Maps GPS-Enabled Campus Navigation with Real-Time Auto-Tracking
+- AI College Assistant for Hall Tickets, Bonafide Certificates, Bus Passes, and Office Timings
+- College of Engineering Administrative Directory & Campus Landmarks
+- One-Time Secure Email Verification (Passwordless Identity Auth)
+
+## Domain Policy
+- Official registration restricted strictly to @andhrauniversity.edu.in domain
+- Zero student passwords stored: protected by HMAC-SHA256 one-time verification

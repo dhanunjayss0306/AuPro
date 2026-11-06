@@ -332,6 +332,12 @@ export default function Home() {
   const [directionsEnd, setDirectionsEnd] = useState('AU College of Engineering (Main & Admin Block)');
   const [transportMode, setTransportMode] = useState<'w' | 'm' | 'd' | 'r'>('w');
 
+  // GPS & Live Geolocation Auto-Tracking State
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number; accuracy?: number } | null>(null);
+  const [isGpsTracking, setIsGpsTracking] = useState(false);
+  const [gpsError, setGpsError] = useState('');
+  const [isLocating, setIsLocating] = useState(false);
+
   // About tab sub-navigation & settings
   const [aboutSubTab, setAboutSubTab] = useState<'profile' | 'college'>('profile');
   const [settingsNotifications, setSettingsNotifications] = useState(true);
@@ -513,6 +519,79 @@ export default function Home() {
     } catch {
       setAuthError('Unable to connect to Google OAuth.');
     }
+  };
+
+  // Real-time GPS Auto-Tracking on Mobile when Location tab is open
+  useEffect(() => {
+    if (tab !== 'location') return;
+    if (typeof window === 'undefined' || !('geolocation' in navigator)) {
+      setGpsError('Geolocation is not supported by your device or browser.');
+      return;
+    }
+
+    let watchId: number | undefined;
+    setIsLocating(true);
+
+    const onGeoSuccess = (pos: GeolocationPosition) => {
+      const { latitude, longitude, accuracy } = pos.coords;
+      setUserCoords({ lat: latitude, lng: longitude, accuracy });
+      setIsGpsTracking(true);
+      setGpsError('');
+      setIsLocating(false);
+    };
+
+    const onGeoError = (err: GeolocationPositionError) => {
+      console.warn('GPS location tracking notice:', err.message);
+      setGpsError(err.message);
+      setIsLocating(false);
+    };
+
+    const geoOptions: PositionOptions = {
+      enableHighAccuracy: true,
+      timeout: 15000,
+      maximumAge: 5000,
+    };
+
+    navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError, geoOptions);
+
+    try {
+      watchId = navigator.geolocation.watchPosition(onGeoSuccess, onGeoError, geoOptions);
+    } catch (e) {
+      console.warn('watchPosition failed:', e);
+    }
+
+    return () => {
+      if (watchId !== undefined && typeof navigator !== 'undefined' && navigator.geolocation) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+    };
+  }, [tab]);
+
+  const handleLocateMe = () => {
+    if (typeof window === 'undefined' || !('geolocation' in navigator)) {
+      setToast('Geolocation is not supported on this device.');
+      return;
+    }
+    setIsLocating(true);
+    setToast('🛰️ Acquiring live GPS position...');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude, accuracy } = pos.coords;
+        setUserCoords({ lat: latitude, lng: longitude, accuracy });
+        setIsGpsTracking(true);
+        setGpsError('');
+        setIsLocating(false);
+        setMapLocationQuery(`${latitude},${longitude}`);
+        setDirectionsStart('Your location');
+        setToast(`📍 GPS Locked: ${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E (±${Math.round(accuracy)}m)`);
+      },
+      (err) => {
+        setIsLocating(false);
+        setGpsError(err.message);
+        setToast(`GPS notice: ${err.message}. Showing campus map.`);
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 3000 }
+    );
   };
 
   const handleAskBot = (questionText: string) => {
@@ -1589,7 +1668,13 @@ export default function Home() {
               title="Google Maps Andhra University"
               src={
                 showDirections
-                  ? `https://www.google.com/maps?saddr=${encodeURIComponent(directionsStart === 'Your location' ? 'Andhra University Visakhapatnam' : directionsStart)}&daddr=${encodeURIComponent(directionsEnd || selectedLandmark?.query || 'AU College of Engineering')}&dirflg=${transportMode === 'm' ? 'w' : transportMode}&output=embed`
+                  ? `https://www.google.com/maps?saddr=${encodeURIComponent(
+                      directionsStart === 'Your location' && userCoords
+                        ? `${userCoords.lat},${userCoords.lng}`
+                        : directionsStart === 'Your location'
+                        ? 'Andhra University Visakhapatnam'
+                        : directionsStart
+                    )}&daddr=${encodeURIComponent(directionsEnd || selectedLandmark?.query || 'AU College of Engineering')}&dirflg=${transportMode === 'm' ? 'w' : transportMode}&output=embed`
                   : `https://www.google.com/maps?q=${encodeURIComponent(mapLocationQuery)}&t=${mapLayer}&z=17&output=embed`
               }
               allowFullScreen
@@ -1599,6 +1684,16 @@ export default function Home() {
 
             {/* Floating Top Bar: Search Bar or Directions Header */}
             <div className="gmaps-top-overlay">
+              {isGpsTracking && userCoords && (
+                <div
+                  className="gmaps-gps-badge"
+                  onClick={handleLocateMe}
+                  title="Auto-tracking active. Tap to re-center on live GPS."
+                >
+                  <span className="gps-live-dot" />
+                  <span>GPS Active: {userCoords.lat.toFixed(4)}°N, {userCoords.lng.toFixed(4)}°E (±{Math.round(userCoords.accuracy || 10)}m)</span>
+                </div>
+              )}
               {!showDirections ? (
                 <>
                   {/* Google Maps Search Bar Card */}
@@ -1808,9 +1903,18 @@ export default function Home() {
                       <button
                         key={preset}
                         className={`gmaps-preset-pill ${directionsStart === preset ? 'active' : ''}`}
-                        onClick={() => setDirectionsStart(preset)}
+                        onClick={() => {
+                          setDirectionsStart(preset);
+                          if (preset === 'Your location') {
+                            handleLocateMe();
+                          }
+                        }}
                       >
-                        {preset}
+                        {preset === 'Your location'
+                          ? userCoords
+                            ? '📍 Your location (Live GPS)'
+                            : '📍 Your location'
+                          : preset}
                       </button>
                     ))}
                   </div>
@@ -1828,14 +1932,10 @@ export default function Home() {
                 <LayersIcon size={20} />
               </button>
               <button
-                className="gmaps-fab-btn"
-                title="Center on AU Engineering Campus"
-                onClick={() => {
-                  setMapLocationQuery('Andhra University College of Engineering, Visakhapatnam');
-                  setSelectedLandmark(campusLandmarks[0]);
-                  setShowPlaceSheet(true);
-                  setToast('Centered on AU College of Engineering.');
-                }}
+                className={`gmaps-fab-btn ${isGpsTracking ? 'gps-active' : ''}`}
+                title={isGpsTracking ? "GPS Auto-Tracking Active • Tap to center" : "Acquire Live GPS Location"}
+                onClick={handleLocateMe}
+                aria-label="Auto-track location via GPS"
               >
                 <CrosshairGpsIcon size={20} />
               </button>
@@ -1933,11 +2033,14 @@ export default function Home() {
                 <button
                   className="gmaps-trip-start-btn"
                   onClick={() => {
-                    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(directionsStart === 'Your location' ? 'Andhra University Visakhapatnam' : directionsStart)}&destination=${encodeURIComponent(directionsEnd)}&travelmode=${transportMode === 'w' ? 'walking' : transportMode === 'd' ? 'driving' : 'transit'}`;
+                    const originParam = directionsStart === 'Your location' && userCoords
+                      ? `${userCoords.lat},${userCoords.lng}`
+                      : encodeURIComponent(directionsStart === 'Your location' ? 'Andhra University Visakhapatnam' : directionsStart);
+                    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${originParam}&destination=${encodeURIComponent(directionsEnd)}&travelmode=${transportMode === 'w' ? 'walking' : transportMode === 'd' ? 'driving' : 'transit'}`;
                     window.open(mapsUrl, '_blank');
                   }}
                 >
-                  <span>Start</span>
+                  <span>Start Navigation</span>
                   <span style={{ fontSize: 16 }}>➔</span>
                 </button>
               </div>

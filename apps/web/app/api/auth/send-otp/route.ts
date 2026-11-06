@@ -5,6 +5,30 @@ import crypto from 'node:crypto';
 const COLLEGE_DOMAIN = '@andhrauniversity.edu.in';
 const AUTH_SECRET = process.env.AUTH_SECRET || 'aupro-andhra-university-otp-signing-secret-2026';
 
+// In-Memory Rate Limiting (Protects against brute force and email spam)
+interface RateLimitRecord {
+  count: number;
+  resetAt: number;
+}
+const rateLimitMap = new Map<string, RateLimitRecord>();
+
+function checkRateLimit(key: string, limit = 5, windowMs = 10 * 60 * 1000): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const record = rateLimitMap.get(key);
+
+  if (!record || now > record.resetAt) {
+    rateLimitMap.set(key, { count: 1, resetAt: now + windowMs });
+    return { allowed: true, remaining: limit - 1 };
+  }
+
+  if (record.count >= limit) {
+    return { allowed: false, remaining: 0 };
+  }
+
+  record.count += 1;
+  return { allowed: true, remaining: limit - record.count };
+}
+
 function generate6DigitOtp(): string {
   // Generates cryptographically secure 6-digit numeric code (100000 to 999999)
   return crypto.randomInt(100000, 1000000).toString();
@@ -151,6 +175,19 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: `Registration is strictly restricted to official ${COLLEGE_DOMAIN} student email addresses.` },
         { status: 403 }
+      );
+    }
+
+    // Rate Limiting: Max 5 requests per 10 minutes per IP/Email
+    const forwarded = req.headers.get('x-forwarded-for');
+    const ip = forwarded ? forwarded.split(',')[0].trim() : '127.0.0.1';
+    const rateLimitKey = `${ip}:${cleanEmail}`;
+    const rateCheck = checkRateLimit(rateLimitKey, 5, 10 * 60 * 1000);
+
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: 'Too many OTP requests. Please wait 10 minutes before requesting another verification code.' },
+        { status: 429 }
       );
     }
 

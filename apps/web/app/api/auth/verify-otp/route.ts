@@ -1,7 +1,36 @@
 import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
 
+const COLLEGE_DOMAIN = '@andhrauniversity.edu.in';
 const AUTH_SECRET = process.env.AUTH_SECRET || 'aupro-andhra-university-otp-signing-secret-2026';
+
+// Brute-force protection: Max 5 failed attempts per IP/Email within 10 minutes
+const failedAttemptsMap = new Map<string, { count: number; resetAt: number }>();
+
+function isBruteForceLocked(key: string, maxFails = 5): boolean {
+  const now = Date.now();
+  const rec = failedAttemptsMap.get(key);
+  if (!rec) return false;
+  if (now > rec.resetAt) {
+    failedAttemptsMap.delete(key);
+    return false;
+  }
+  return rec.count >= maxFails;
+}
+
+function recordFailure(key: string, windowMs = 10 * 60 * 1000) {
+  const now = Date.now();
+  const rec = failedAttemptsMap.get(key);
+  if (!rec || now > rec.resetAt) {
+    failedAttemptsMap.set(key, { count: 1, resetAt: now + windowMs });
+  } else {
+    rec.count += 1;
+  }
+}
+
+function clearFailures(key: string) {
+  failedAttemptsMap.delete(key);
+}
 
 export async function POST(req: Request) {
   try {
@@ -17,6 +46,26 @@ export async function POST(req: Request) {
 
     const cleanEmail = email.toLowerCase().trim();
     const cleanOtp = String(otp).trim();
+
+    // Enforce College Domain
+    if (!cleanEmail.endsWith(COLLEGE_DOMAIN)) {
+      return NextResponse.json(
+        { error: `Verification is strictly restricted to official ${COLLEGE_DOMAIN} email addresses.` },
+        { status: 403 }
+      );
+    }
+
+    // Check rate limit & lockout
+    const forwarded = req.headers.get('x-forwarded-for');
+    const ip = forwarded ? forwarded.split(',')[0].trim() : '127.0.0.1';
+    const lockKey = `${ip}:${cleanEmail}`;
+
+    if (isBruteForceLocked(lockKey, 5)) {
+      return NextResponse.json(
+        { error: 'Account temporarily locked due to multiple failed verification attempts. Please wait 10 minutes.' },
+        { status: 429 }
+      );
+    }
 
     // Decode token
     let tokenData: { email: string; expiresAt: number; hmac: string };
@@ -55,11 +104,15 @@ export async function POST(req: Request) {
     const expectedBuffer = Buffer.from(expectedHmac, 'hex');
 
     if (hmacBuffer.length !== expectedBuffer.length || !crypto.timingSafeEqual(hmacBuffer, expectedBuffer)) {
+      recordFailure(lockKey);
       return NextResponse.json(
         { error: 'Invalid verification code. Please check your 6-digit code or request a new one.' },
         { status: 400 }
       );
     }
+
+    // Verified! Clear any previous failed attempts
+    clearFailures(lockKey);
 
     // Verified! Generate proof of verification timestamp
     return NextResponse.json({

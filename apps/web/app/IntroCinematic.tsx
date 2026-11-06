@@ -76,8 +76,8 @@ export function IntroCinematic({ onComplete }: IntroCinematicProps) {
 
           {/* Subtitle Banner */}
           <div className="intro-subtitle">
-            <span className="intro-sub-line">ANDHRA UNIVERSITY COLLEGE OF ENGINEERING</span>
-            <span className="intro-sub-tag">AUTONOMOUS · VISAKHAPATNAM</span>
+            <span className="intro-sub-line">ANDHRA UNIVERSITY</span>
+            <span className="intro-sub-tag">COLLEGE OF ENGINEERING · VISAKHAPATNAM</span>
           </div>
         </div>
       </div>

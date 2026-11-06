@@ -81,7 +81,7 @@ export function WhatsAppIcon({ size = 20 }: { size?: number }) {
   );
 }
 
-type ServiceIconKind = 'document' | 'payment' | 'ticket' | 'bus' | 'home' | 'help';
+export type ServiceIconKind = 'document' | 'payment' | 'ticket' | 'bus' | 'home' | 'help';
 
 export function ServiceIcon({ kind, size = 22 }: { kind: ServiceIconKind; size?: number }) {
   const paths: Record<ServiceIconKind, React.ReactNode> = {

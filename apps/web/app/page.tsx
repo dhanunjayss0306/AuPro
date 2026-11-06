@@ -22,6 +22,8 @@ import {
   WalkIcon,
   CarIcon,
   TransitBusIcon,
+  SunIcon,
+  MoonIcon,
 } from './icons';
 import { MomentCard, MomentPost } from './MomentCard';
 import { IntroCinematic } from './IntroCinematic';
@@ -275,6 +277,38 @@ export default function Home() {
   const [authOtpCountdown, setAuthOtpCountdown] = useState(0);
   const [isOtpLoading, setIsOtpLoading] = useState(false);
   const [authError, setAuthError] = useState('');
+
+  // Dark Mode Theme State ('light' | 'dark')
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  // Theme management & persistence
+  useEffect(() => {
+    try {
+      const savedTheme = localStorage.getItem('aupro_theme') as 'light' | 'dark' | null;
+      if (savedTheme) {
+        setTheme(savedTheme);
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+      } else {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const initial = prefersDark ? 'dark' : 'light';
+        setTheme(initial);
+        document.documentElement.setAttribute('data-theme', initial);
+        document.documentElement.classList.toggle('dark', initial === 'dark');
+      }
+    } catch {}
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    try {
+      localStorage.setItem('aupro_theme', nextTheme);
+      document.documentElement.setAttribute('data-theme', nextTheme);
+      document.documentElement.classList.toggle('dark', nextTheme === 'dark');
+    } catch {}
+    setToast(nextTheme === 'dark' ? '🌙 Dark mode enabled' : '☀️ Light mode enabled');
+  };
 
   // Topbar Profile Quick Menu
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -1045,6 +1079,15 @@ export default function Home() {
           <span className="brand-badge">AU Eng</span>
         </div>
         <div className="topbar-actions">
+          <button
+            className="icon-button theme-toggle-btn"
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            onClick={toggleTheme}
+            style={{ color: theme === 'dark' ? '#fbbf24' : 'var(--ink)' }}
+          >
+            {theme === 'dark' ? <SunIcon size={20} /> : <MoonIcon size={20} />}
+          </button>
           <button className="icon-button" aria-label="Notifications" onClick={() => setTopNotice('No new unread notices.')}>
             <NotificationIcon size={22} />
           </button>
@@ -1072,10 +1115,17 @@ export default function Home() {
               <div className="profile-dropdown-user">
                 <h3>{authName || 'AU Student'}</h3>
                 <span>@{authUsername || 'au.student'}</span>
-                <span style={{ color: '#701d32', fontWeight: 600, fontSize: 11 }}>{authEmail}</span>
+                <span className="profile-dropdown-email">{authEmail}</span>
               </div>
             </div>
             <div className="profile-dropdown-actions">
+              <button
+                className="profile-dropdown-btn"
+                onClick={toggleTheme}
+              >
+                <span>{theme === 'dark' ? '☀️' : '🌙'}</span>
+                <span>{theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}</span>
+              </button>
               <button
                 className="profile-dropdown-btn"
                 onClick={() => {
@@ -1988,6 +2038,20 @@ export default function Home() {
                   {/* SETTINGS CARD */}
                   <div className="settings-card">
                     <h3>Account Preferences</h3>
+                    <div className="settings-row">
+                      <div className="settings-info">
+                        <strong>Dark Mode Appearance</strong>
+                        <span>Switch between collegiate light theme and modern dark mode</span>
+                      </div>
+                      <button
+                        className={`settings-toggle-btn ${theme === 'dark' ? 'active' : ''}`}
+                        onClick={toggleTheme}
+                        aria-label="Toggle dark mode"
+                      >
+                        <span className="settings-toggle-thumb" />
+                      </button>
+                    </div>
+
                     <div className="settings-row">
                       <div className="settings-info">
                         <strong>Official Announcements Push</strong>

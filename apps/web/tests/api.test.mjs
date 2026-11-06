@@ -121,3 +121,22 @@ test('MomentCard has Instagram interactions and category badges', async () => {
   assert.ok(cardContent.includes('RepostIcon'), 'Must have Repost icon');
   assert.ok(cardContent.includes('handleDoubleTap'), 'Must have double-tap like interaction');
 });
+
+test('Dark mode support and profile email wrapping', async () => {
+  const pageContent = await readFile(new URL('../app/page.tsx', import.meta.url), 'utf8');
+  const cssContent = await readFile(new URL('../app/globals.css', import.meta.url), 'utf8');
+  const iconsContent = await readFile(new URL('../app/icons.tsx', import.meta.url), 'utf8');
+
+  // Dark mode in page
+  assert.ok(pageContent.includes('toggleTheme'), 'Must have toggleTheme function');
+  assert.ok(pageContent.includes('aupro_theme'), 'Must persist theme preference');
+  assert.ok(pageContent.includes('SunIcon') && pageContent.includes('MoonIcon'), 'Must use Sun and Moon icons');
+
+  // Dark mode in icons
+  assert.ok(iconsContent.includes('SunIcon') && iconsContent.includes('MoonIcon'), 'Must export SunIcon and MoonIcon');
+
+  // Email wrapping in profile menu
+  assert.ok(pageContent.includes('profile-dropdown-email'), 'Must use profile-dropdown-email for wrapping');
+  assert.ok(cssContent.includes('word-break: break-all'), 'Must break email word across lines');
+  assert.ok(cssContent.includes('[data-theme=\'dark\']'), 'Must have dark theme CSS rules');
+});

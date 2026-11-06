@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
+import { isAccountRegistered, MAIN_ADMIN_EMAIL } from '../account-registry';
 
 // College domain enforcement
 const COLLEGE_DOMAIN = '@andhrauniversity.edu.in';
@@ -175,6 +176,15 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: `Registration is strictly restricted to official ${COLLEGE_DOMAIN} student email addresses.` },
         { status: 403 }
+      );
+    }
+
+    // Strict One-Account-Per-Student Enforcement (Main Admin email is exempt)
+    const { isSignup = false } = body;
+    if (isSignup && cleanEmail !== MAIN_ADMIN_EMAIL && isAccountRegistered(cleanEmail)) {
+      return NextResponse.json(
+        { error: 'An account has already been created for this university email. Each student may register only one account. Please sign in instead.' },
+        { status: 409 }
       );
     }
 

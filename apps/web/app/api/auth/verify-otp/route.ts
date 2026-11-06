@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
+import { registerAccount } from '../account-registry';
 
 const COLLEGE_DOMAIN = '@andhrauniversity.edu.in';
 const AUTH_SECRET = process.env.AUTH_SECRET || 'aupro-andhra-university-otp-signing-secret-2026';
@@ -113,6 +114,9 @@ export async function POST(req: Request) {
 
     // Verified! Clear any previous failed attempts
     clearFailures(lockKey);
+
+    // Register account in registry to prevent duplicate accounts
+    registerAccount(cleanEmail);
 
     // Verified! Generate proof of verification timestamp
     return NextResponse.json({

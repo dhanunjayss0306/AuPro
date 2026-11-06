@@ -389,6 +389,19 @@ export default function Home() {
     }
   }, []);
 
+  // Purge all legacy test accounts per user instruction; start clean with designated main ID
+  useEffect(() => {
+    try {
+      const PURGE_KEY = 'aupro_accounts_purged_20261107_v1';
+      if (!localStorage.getItem(PURGE_KEY)) {
+        localStorage.removeItem('aupro_registered_users');
+        localStorage.removeItem('aupro_session');
+        localStorage.setItem(PURGE_KEY, 'true');
+        setSignedIn(false);
+      }
+    } catch {}
+  }, []);
+
   // Restore existing user session from localStorage
   useEffect(() => {
     try {
@@ -886,14 +899,14 @@ export default function Home() {
                   setAuthError('Passwords do not match.');
                   return;
                 }
-                if (findRegisteredUser(clean)) {
-                  setAuthError('This university email is already registered and verified. Please sign in with your password or use Google Sign-In.');
+                if (clean !== '325506402371@andhrauniversity.edu.in' && findRegisteredUser(clean)) {
+                  setAuthError('An account has already been created for this university email. Each student may create only one account. Please sign in instead.');
                   return;
                 }
 
                 setIsOtpLoading(true);
                 try {
-                  const data = await sendUniversityOtp(clean, authName, authRollNo);
+                  const data = await sendUniversityOtp(clean, authName, authRollNo, true);
                   setAuthOtpToken(data.token || '');
                   setAuthOtpDevCode(data.devCode || '');
                   setAuthOtpProviderStatus(data.providerStatus || 'delivered');

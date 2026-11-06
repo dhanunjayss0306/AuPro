@@ -89,7 +89,7 @@ export function getGoogleOAuthUrl(redirectTo?: string): string {
 /**
  * Request a 6-digit cryptographic OTP code to verify official college email.
  */
-export async function sendUniversityOtp(email: string, fullName: string, rollNo: string) {
+export async function sendUniversityOtp(email: string, fullName: string, rollNo: string, isSignup = false) {
   const cleanEmail = email.toLowerCase().trim();
   if (!isValidCollegeEmail(cleanEmail)) {
     throw new Error('Only official @andhrauniversity.edu.in emails are permitted.');
@@ -98,7 +98,7 @@ export async function sendUniversityOtp(email: string, fullName: string, rollNo:
   const res = await fetch('/api/auth/send-otp', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: cleanEmail, fullName, rollNo }),
+    body: JSON.stringify({ email: cleanEmail, fullName, rollNo, isSignup }),
   });
 
   const data = await res.json();

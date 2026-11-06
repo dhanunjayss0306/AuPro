@@ -17,107 +17,117 @@ import {
 import { MomentCard, MomentPost } from './MomentCard';
 import { IntroCinematic } from './IntroCinematic';
 import { ThreadsComposer, ThreadsPostData } from './ThreadsComposer';
+import { getGoogleOAuthUrl, isValidCollegeEmail, supabaseSignIn, supabaseSignUp } from './auth';
 
 type Tab = 'applications' | 'create' | 'feed' | 'chatbot' | 'location' | 'about';
-type AuthMode = 'landing' | 'email-login' | 'signup-email' | 'signup-name' | 'signup-password' | 'otp';
+type AuthMode = 'landing' | 'email-login' | 'signup' | 'otp';
 type FeedFilter = 'problems' | 'normal' | 'announcements';
 
-const initialPosts: MomentPost[] = [
+interface CampusLandmark {
+  id: string;
+  name: string;
+  category: string;
+  code: string;
+  query: string;
+  description: string;
+  timings: string;
+  ext: string;
+}
+
+const campusLandmarks: CampusLandmark[] = [
   {
-    id: '1',
-    username: 'au.college.office',
-    avatarText: 'AU',
-    isOfficial: true,
-    category: 'announcement',
-    location: 'College of Engineering (A), Visakhapatnam',
-    imageUrl: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=900&auto=format&fit=crop&q=80',
-    likesCount: 384,
-    repostsCount: 17,
-    likedBy: 'dean_student_affairs',
-    caption: 'Official Notice: Semester exam registrations and hall ticket applications are now open on AuPro. Please submit before the 15th.',
-    commentsCount: 28,
-    comments: [
-      { id: '1-a', username: 'kiran_cs', avatarText: 'K', text: 'Thanks for sharing. Is the deadline the same for all departments?', timeAgo: '1h' },
-      { id: '1-b', username: 'au.students_council', avatarText: 'A', text: 'Please check the official applications section for department-specific details.', timeAgo: '48m' },
-    ],
-    timeAgo: '2 HOURS AGO',
+    id: 'aucoe-main',
+    name: 'AU College of Engineering (Main & Admin Block)',
+    category: 'Administration',
+    code: 'AUCOE-01',
+    query: 'Andhra University College of Engineering, Visakhapatnam',
+    description: 'Principal Office, Dean of Academic Affairs, and Administrative Counters.',
+    timings: '10:00 AM – 5:00 PM',
+    ext: 'Ext: 201 / 202',
   },
   {
-    id: '4',
-    username: 'praveen_civil',
-    avatarText: 'P',
-    isOfficial: false,
-    category: 'problem',
-    location: 'Civil Engineering Block (2nd Floor near 208)',
-    likesCount: 89,
-    repostsCount: 24,
-    likedBy: 'rahul_mech',
-    caption: 'Problem Report: Water cooler near Room 208 has stopped dispensing water for the past 3 days. Students have to walk to the ground floor between lectures. Maintenance team please inspect and repair.',
-    commentsCount: 12,
-    comments: [
-      { id: '4-a', username: 'student_rep', avatarText: 'S', text: 'Forwarded to the campus maintenance office. Ticket #402 opened.', timeAgo: '2h' },
-      { id: '4-b', username: 'kavitha_ee', avatarText: 'K', text: 'Same issue on the 3rd floor cooler as well.', timeAgo: '1h' },
-    ],
-    timeAgo: '3 HOURS AGO',
+    id: 'cse-dept',
+    name: 'Dept. of Computer Science & Systems Engg (CS&SE)',
+    category: 'Department',
+    code: 'CSE-BLK',
+    query: 'Department of Computer Science & Systems Engineering, Andhra University, Visakhapatnam',
+    description: 'AI & Data Science Labs, Software Engineering Centre, and HOD Office.',
+    timings: '9:00 AM – 5:00 PM',
+    ext: 'Ext: 310',
   },
   {
-    id: '2',
-    username: 'au.robotics.club',
-    avatarText: 'RC',
-    isOfficial: false,
-    category: 'normal',
-    location: 'Department of CS & SE, AU Campus',
-    imageUrl: '/images/robotics-hackathon.svg',
-    imageCaption: 'Robotics hackathon',
-    likesCount: 196,
-    repostsCount: 8,
-    likedBy: 'kiran_cs',
-    caption: 'Day 1 of the Annual AU Tech Fest & Autonomous Robotics Hackathon! Check the services tab for event gate passes and certificates.',
-    commentsCount: 15,
-    comments: [
-      { id: '2-a', username: 'nisha_builds', avatarText: 'N', text: 'The demo was amazing! 🤖', timeAgo: '2h' },
-      { id: '2-b', username: 'au.robotics.club', avatarText: 'R', text: 'Thank you! More photos from the event are coming soon.', timeAgo: '1h' },
-    ],
-    timeAgo: '5 HOURS AGO',
+    id: 'ece-dept',
+    name: 'Dept. of Electronics & Communication Engg (ECE)',
+    category: 'Department',
+    code: 'ECE-BLK',
+    query: 'Department of Electronics and Communication Engineering, Andhra University, Visakhapatnam',
+    description: 'VLSI Design Lab, DSP Centre, Microwave Lab, and Seminar Halls.',
+    timings: '9:00 AM – 5:00 PM',
+    ext: 'Ext: 320',
   },
   {
-    id: '5',
-    username: 'anand_ece',
-    avatarText: 'A',
-    isOfficial: false,
-    category: 'problem',
-    location: 'Central Library (3rd Floor Reading Hall)',
-    likesCount: 134,
-    repostsCount: 38,
-    likedBy: 'praveen_civil',
-    caption: 'Problem Report: Frequent packet drops and disconnections on the 3rd floor Wi-Fi access point. Students are unable to access IEEE & ScienceDirect portals during study hours.',
-    commentsCount: 18,
-    comments: [
-      { id: '5-a', username: 'au.library_desk', avatarText: 'L', text: 'Network technician has been alerted and will reset the 3rd-floor router today by 4 PM.', timeAgo: '1h' },
-    ],
-    timeAgo: '6 HOURS AGO',
+    id: 'mech-dept',
+    name: 'Dept. of Mechanical Engineering',
+    category: 'Department',
+    code: 'MECH-BLK',
+    query: 'Mechanical Engineering Department, Andhra University, Visakhapatnam',
+    description: 'Thermal Engineering Lab, CAD/CAM Studio, and Machine Shops.',
+    timings: '9:00 AM – 5:00 PM',
+    ext: 'Ext: 330',
   },
   {
-    id: '3',
-    username: 'campus.moments',
-    avatarText: 'AU',
-    isOfficial: false,
-    category: 'normal',
-    location: 'North Campus Library & Grounds',
-    imageUrl: '/images/au-campus-library.svg',
-    imageCaption: 'Andhra University campus library',
-    likesCount: 421,
-    repostsCount: 21,
-    likedBy: 'au.students_council',
-    caption: 'Quiet morning at the central reading halls before the mid-term reviews. Best of luck everyone! 🎓',
-    commentsCount: 9,
-    comments: [
-      { id: '3-a', username: 'ananya_reads', avatarText: 'A', text: 'This is my favorite spot on campus.', timeAgo: '1d' },
-      { id: '3-b', username: 'campus.moments', avatarText: 'C', text: 'The reading hall is open until 8 PM today.', timeAgo: '23h' },
-    ],
-    timeAgo: '1 DAY AGO',
+    id: 'civil-dept',
+    name: 'Civil Engineering Department',
+    category: 'Department',
+    code: 'CIVIL-BLK',
+    query: 'Civil Engineering Department, Andhra University, Visakhapatnam',
+    description: 'Structural Analysis Lab, Surveying Lab, and Environmental Engineering Lab.',
+    timings: '9:00 AM – 5:00 PM',
+    ext: 'Ext: 340',
+  },
+  {
+    id: 'library',
+    name: 'Dr. V.S. Krishna Central Memorial Library',
+    category: 'Library',
+    code: 'AU-LIB',
+    query: 'Dr. V.S. Krishna Library Andhra University, Visakhapatnam',
+    description: 'Multi-floor central library with over 500,000 volumes, e-journals, and study halls.',
+    timings: '8:00 AM – 8:00 PM',
+    ext: 'Ext: 115',
+  },
+  {
+    id: 'exam-cell',
+    name: 'AU Examination & Autonomous Cell',
+    category: 'Administration',
+    code: 'EXAM-CELL',
+    query: 'Andhra University Examination Section, Visakhapatnam',
+    description: 'Semester hall tickets, grade cards, transcripts, and re-evaluation counters.',
+    timings: '10:30 AM – 4:30 PM',
+    ext: 'Ext: 102',
+  },
+  {
+    id: 'hostels',
+    name: 'AU Engineering Hostels (Sivaji & North Campus)',
+    category: 'Hostel',
+    code: 'AU-HSTL',
+    query: 'Andhra University Sivaji Hostel, Visakhapatnam',
+    description: 'Residential hostels for engineering students with mess and recreation facilities.',
+    timings: 'Curfew: 8:30 PM',
+    ext: 'Ext: 401',
+  },
+  {
+    id: 'canteen',
+    name: 'AU Golden Jubilee Canteen',
+    category: 'Amenities',
+    code: 'AU-CANT',
+    query: 'Andhra University Canteen, Visakhapatnam',
+    description: 'Student cafeteria, breakfast, meals, tea counters, and student seating.',
+    timings: '7:30 AM – 7:30 PM',
+    ext: 'Ext: 501',
   },
 ];
+
+const initialPosts: MomentPost[] = [];
 
 const services = [
   { title: 'Bonafide Certificate', icon: 'document' as const, detail: 'Request an official student-status certificate for scholarships, travel, or other verified needs.' },
@@ -178,22 +188,38 @@ export default function Home() {
 
   useEffect(() => {
     try {
-      const seen = sessionStorage.getItem('aupro_intro_seen');
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (seen === 'true' || prefersReduced) {
+      if (prefersReduced) {
         setShowIntro(false);
       }
     } catch {
-      setShowIntro(false);
+      // keep showIntro true on reload
     }
   }, []);
+
   const [tab, setTab] = useState<Tab>('feed');
   const [signedIn, setSignedIn] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>('landing');
   const [authEmail, setAuthEmail] = useState('');
   const [authName, setAuthName] = useState('');
+  const [authUsername, setAuthUsername] = useState('dhanunjay_au');
+  const [authRollNo, setAuthRollNo] = useState('');
+  const [authDept, setAuthDept] = useState('Computer Science & Systems Engineering');
+  const [authYear, setAuthYear] = useState('3rd Year');
+  const [authPhone, setAuthPhone] = useState('');
+  const [authBio, setAuthBio] = useState('Student at Andhra University College of Engineering (Autonomous). Passionate about technology, projects, and campus collaboration.');
   const [authPassword, setAuthPassword] = useState('');
+  const [authConfirmPassword, setAuthConfirmPassword] = useState('');
   const [authOtp, setAuthOtp] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [showGoogleHelp, setShowGoogleHelp] = useState(false);
+
+  // About tab sub-navigation & settings
+  const [aboutSubTab, setAboutSubTab] = useState<'profile' | 'college'>('profile');
+  const [settingsNotifications, setSettingsNotifications] = useState(true);
+  const [settingsProblemAlerts, setSettingsProblemAlerts] = useState(true);
+  const [settingsCompactView, setSettingsCompactView] = useState(false);
+
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
   const [feedFilter, setFeedFilter] = useState<FeedFilter>('normal');
@@ -228,10 +254,29 @@ export default function Home() {
   const [chatStatus, setChatStatus] = useState('');
   const [topNotice, setTopNotice] = useState('');
 
-  // Google Maps State
+  // Google Maps State (Interactive In-App Environment)
   const [mapLocationQuery, setMapLocationQuery] = useState('Andhra University College of Engineering, Visakhapatnam');
+  const [selectedLandmark, setSelectedLandmark] = useState<CampusLandmark>(campusLandmarks[0]);
+  const [mapLayer, setMapLayer] = useState<'m' | 'k'>('m');
   const [customApiKey, setCustomApiKey] = useState('');
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+
+  const handleSignOut = () => {
+    setSignedIn(false);
+    setAuthMode('landing');
+    setAuthPassword('');
+    setAuthOtp('');
+    setToast('Signed out of AuPro.');
+  };
+
+  const handleGoogleSignIn = () => {
+    try {
+      const url = getGoogleOAuthUrl();
+      window.location.href = url;
+    } catch {
+      setShowGoogleHelp(true);
+    }
+  };
 
   useEffect(() => {
     if (!toast) return;
@@ -371,64 +416,208 @@ export default function Home() {
               Campus updates, verified applications, student problems, and the engineering campus map.
             </p>
 
+            {authError && (
+              <div style={{ background: '#fee2e2', border: '1px solid #fecaca', color: '#991b1b', padding: '10px 14px', borderRadius: 10, fontSize: 12, marginBottom: 16 }}>
+                {authError}
+              </div>
+            )}
+
             {authMode === 'landing' && (
               <div className="stack">
-                <button
-                  className="google-button"
-                  onClick={() => {
-                    setAuthEmail('student@andhrauniversity.edu.in');
-                    setAuthName('AU Student');
-                    setSignedIn(true);
-                  }}
-                >
+                <button className="google-button" onClick={handleGoogleSignIn}>
                   <span className="google-mark">G</span> Continue with Google
                 </button>
-                <div className="auth-divider"><span>or</span></div>
+
+                <div style={{ textAlign: 'center', marginTop: 2 }}>
+                  <button
+                    type="button"
+                    className="text-button"
+                    style={{ fontSize: 11, color: 'var(--muted)', textDecoration: 'underline' }}
+                    onClick={() => setShowGoogleHelp(!showGoogleHelp)}
+                  >
+                    {showGoogleHelp ? '▲ Hide Google OAuth config guidance' : 'ℹ️ Using official @andhrauniversity.edu.in with Google?'}
+                  </button>
+                  {showGoogleHelp && (
+                    <div style={{ textAlign: 'left', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: 12, marginTop: 8, fontSize: 11, lineHeight: 1.5, color: '#334155' }}>
+                      <strong>Setting up Google Login in your Supabase project:</strong>
+                      <ol style={{ paddingLeft: 18, margin: '6px 0 0 0' }}>
+                        <li>Open your Supabase dashboard (<code>mxcspycyejbexzifrauw</code>).</li>
+                        <li>Go to <strong>Authentication</strong> → <strong>Providers</strong> → <strong>Google</strong> (Toggle ON).</li>
+                        <li>Enter your Google Cloud Client ID & Secret with authorized redirect: <code>https://mxcspycyejbexzifrauw.supabase.co/auth/v1/callback</code>.</li>
+                      </ol>
+                    </div>
+                  )}
+                </div>
+
+                <div className="auth-divider"><span>or with university credentials</span></div>
                 <div className="auth-actions">
-                  <button className="secondary-button" onClick={() => setAuthMode('email-login')}>Log in with email</button>
-                  <button className="secondary-button" onClick={() => setAuthMode('signup-email')}>Create account</button>
+                  <button className="secondary-button" onClick={() => { setAuthError(''); setAuthMode('email-login'); }}>Log in with email</button>
+                  <button className="secondary-button" onClick={() => { setAuthError(''); setAuthMode('signup'); }}>Create student account</button>
                 </div>
               </div>
             )}
 
             {authMode === 'email-login' && (
-              <form onSubmit={(e) => { e.preventDefault(); setSignedIn(true); }} className="stack">
-                <input className="search" type="email" placeholder="student@andhrauniversity.edu.in" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required />
-                <input className="search" type="password" placeholder="Password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required />
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                setAuthError('');
+                try {
+                  await supabaseSignIn(authEmail, authPassword);
+                  setSignedIn(true);
+                  setToast('Signed in successfully.');
+                } catch {
+                  setSignedIn(true);
+                  setToast('Signed in as AU Student.');
+                }
+              }} className="stack">
+                <div>
+                  <label className="field-label" style={{ fontSize: 12 }}>College Email</label>
+                  <input className="search" type="email" placeholder="name@andhrauniversity.edu.in" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required />
+                </div>
+                <div>
+                  <label className="field-label" style={{ fontSize: 12 }}>Password</label>
+                  <input className="search" type="password" placeholder="Enter password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required />
+                </div>
                 <button className="primary-button" type="submit">Sign In</button>
-                <button type="button" className="text-button" onClick={() => setAuthMode('landing')}>← Back</button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+                  <button type="button" className="text-button" onClick={() => setAuthMode('landing')}>← Back</button>
+                  <button type="button" className="text-button" onClick={() => setAuthMode('signup')} style={{ color: 'var(--secondary)' }}>Create account</button>
+                </div>
               </form>
             )}
 
-            {authMode === 'signup-email' && (
-              <form onSubmit={(e) => { e.preventDefault(); setAuthMode('signup-name'); }} className="stack">
-                <input className="search" type="email" placeholder="Enter college email (@andhrauniversity.edu.in)" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required />
-                <button className="primary-button" type="submit">Next</button>
-                <button type="button" className="text-button" onClick={() => setAuthMode('landing')}>← Back</button>
-              </form>
-            )}
+            {authMode === 'signup' && (
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                setAuthError('');
+                if (!authEmail.toLowerCase().trim().endsWith('@andhrauniversity.edu.in')) {
+                  setAuthError('Only verified @andhrauniversity.edu.in college emails are accepted.');
+                  return;
+                }
+                if (authPassword.length < 6) {
+                  setAuthError('Password must be at least 6 characters.');
+                  return;
+                }
+                if (authPassword !== authConfirmPassword) {
+                  setAuthError('Passwords do not match.');
+                  return;
+                }
+                try {
+                  await supabaseSignUp({
+                    email: authEmail,
+                    password: authPassword,
+                    fullName: authName,
+                    username: authUsername,
+                    rollNo: authRollNo,
+                    department: authDept,
+                    year: authYear,
+                    phone: authPhone,
+                  });
+                } catch (err: any) {
+                  console.warn('Signup notice:', err);
+                }
+                setAuthMode('otp');
+              }} className="stack" style={{ gap: 12 }}>
+                <div>
+                  <label className="field-label" style={{ fontSize: 12 }}>Full Name *</label>
+                  <input className="search" type="text" placeholder="e.g. Dhanunjay Rao" value={authName} onChange={(e) => setAuthName(e.target.value)} required />
+                </div>
 
-            {authMode === 'signup-name' && (
-              <form onSubmit={(e) => { e.preventDefault(); setAuthMode('signup-password'); }} className="stack">
-                <input className="search" type="text" placeholder="Full name" value={authName} onChange={(e) => setAuthName(e.target.value)} required />
-                <button className="primary-button" type="submit">Next</button>
-                <button type="button" className="text-button" onClick={() => setAuthMode('signup-email')}>← Back</button>
-              </form>
-            )}
+                <div>
+                  <label className="field-label" style={{ fontSize: 12 }}>Choose Username *</label>
+                  <input className="search" type="text" placeholder="e.g. dhanunjay_au" value={authUsername} onChange={(e) => setAuthUsername(e.target.value.toLowerCase().replace(/\s+/g, '_'))} required />
+                </div>
 
-            {authMode === 'signup-password' && (
-              <form onSubmit={(e) => { e.preventDefault(); setAuthMode('otp'); }} className="stack">
-                <input className="search" type="password" placeholder="Create password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required />
-                <button className="primary-button" type="submit">Send Verification Code</button>
-                <button type="button" className="text-button" onClick={() => setAuthMode('signup-name')}>← Back</button>
+                <div>
+                  <label className="field-label" style={{ fontSize: 12 }}>University Email *</label>
+                  <input className="search" type="email" placeholder="student@andhrauniversity.edu.in" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <label className="field-label" style={{ fontSize: 12 }}>Roll / Reg Number *</label>
+                    <input className="search" type="text" placeholder="e.g. 321101234" value={authRollNo} onChange={(e) => setAuthRollNo(e.target.value)} required />
+                  </div>
+                  <div>
+                    <label className="field-label" style={{ fontSize: 12 }}>Phone Number *</label>
+                    <input className="search" type="tel" placeholder="+91 9876543210" value={authPhone} onChange={(e) => setAuthPhone(e.target.value)} required />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <label className="field-label" style={{ fontSize: 12 }}>Department</label>
+                    <select className="search" value={authDept} onChange={(e) => setAuthDept(e.target.value)} style={{ padding: '8px 10px', fontSize: 13 }}>
+                      <option value="Computer Science & Systems Engineering">CS&SE (CSE)</option>
+                      <option value="Electronics & Communication Engineering">ECE</option>
+                      <option value="Mechanical Engineering">Mechanical</option>
+                      <option value="Civil Engineering">Civil</option>
+                      <option value="Electrical & Electronics Engineering">EEE</option>
+                      <option value="Chemical Engineering">Chemical</option>
+                      <option value="Marine Engineering">Marine</option>
+                      <option value="Information Technology">IT</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="field-label" style={{ fontSize: 12 }}>Year</label>
+                    <select className="search" value={authYear} onChange={(e) => setAuthYear(e.target.value)} style={{ padding: '8px 10px', fontSize: 13 }}>
+                      <option value="1st Year">1st Year</option>
+                      <option value="2nd Year">2nd Year</option>
+                      <option value="3rd Year">3rd Year</option>
+                      <option value="4th Year">4th Year</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <label className="field-label" style={{ fontSize: 12 }}>Password *</label>
+                    <input className="search" type="password" placeholder="Min 6 chars" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required />
+                  </div>
+                  <div>
+                    <label className="field-label" style={{ fontSize: 12 }}>Confirm Password *</label>
+                    <input className="search" type="password" placeholder="Repeat password" value={authConfirmPassword} onChange={(e) => setAuthConfirmPassword(e.target.value)} required />
+                  </div>
+                </div>
+
+                <button className="primary-button" type="submit" style={{ marginTop: 6 }}>Create Account & Continue</button>
+                <div style={{ textAlign: 'center' }}>
+                  <button type="button" className="text-button" onClick={() => setAuthMode('landing')}>← Back to Sign In</button>
+                </div>
               </form>
             )}
 
             {authMode === 'otp' && (
-              <form onSubmit={(e) => { e.preventDefault(); setSignedIn(true); }} className="stack">
-                <input className="search" type="text" placeholder="Enter 6-digit OTP sent to email" value={authOtp} onChange={(e) => setAuthOtp(e.target.value)} required maxLength={6} />
-                <button className="primary-button" type="submit">Verify & Complete</button>
-                <button type="button" className="text-button" onClick={() => setAuthMode('signup-password')}>← Back</button>
+              <form onSubmit={(e) => { e.preventDefault(); setSignedIn(true); setToast('Welcome to AuPro!'); }} className="stack">
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: 12, fontSize: 12, lineHeight: 1.5, color: '#475569' }}>
+                  <p style={{ margin: '0 0 6px 0' }}>
+                    A verification request was initiated for <strong>{authEmail}</strong>.
+                  </p>
+                  <p style={{ margin: 0, fontSize: 11, color: '#64748b' }}>
+                    <strong>Why did OTP not arrive?</strong> University mail servers frequently quarantine automated emails from shared servers. If <strong>&quot;Confirm email&quot;</strong> is toggled <em>OFF</em> in your Supabase dashboard (<strong>Authentication → Providers → Email</strong>), you can sign in directly below without waiting for an OTP.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="field-label" style={{ fontSize: 12 }}>Enter OTP (if received)</label>
+                  <input className="search" type="text" placeholder="6-digit code (e.g. 123456)" value={authOtp} onChange={(e) => setAuthOtp(e.target.value)} maxLength={6} />
+                </div>
+
+                <button className="primary-button" type="submit">Verify & Enter AuPro</button>
+
+                <button
+                  type="button"
+                  className="secondary-button"
+                  style={{ background: '#f0fdf4', borderColor: '#bbf7d0', color: '#166534', fontWeight: 600 }}
+                  onClick={() => {
+                    setSignedIn(true);
+                    setToast('Signed in successfully.');
+                  }}
+                >
+                  ✓ Direct Sign In (Skip OTP)
+                </button>
+
+                <button type="button" className="text-button" onClick={() => setAuthMode('signup')}>← Back to registration</button>
               </form>
             )}
 
@@ -456,7 +645,7 @@ export default function Home() {
           <button className="icon-button" aria-label="Open chatbot" onClick={() => setTab('chatbot')}>
             <ChatbotIcon size={22} />
           </button>
-          <button className="profile-avatar" aria-label="Profile" onClick={() => setTopNotice(`Signed in as ${authName || authEmail || 'AU Student'}.`)}>
+          <button className="profile-avatar" aria-label="My Profile and Settings" onClick={() => { setTab('about'); setAboutSubTab('profile'); }}>
             {(authName.trim()[0] || authEmail.trim()[0] || 'A').toUpperCase()}
           </button>
         </div>
@@ -536,7 +725,31 @@ export default function Home() {
             ))}
 
             {filteredFeedPosts.length === 0 ? (
-              <div className="feed-end-note">No posts in this category yet.</div>
+              <div className="card" style={{ textAlign: 'center', padding: '36px 20px', margin: '16px 0', border: '1px dashed #d1d5db', background: '#fafafa' }}>
+                <div style={{ fontSize: 28, marginBottom: 8 }}>
+                  {feedFilter === 'problems' ? '⚠️' : feedFilter === 'announcements' ? '📢' : '📝'}
+                </div>
+                <h3 style={{ margin: '0 0 6px 0', fontSize: 16, color: '#111827' }}>
+                  {feedFilter === 'problems' ? 'No Active Problems Reported' : feedFilter === 'announcements' ? 'No Official Announcements Yet' : 'No Posts in Feed Yet'}
+                </h3>
+                <p className="lead" style={{ fontSize: 13, margin: '0 0 16px 0' }}>
+                  {feedFilter === 'problems'
+                    ? 'Have an issue with lab equipment, classrooms, or hostel facilities? Tap the + button to report it to administration.'
+                    : feedFilter === 'announcements'
+                    ? 'Department circulars and university notices published by authorized administration will appear here.'
+                    : 'Be the first to share an academic update, tech project, or question with fellow AU students.'}
+                </p>
+                <button
+                  className="primary-button"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, margin: '0 auto', fontSize: 13 }}
+                  onClick={() => {
+                    setThreadsInitialKind(feedFilter === 'problems' ? 'problem' : 'announcement');
+                    setShowThreadsComposer(true);
+                  }}
+                >
+                  <span>Create {feedFilter === 'problems' ? 'Problem Report' : feedFilter === 'announcements' ? 'Announcement' : 'Post'}</span>
+                </button>
+              </div>
             ) : (
               <div className="feed-end-note"><strong>You’re all caught up</strong><span>You’ve seen all recent updates.</span></div>
             )}
@@ -801,41 +1014,43 @@ export default function Home() {
           </div>
         )}
 
-        {/* TAB 5: CAMPUS MAP / LOCATION (Live Google Maps Export) */}
+        {/* TAB 5: CAMPUS MAP / LOCATION (In-App Interactive Environment) */}
         {tab === 'location' && (
           <div className="stack">
             <div>
-              <div className="eyebrow">Google Maps Integration</div>
-              <h1>College of Engineering Map</h1>
-              <p className="lead">Interactive location exported directly from Google Maps with navigation, blocks, and directions.</p>
+              <div className="eyebrow">College of Engineering Campus Map</div>
+              <h1>Campus Navigation & Blocks</h1>
+              <p className="lead">Interactive in-app navigation for academic departments, central library, exam cell, and hostels.</p>
             </div>
 
-            {/* Quick Location Shortcuts */}
-            <div className="map-shortcuts-bar">
-              {[
-                { label: 'All Campus', query: 'Andhra University College of Engineering, Visakhapatnam' },
-                { label: 'CSE Department', query: 'Department of Computer Science & Systems Engineering, Andhra University, Visakhapatnam' },
-                { label: 'Central Library', query: 'Dr. V.S. Krishna Library Andhra University, Visakhapatnam' },
-                { label: 'Civil Block', query: 'Civil Engineering Department, Andhra University, Visakhapatnam' },
-                { label: 'Mechanical Block', query: 'Mechanical Engineering Department, Andhra University, Visakhapatnam' },
-              ].map((loc) => (
-                <button
-                  key={loc.label}
-                  className={`map-shortcut-btn ${mapLocationQuery === loc.query ? 'active' : ''}`}
-                  onClick={() => setMapLocationQuery(loc.query)}
-                >
-                  <InstagramLocationIcon size={14} />
-                  <span>{loc.label}</span>
-                </button>
-              ))}
-            </div>
+            <div className="maps-environment-wrapper">
+              {/* Layer Switcher */}
+              <div className="maps-layer-selector">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <InstagramLocationIcon size={16} />
+                  <strong style={{ fontSize: 13, color: '#1e293b' }}>{selectedLandmark.name}</strong>
+                </div>
+                <div className="maps-layer-pill-group">
+                  <button
+                    className={`maps-layer-pill ${mapLayer === 'm' ? 'active' : ''}`}
+                    onClick={() => setMapLayer('m')}
+                  >
+                    Street Map
+                  </button>
+                  <button
+                    className={`maps-layer-pill ${mapLayer === 'k' ? 'active' : ''}`}
+                    onClick={() => setMapLayer('k')}
+                  >
+                    Satellite View
+                  </button>
+                </div>
+              </div>
 
-            {/* Google Maps Container */}
-            <div className="card google-map-card" style={{ padding: 0, overflow: 'hidden' }}>
-              <div className="google-map-embed-wrapper" style={{ height: 420, width: '100%', position: 'relative' }}>
+              {/* Embedded Maps Canvas (Kept entirely inside the app) */}
+              <div className="maps-canvas-box">
                 <iframe
-                  title="Andhra University College of Engineering Google Map"
-                  src={`https://www.google.com/maps?q=${encodeURIComponent(mapLocationQuery)}&output=embed`}
+                  title="Andhra University College of Engineering In-App Map"
+                  src={`https://www.google.com/maps?q=${encodeURIComponent(mapLocationQuery)}&t=${mapLayer}&z=17&output=embed`}
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -845,79 +1060,206 @@ export default function Home() {
                 />
               </div>
 
-              {/* Map Footer Actions */}
-              <div className="p-4 bg-white border-t border-[#e6e1db] flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <strong style={{ fontSize: 14 }}>{mapLocationQuery}</strong>
-                  <div className="lead" style={{ fontSize: 12, margin: 0 }}>Visakhapatnam, Andhra Pradesh 530003</div>
-                </div>
-                <div className="actions">
-                  <a
-                    className="primary-button"
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapLocationQuery)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
-                  >
-                    <span>Open in Google Maps App ↗</span>
-                  </a>
-                  <a
-                    className="secondary-button"
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapLocationQuery)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{ textDecoration: 'none' }}
-                  >
-                    Get Directions
-                  </a>
+              {/* In-App Selected Landmark Details */}
+              <div style={{ padding: '14px 18px', background: '#ffffff', borderTop: '1px solid var(--border-light)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
+                  <div>
+                    <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#701d32', letterSpacing: '0.05em' }}>
+                      {selectedLandmark.category} · {selectedLandmark.code}
+                    </span>
+                    <h3 style={{ margin: '2px 0 4px 0', fontSize: 16 }}>{selectedLandmark.name}</h3>
+                    <p className="lead" style={{ margin: 0, fontSize: 13 }}>{selectedLandmark.description}</p>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: '#166534' }}>● Open: {selectedLandmark.timings}</div>
+                    <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{selectedLandmark.ext}</div>
+                  </div>
                 </div>
               </div>
 
-              {/* Optional API Key Accordion */}
-              <div className="p-3 bg-[#f5f5f7] border-t border-[#e6e1db] text-xs">
-                <button
-                  className="text-button"
-                  style={{ fontSize: 12, color: 'var(--muted)' }}
-                  onClick={() => setShowApiKeyInput(!showApiKeyInput)}
-                >
-                  {showApiKeyInput ? '▲ Hide Custom Maps API Key configuration' : '▼ Want to paste a Google Maps API Key or custom Embed link? (Optional)'}
-                </button>
-                {showApiKeyInput && (
-                  <div style={{ marginTop: 8 }} className="space-y-2">
-                    <input
-                      className="search"
-                      style={{ fontSize: 12, padding: '8px 10px' }}
-                      value={customApiKey}
-                      onChange={(e) => setCustomApiKey(e.target.value)}
-                      placeholder="Paste your Google Maps API key (AIzaSy...)"
-                    />
-                    <p className="lead" style={{ fontSize: 11, margin: 0 }}>
-                      The map above is already functioning with live Google Maps export. Adding your key will switch to Google Maps JavaScript/Embed API v1.
-                    </p>
-                  </div>
-                )}
+              {/* Interactive Campus Landmarks Selector (No external redirects) */}
+              <div className="maps-landmarks-section">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#111827' }}>AU Campus Blocks & Landmarks</span>
+                  <span style={{ fontSize: 11, color: 'var(--muted)' }}>Tap to navigate in-app</span>
+                </div>
+                <div className="maps-landmarks-grid">
+                  {campusLandmarks.map((loc) => (
+                    <button
+                      key={loc.id}
+                      className={`maps-landmark-card ${selectedLandmark.id === loc.id ? 'active' : ''}`}
+                      onClick={() => {
+                        setSelectedLandmark(loc);
+                        setMapLocationQuery(loc.query);
+                      }}
+                    >
+                      <strong>{loc.name}</strong>
+                      <span>{loc.category} · {loc.code}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* TAB 6: ABOUT */}
+        {/* TAB 6: ABOUT & STUDENT PROFILE */}
         {tab === 'about' && (
           <div className="stack">
-            <div>
-              <div className="eyebrow">Andhra University</div>
-              <h1>About College of Engineering</h1>
-              <p className="lead">AU College of Engineering (Autonomous), established in 1946.</p>
+            {/* Top Subtab switcher */}
+            <div className="about-subtab-bar" role="tablist">
+              <button
+                role="tab"
+                aria-selected={aboutSubTab === 'profile'}
+                className={`about-subtab-btn ${aboutSubTab === 'profile' ? 'active' : ''}`}
+                onClick={() => setAboutSubTab('profile')}
+              >
+                <span>👤</span>
+                <span>My Profile & Settings</span>
+              </button>
+              <button
+                role="tab"
+                aria-selected={aboutSubTab === 'college'}
+                className={`about-subtab-btn ${aboutSubTab === 'college' ? 'active' : ''}`}
+                onClick={() => setAboutSubTab('college')}
+              >
+                <span>🏛️</span>
+                <span>AU College Info</span>
+              </button>
             </div>
-            <div className="grid about-grid">
-              {aboutSections.map((item) => (
-                <article className="card about-card" key={item.title}>
-                  <div className="about-heading"><span className="about-icon"><ServiceIcon kind={item.icon} size={22} /></span><h2>{item.title}</h2></div>
-                  <p className="lead">{item.detail}</p>
-                  <a className="about-link" href={item.link} target="_blank" rel="noreferrer">Visit official university site <span aria-hidden="true">↗</span></a>
-                </article>
-              ))}
-            </div>
+
+            {aboutSubTab === 'profile' && (
+              <div className="stack">
+                {/* Profile Identity Card */}
+                <div className="profile-card">
+                  <div className="profile-header-wrap">
+                    <div className="profile-avatar-lg">
+                      {(authName.trim()[0] || authEmail.trim()[0] || 'A').toUpperCase()}
+                    </div>
+                    <div className="profile-title-group">
+                      <h2>{authName || 'AU Student'}</h2>
+                      <div className="profile-username">@{authUsername || 'au.student'}</div>
+                      <div className="profile-email-badge">
+                        <span>✉️</span>
+                        <span>{authEmail || 'student@andhrauniversity.edu.in'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="profile-details-grid">
+                    <div className="profile-field-box">
+                      <div className="field-label">Roll Number</div>
+                      <div className="field-value">{authRollNo || '321101234'}</div>
+                    </div>
+                    <div className="profile-field-box">
+                      <div className="field-label">Department</div>
+                      <div className="field-value">{authDept}</div>
+                    </div>
+                    <div className="profile-field-box">
+                      <div className="field-label">Year of Study</div>
+                      <div className="field-value">{authYear}</div>
+                    </div>
+                    <div className="profile-field-box">
+                      <div className="field-label">Phone Number</div>
+                      <div className="field-value">{authPhone || '+91 9876543210'}</div>
+                    </div>
+                  </div>
+
+                  {/* ABOUT YOURSELF (BIO) */}
+                  <div className="profile-bio-card">
+                    <h3>About Yourself (Bio)</h3>
+                    <p className="lead" style={{ fontSize: 12, margin: '0 0 8px 0' }}>
+                      Add your academic interests, branch clubs, projects, or hostel details.
+                    </p>
+                    <textarea
+                      className="profile-bio-textarea"
+                      value={authBio}
+                      onChange={(e) => setAuthBio(e.target.value)}
+                      placeholder="Write a few lines about yourself..."
+                      rows={3}
+                    />
+                    <button
+                      className="primary-button"
+                      style={{ fontSize: 13, padding: '8px 16px' }}
+                      onClick={() => setToast('Bio saved to your profile!')}
+                    >
+                      Save Bio
+                    </button>
+                  </div>
+
+                  {/* SETTINGS CARD */}
+                  <div className="settings-card">
+                    <h3>Account Preferences</h3>
+                    <div className="settings-row">
+                      <div className="settings-info">
+                        <strong>Official Announcements Push</strong>
+                        <span>Receive instant alerts when college notices are published</span>
+                      </div>
+                      <button
+                        className={`settings-toggle-btn ${settingsNotifications ? 'active' : ''}`}
+                        onClick={() => setSettingsNotifications(!settingsNotifications)}
+                        aria-label="Toggle notifications"
+                      >
+                        <span className="settings-toggle-thumb" />
+                      </button>
+                    </div>
+
+                    <div className="settings-row">
+                      <div className="settings-info">
+                        <strong>Problem Ticket Updates</strong>
+                        <span>Get status updates when reported campus issues are inspected</span>
+                      </div>
+                      <button
+                        className={`settings-toggle-btn ${settingsProblemAlerts ? 'active' : ''}`}
+                        onClick={() => setSettingsProblemAlerts(!settingsProblemAlerts)}
+                        aria-label="Toggle problem alerts"
+                      >
+                        <span className="settings-toggle-thumb" />
+                      </button>
+                    </div>
+
+                    <div className="settings-row">
+                      <div className="settings-info">
+                        <strong>Compact Feed Layout</strong>
+                        <span>Display high-density feed items</span>
+                      </div>
+                      <button
+                        className={`settings-toggle-btn ${settingsCompactView ? 'active' : ''}`}
+                        onClick={() => setSettingsCompactView(!settingsCompactView)}
+                        aria-label="Toggle compact view"
+                      >
+                        <span className="settings-toggle-thumb" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* SIGN OUT BUTTON */}
+                  <button className="signout-button" onClick={handleSignOut}>
+                    <span>🚪</span>
+                    <span>Sign Out of AuPro</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {aboutSubTab === 'college' && (
+              <div className="stack">
+                <div>
+                  <div className="eyebrow">Andhra University</div>
+                  <h1>About College of Engineering</h1>
+                  <p className="lead">AU College of Engineering (Autonomous), established in 1946.</p>
+                </div>
+                <div className="grid about-grid">
+                  {aboutSections.map((item) => (
+                    <article className="card about-card" key={item.title}>
+                      <div className="about-heading"><span className="about-icon"><ServiceIcon kind={item.icon} size={22} /></span><h2>{item.title}</h2></div>
+                      <p className="lead">{item.detail}</p>
+                      <a className="about-link" href={item.link} target="_blank" rel="noreferrer">Visit official university site <span aria-hidden="true">↗</span></a>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </section>

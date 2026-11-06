@@ -29,30 +29,34 @@ test('UI requirements: page.tsx matches user specifications', async () => {
 
   // 3. Cinematic opening intro integrated
   assert.ok(pageContent.includes('IntroCinematic'), 'Must import and use IntroCinematic');
-  assert.ok(pageContent.includes('aupro_intro_seen'), 'Must use session storage guard for intro');
 
-  // 4. Threads composer integrated with email passing
+  // 4. In-App Maps Environment (No external redirects)
+  assert.ok(pageContent.includes('maps-environment-wrapper'), 'Must have In-App Maps Environment');
+  assert.ok(pageContent.includes('campusLandmarks'), 'Must have campus landmarks directory');
+
+  // 5. Profile & About Yourself & Sign Out
+  assert.ok(pageContent.includes('About Yourself'), 'Must have About Yourself bio field');
+  assert.ok(pageContent.includes('Sign Out of AuPro'), 'Must have Sign Out option');
+  assert.ok(pageContent.includes('authPhone'), 'Must ask for and display student phone number');
+
+  // 6. Threads composer integrated with email passing
   assert.ok(pageContent.includes('ThreadsComposer'), 'Must import and use ThreadsComposer');
   assert.ok(pageContent.includes('handleThreadsPost'), 'Must handle posting from Threads composer');
   assert.ok(pageContent.includes('userEmail={authEmail}'), 'Must pass user email to composer for announcement authorization');
 
-  // 5. No "Search campus posts" in topbar/feed
+  // 7. No "Search campus posts" in topbar/feed
   assert.ok(!pageContent.includes('placeholder="Search campus"'), 'Must NOT have "Search campus" search bar');
 
-  // 6. Google Maps export for Location tab
-  assert.ok(pageContent.includes('google.com/maps'), 'Must have Google Maps export in location tab');
-  assert.ok(pageContent.includes('iframe'), 'Must have interactive iframe for Google Maps');
-
-  // 7. Upgraded sharp chatbot
+  // 8. Upgraded sharp chatbot
   assert.ok(pageContent.includes('chatbot-chip-container'), 'Must have quick question chips for chatbot');
   assert.ok(pageContent.includes('chat-messages-scroll'), 'Must have conversational stream');
 });
 
-test('IntroCinematic has streaming-service style animation, skip button, and reduced motion check', async () => {
+test('IntroCinematic has streaming-service style animation and reduced motion check without skip button', async () => {
   const introContent = await readFile(new URL('../app/IntroCinematic.tsx', import.meta.url), 'utf8');
 
   assert.ok(introContent.includes('prefers-reduced-motion'), 'Must check prefers-reduced-motion');
-  assert.ok(introContent.includes('intro-skip-button'), 'Must have an accessible skip button');
+  assert.ok(!introContent.includes('intro-skip-button'), 'Must NOT have skip button per user instruction');
   assert.ok(introContent.includes('intro-prisms-wrapper'), 'Must have converging light prism ribbons');
   assert.ok(introContent.includes('intro-wordmark-wrap'), 'Must have AuPro wordmark');
   assert.ok(introContent.includes('intro-subtitle'), 'Must have collegiate subtitle');

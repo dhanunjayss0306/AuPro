@@ -19,46 +19,25 @@ export function IntroCinematic({ onComplete }: IntroCinematicProps) {
       }
     }
 
-    // Sequence timeline:
-    // 0.0s - 0.7s: Prisms converge
-    // 0.7s - 1.8s: Reveal AuPro lettermark
-    // 1.8s - 2.5s: Cinematic zoom & bloom
-    // 2.5s - 2.9s: Smooth dissolve
-    const t1 = setTimeout(() => setPhase('reveal'), 700);
-    const t2 = setTimeout(() => setPhase('bloom'), 1800);
-    const t3 = setTimeout(() => setPhase('fade-out'), 2500);
+    // Sequence timeline (runs on every reload/open without skip button):
+    // 0.0s - 0.5s: Prisms converge
+    // 0.5s - 1.5s: Reveal AuPro lettermark
+    // 1.5s - 2.0s: Cinematic zoom & light bloom
+    // 2.0s - 2.3s: Smooth dissolve into sign-in
+    const t1 = setTimeout(() => setPhase('reveal'), 500);
+    const t2 = setTimeout(() => setPhase('bloom'), 1500);
+    const t3 = setTimeout(() => setPhase('fade-out'), 2000);
     const t4 = setTimeout(() => {
-      try {
-        sessionStorage.setItem('aupro_intro_seen', 'true');
-      } catch {}
       onComplete();
-    }, 2900);
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' || e.key === ' ' || e.key === 'Enter') {
-        try {
-          sessionStorage.setItem('aupro_intro_seen', 'true');
-        } catch {}
-        onComplete();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
+    }, 2300);
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
       clearTimeout(t4);
-      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [onComplete]);
-
-  const handleSkip = () => {
-    try {
-      sessionStorage.setItem('aupro_intro_seen', 'true');
-    } catch {}
-    onComplete();
-  };
 
   return (
     <div
@@ -67,15 +46,6 @@ export function IntroCinematic({ onComplete }: IntroCinematicProps) {
       aria-label="AuPro cinematic intro"
       aria-live="polite"
     >
-      {/* Accessible Skip Button */}
-      <button
-        onClick={handleSkip}
-        className="intro-skip-button"
-        aria-label="Skip introductory animation"
-      >
-        Skip ➔
-      </button>
-
       {/* Atmospheric Vignette & Subtle Light Beams */}
       <div className="intro-vignette" />
 

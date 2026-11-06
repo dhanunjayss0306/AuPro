@@ -54,11 +54,48 @@ export function InstagramShareIcon({ size = 24 }: { size?: number }) {
 // Repost icon for the AuPro feed
 export function RepostIcon({ active = false, size = 24 }: { active?: boolean; size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.5" : "2"} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M5 8h10a4 4 0 0 1 4 4v1" />
-      <path d="m16.5 10.5 2.5 2.5 2.5-2.5" />
-      <path d="M19 16H9a4 4 0 0 1-4-4v-1" />
-      <path d="m7.5 13.5-2.5-2.5-2.5 2.5" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? "2.4" : "2.2"} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M6.4 8.5a6.7 6.7 0 0 1 11.3-2.1l1.8 2.1" />
+      <path d="M19.5 4.5v4h-4" />
+      <path d="M17.6 15.5a6.7 6.7 0 0 1-11.3 2.1l-1.8-2.1" />
+      <path d="M4.5 19.5v-4h4" />
+    </svg>
+  );
+}
+
+export function NotificationIcon({ size = 24 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+      <path d="M10 21h4" />
+    </svg>
+  );
+}
+
+export function WhatsAppIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20.2 11.8a8.2 8.2 0 0 1-12.1 7.1L3 20l1.1-4.8a8.2 8.2 0 1 1 16.1-3.4Z" />
+      <path d="M8.2 7.8c.3-.5.6-.5.9-.5h.5c.2 0 .4.1.5.4l.8 1.8c.1.3.1.5-.1.7l-.6.7c-.2.2-.2.4 0 .7.5.9 1.3 1.7 2.2 2.2.3.2.5.2.7 0l.8-.9c.2-.2.4-.2.7-.1l1.7.8c.3.1.4.3.4.5 0 .3-.2 1.1-.7 1.5-.5.5-1.2.7-2 .6-1.2-.2-2.6-.8-4.1-2.1-1.6-1.4-2.5-3.1-2.8-4.2-.2-.9.1-1.7.5-2.1Z" />
+    </svg>
+  );
+}
+
+type ServiceIconKind = 'document' | 'payment' | 'ticket' | 'bus' | 'home' | 'help';
+
+export function ServiceIcon({ kind, size = 22 }: { kind: ServiceIconKind; size?: number }) {
+  const paths: Record<ServiceIconKind, React.ReactNode> = {
+    document: <><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v5h5M9 13h6M9 17h6" /></>,
+    payment: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 10h18M7 15h4" /></>,
+    ticket: <><path d="M4 6h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4z" /><path d="M13 8v2M13 14v2" /></>,
+    bus: <><path d="M5 17V6a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v11" /><path d="M5 12h14M7 17v3M17 17v3M8 7h8" /><circle cx="8" cy="15" r="1" /><circle cx="16" cy="15" r="1" /></>,
+    home: <><path d="M3 11 12 4l9 7" /><path d="M5 10v10h14V10M9 20v-6h6v6" /></>,
+    help: <><circle cx="12" cy="12" r="9" /><path d="M9.6 9a2.5 2.5 0 1 1 4.4 1.6c-1 1-2 1.1-2 2.9M12 17h.01" /></>,
+  };
+
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {paths[kind]}
     </svg>
   );
 }

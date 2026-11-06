@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900" role="img" aria-labelledby="title description">
+  <title id="title">Andhra University campus library</title>
+  <desc id="description">An illustrated university library building framed by leafy campus trees.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b9e3f0"/>
+      <stop offset="1" stop-color="#f0eadb"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="900" fill="url(#sky)"/>
+  <circle cx="720" cy="165" r="58" fill="#f8d78a"/>
+  <path d="M0 600q175-110 350-10t350 0 200-20v330H0z" fill="#7fae80"/>
+  <path d="M0 720q205-55 405 12t495-10v178H0z" fill="#4d8065"/>
+  <path d="M135 340 450 175l315 165z" fill="#701d32"/>
+  <path d="M180 337h540v344H180z" fill="#eadfca"/>
+  <path d="M153 336h594v42H153z" fill="#b68e59"/>
+  <path d="M220 402h460v245H220z" fill="#d6c5a5"/>
+  <path d="M252 420v220m100-220v220m100-220v220m100-220v220m100-220v220" stroke="#a27c4a" stroke-width="15"/>
+  <path d="M230 492h440M230 565h440" stroke="#a27c4a" stroke-width="10"/>
+  <path d="M405 540h90v141h-90z" fill="#701d32"/>
+  <path d="M427 557h46v124h-46z" fill="#f0d7a8"/>
+  <path d="M150 685h600v26H150z" fill="#8a6b45"/>
+  <path d="M66 660v-300m-28 300h86M834 660V330m-30 330h90" stroke="#5d7659" stroke-width="28" stroke-linecap="round"/>
+  <circle cx="68" cy="330" r="104" fill="#5f936e"/>
+  <circle cx="826" cy="296" r="112" fill="#648f67"/>
+  <circle cx="32" cy="425" r="65" fill="#6ba176"/>
+  <circle cx="867" cy="409" r="74" fill="#73a678"/>
+  <path d="M140 810h620" stroke="#e8d8b7" stroke-width="22" stroke-linecap="round"/>
+  <path d="M300 768h300" stroke="#f7eedc" stroke-width="8" stroke-linecap="round"/>
+  <text x="450" y="312" text-anchor="middle" fill="#fff8e9" font-family="Arial, sans-serif" font-size="29" font-weight="700" letter-spacing="5">ANDHRA UNIVERSITY</text>
+</svg>

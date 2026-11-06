@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900" role="img" aria-labelledby="title description">
+  <title id="title">Campus robotics hackathon</title>
+  <desc id="description">An illustrated student robotics lab with a small robot on a competition table.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#172b4d"/>
+      <stop offset="1" stop-color="#0b5cad"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d8f6ff"/>
+      <stop offset="1" stop-color="#8bcce5"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="900" fill="url(#background)"/>
+  <path d="M0 620h900v280H0z" fill="#15243a"/>
+  <path d="M65 120h770v430H65z" rx="18" fill="#203b5e" stroke="#7193b8" stroke-width="8"/>
+  <path d="M102 156h696v310H102z" fill="url(#screen)"/>
+  <path d="M145 392h185v-94h-185zM352 392h185v-150H352zM559 392h195v-70H559z" fill="#a5d6e8"/>
+  <path d="M120 522h660" stroke="#90acc9" stroke-width="10" stroke-linecap="round"/>
+  <path d="M160 550v70m580-70v70" stroke="#90acc9" stroke-width="12"/>
+  <path d="M80 700h740l-54 90H134z" fill="#d4e1eb"/>
+  <path d="M128 790h644v42H128z" fill="#879db4"/>
+  <rect x="356" y="458" width="190" height="192" rx="32" fill="#f3f6f7" stroke="#c69b45" stroke-width="12"/>
+  <rect x="390" y="495" width="122" height="82" rx="20" fill="#17324f"/>
+  <circle cx="424" cy="535" r="13" fill="#65d6c3"/>
+  <circle cx="478" cy="535" r="13" fill="#65d6c3"/>
+  <path d="M418 558q33 28 66 0" fill="none" stroke="#65d6c3" stroke-width="8" stroke-linecap="round"/>
+  <path d="M451 458v-44m-18 0h36" stroke="#f3f6f7" stroke-width="12" stroke-linecap="round"/>
+  <path d="M356 526h-62l-36 38m288-38h62l38 40" fill="none" stroke="#f3f6f7" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="255" cy="567" r="18" fill="#c69b45"/>
+  <circle cx="646" cy="567" r="18" fill="#c69b45"/>
+  <circle cx="399" cy="657" r="24" fill="#192d45"/>
+  <circle cx="503" cy="657" r="24" fill="#192d45"/>
+  <path d="M156 176h120m-120 36h80m414 145h116" stroke="#fff" stroke-opacity=".35" stroke-width="8" stroke-linecap="round"/>
+</svg>

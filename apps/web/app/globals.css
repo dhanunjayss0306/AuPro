@@ -5893,3 +5893,95 @@ textarea, select { font: inherit; }
   min-width: 0;
 }
 
+/* Dedicated Full-Page Redirect View for Head Administrator Console */
+.head-admin-fullpage {
+  animation: fadeIn 0.22s ease;
+  padding-bottom: 96px;
+}
+
+.head-admin-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0 16px;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.head-admin-title-group {
+  text-align: center;
+}
+
+.head-admin-hero-card {
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(212, 168, 87, 0.08) 0%, rgba(14, 94, 107, 0.08) 100%);
+  border: 1px solid rgba(212, 168, 87, 0.35);
+  border-radius: 16px;
+}
+
+.head-admin-hero-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d4a857 0%, #b8860b 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(212, 168, 87, 0.25);
+}
+
+/* Compact mobile strip on user profile */
+.head-admin-compact-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(212, 168, 87, 0.08);
+  border: 1px solid rgba(212, 168, 87, 0.25);
+  margin-top: 8px;
+  gap: 8px;
+}
+
+.head-admin-compact-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.head-admin-compact-btn {
+  background: var(--primary);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s ease;
+}
+.head-admin-compact-btn:hover {
+  opacity: 0.9;
+}
+
+[data-theme='dark'] .head-admin-topbar,
+.dark .head-admin-topbar {
+  border-bottom-color: #243044 !important;
+}
+
+[data-theme='dark'] .head-admin-hero-card,
+.dark .head-admin-hero-card {
+  background: linear-gradient(135deg, rgba(212, 168, 87, 0.12) 0%, rgba(14, 94, 107, 0.12) 100%) !important;
+  border-color: rgba(212, 168, 87, 0.3) !important;
+}
+
+[data-theme='dark'] .head-admin-compact-strip,
+.dark .head-admin-compact-strip {
+  background: rgba(212, 168, 87, 0.12) !important;
+  border-color: rgba(212, 168, 87, 0.3) !important;
+}
+

@@ -3096,6 +3096,199 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+            ) : aboutSubTab === 'admin' && isHeadAccount(authEmail) ? (
+              /* DEDICATED WHOLE-PAGE HEAD ADMINISTRATOR CONSOLE (REDIRECT PAGE) */
+              <div className="head-admin-fullpage stack" style={{ gap: 18 }}>
+                {/* Clean Topbar with Back button */}
+                <div className="head-admin-topbar">
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    style={{ fontSize: 13, padding: '7px 14px', borderRadius: 9999, display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                    onClick={() => setAboutSubTab('posts')}
+                  >
+                    <span>←</span>
+                    <span>Back to Profile</span>
+                  </button>
+                  <div className="head-admin-title-group" style={{ textAlign: 'center' }}>
+                    <span className="eyebrow" style={{ color: 'var(--gold)', marginBottom: 0, fontSize: 11 }}>Master Admin</span>
+                    <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>Head Console</h2>
+                  </div>
+                  <button
+                    type="button"
+                    className="primary-button"
+                    style={{ fontSize: 12, padding: '7px 14px', borderRadius: 9999, whiteSpace: 'nowrap' }}
+                    onClick={() => setShowAddUserModal(true)}
+                  >
+                    + Add Student
+                  </button>
+                </div>
+
+                {/* Master Account Hero Banner */}
+                <div className="card head-admin-hero-card">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div className="head-admin-hero-avatar">👑</div>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>Head Administrator</h1>
+                          <span className="head-badge">Master ID</span>
+                        </div>
+                        <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2, wordBreak: 'break-all' }}>{HEAD_ACCOUNT_EMAIL}</div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        className="primary-button"
+                        style={{ fontSize: 12, padding: '7px 14px' }}
+                        onClick={() => setShowAddUserModal(true)}
+                      >
+                        ➕ Add Another One
+                      </button>
+                      <button
+                        type="button"
+                        className="danger-button"
+                        style={{ fontSize: 12, padding: '7px 14px' }}
+                        onClick={handlePurgeAllAccounts}
+                        title="Delete all accounts except the Head Account"
+                      >
+                        🧹 Purge Other Accounts
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Summary Metrics */}
+                  <div className="head-metrics-grid">
+                    <div className="head-metric-card">
+                      <span className="head-metric-label">Registered Accounts</span>
+                      <span className="head-metric-value">{Object.keys(registeredUsersList).length}</span>
+                      <span className="head-metric-sub">1 Master ID</span>
+                    </div>
+                    <div className="head-metric-card">
+                      <span className="head-metric-label">Feed Posts</span>
+                      <span className="head-metric-value">{feedPosts.length}</span>
+                      <span className="head-metric-sub">AU Campus</span>
+                    </div>
+                    <div className="head-metric-card">
+                      <span className="head-metric-label">Activity Log</span>
+                      <span className="head-metric-value">{platformActivities.length}</span>
+                      <span className="head-metric-sub">Live Events</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 1: Registered Student Accounts Directory */}
+                <div className="card" style={{ padding: 18 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>Registered Student Accounts</h3>
+                      <span style={{ fontSize: 12, color: 'var(--muted)' }}>Authorize, view, or remove campus student accounts</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      style={{ fontSize: 12, padding: '5px 12px' }}
+                      onClick={refreshAdminData}
+                    >
+                      🔄 Refresh
+                    </button>
+                  </div>
+
+                  <div className="head-users-list">
+                    {Object.values(registeredUsersList).map((user) => {
+                      const isThisHead = isHeadAccount(user.email);
+                      return (
+                        <div key={user.email} className={`head-user-card ${isThisHead ? 'is-head-account' : ''}`}>
+                          <div className="head-user-left">
+                            <div className="head-user-avatar">
+                              {isThisHead ? '👑' : (user.name[0] || 'U').toUpperCase()}
+                            </div>
+                            <div className="head-user-info">
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                                <strong style={{ color: 'var(--ink)', fontSize: 14 }}>{user.name}</strong>
+                                {isThisHead && <span className="head-badge">Head Master</span>}
+                                <span className="head-roll-badge">{user.rollNo || 'No Roll'}</span>
+                              </div>
+                              <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2, wordBreak: 'break-all' }}>{user.email}</div>
+                              <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
+                                {user.department || 'AU Engineering'} • {user.year || '4th Yr'}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="head-user-right">
+                            {isThisHead ? (
+                              <span className="head-locked-pill">Protected (Head)</span>
+                            ) : (
+                              <button
+                                type="button"
+                                className="danger-button-outline"
+                                onClick={() => handleDeleteUserAccount(user.email, user.name)}
+                              >
+                                🗑️ Remove
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Section 2: Everyone's Activity Audit Feed */}
+                <div className="card" style={{ padding: 18 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>Everyone's Live Activity Stream</h3>
+                      <span style={{ fontSize: 12, color: 'var(--muted)' }}>Real-time audit log of campus actions, logins, and submissions</span>
+                    </div>
+                    {platformActivities.length > 0 && (
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        style={{ fontSize: 12, padding: '5px 12px' }}
+                        onClick={() => {
+                          if (typeof window !== 'undefined' && window.confirm('Clear all recorded activity history?')) {
+                            clearPlatformActivities();
+                            refreshAdminData();
+                            setToast('Activity history cleared.');
+                          }
+                        }}
+                      >
+                        Clear Log
+                      </button>
+                    )}
+                  </div>
+
+                  {platformActivities.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--muted)', fontSize: 13 }}>
+                      No platform activities recorded yet. Actions like signups, posts, logins, and applications will appear here in real-time.
+                    </div>
+                  ) : (
+                    <div className="head-activity-list">
+                      {platformActivities.map((act) => (
+                        <div key={act.id} className="head-activity-item">
+                          <div className="head-activity-dot" />
+                          <div className="head-activity-content">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+                              <strong style={{ fontSize: 13, color: 'var(--ink)' }}>{act.action}</strong>
+                              <span style={{ fontSize: 11, color: 'var(--muted)' }}>
+                                {new Date(act.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: 12, color: 'var(--secondary)', marginTop: 2, wordBreak: 'break-all' }}>{act.actor}</div>
+                            {act.details && (
+                              <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4, background: 'var(--hover-subtle)', padding: '4px 8px', borderRadius: 6, wordBreak: 'break-word' }}>
+                                {act.details}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             ) : (
               /* INSTAGRAM-STYLE PROFILE SCREEN (Posts and Saved) */
               <div className="insta-profile-screen">
@@ -3185,21 +3378,23 @@ export default function Home() {
                     {authBio || 'Engineering Student @ Andhra University. Passionate about technology, projects, and campus collaboration.'}
                   </p>
                   {isHeadAccount(authEmail) && (
-                    <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(212, 168, 87, 0.1)', border: '1px solid rgba(212, 168, 87, 0.35)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-                      <div>
-                        <strong style={{ fontSize: 13, color: 'var(--ink)', display: 'block' }}>👑 Master Head Account</strong>
-                        <span style={{ fontSize: 12, color: 'var(--muted)' }}>Manage student accounts, authorize logins, & live audit stream</span>
+                    <div className="head-admin-compact-strip">
+                      <div className="head-admin-compact-left">
+                        <span style={{ fontSize: 14 }}>👑</span>
+                        <div>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink)' }}>Head Administrator</div>
+                          <div style={{ fontSize: 11, color: 'var(--muted)' }}>Master ID: 325506402371</div>
+                        </div>
                       </div>
                       <button
                         type="button"
-                        className="primary-button"
-                        style={{ fontSize: 12, padding: '6px 14px', whiteSpace: 'nowrap' }}
+                        className="head-admin-compact-btn"
                         onClick={() => {
                           refreshAdminData();
                           setAboutSubTab('admin');
                         }}
                       >
-                        Head Console →
+                        Open Console →
                       </button>
                     </div>
                   )}
@@ -3460,9 +3655,10 @@ export default function Home() {
                         refreshAdminData();
                         setAboutSubTab('admin');
                       }}
+                      title="Open Head Administrator Console"
                     >
                       <span className="tab-icon">👑</span>
-                      <span className="tab-label">Head Console</span>
+                      <span className="tab-label">Console</span>
                     </button>
                   )}
                 </div>
@@ -3558,175 +3754,6 @@ export default function Home() {
                         </div>
                       ))
                     )}
-                  </div>
-                )}
-
-                {/* SUBTAB 3: HEAD ADMINISTRATOR CONSOLE (ONLY VISIBLE TO HEAD ACCOUNT) */}
-                {aboutSubTab === 'admin' && isHeadAccount(authEmail) && (
-                  <div className="head-admin-console stack" style={{ gap: 18 }}>
-                    {/* Head Console Header */}
-                    <div className="card" style={{ padding: 18, background: 'var(--surface-elevated)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <span style={{ fontSize: 24 }}>👑</span>
-                            <div>
-                              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>Head Administrator Console</h2>
-                              <span style={{ fontSize: 13, color: 'var(--muted)' }}>Master Account: {HEAD_ACCOUNT_EMAIL}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                          <button
-                            type="button"
-                            className="primary-button"
-                            style={{ fontSize: 13, padding: '8px 16px' }}
-                            onClick={() => setShowAddUserModal(true)}
-                          >
-                            ➕ Add Another One
-                          </button>
-                          <button
-                            type="button"
-                            className="danger-button"
-                            style={{ fontSize: 13, padding: '8px 14px' }}
-                            onClick={handlePurgeAllAccounts}
-                            title="Delete all accounts except the Head Account"
-                          >
-                            🧹 Purge All Other Accounts
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Summary Metrics */}
-                      <div className="head-metrics-grid">
-                        <div className="head-metric-card">
-                          <span className="head-metric-label">Registered Accounts</span>
-                          <span className="head-metric-value">{Object.keys(registeredUsersList).length}</span>
-                          <span className="head-metric-sub">1 Master Head ID</span>
-                        </div>
-                        <div className="head-metric-card">
-                          <span className="head-metric-label">Total Feed Posts</span>
-                          <span className="head-metric-value">{feedPosts.length}</span>
-                          <span className="head-metric-sub">Campus Wide</span>
-                        </div>
-                        <div className="head-metric-card">
-                          <span className="head-metric-label">Activity Log Events</span>
-                          <span className="head-metric-value">{platformActivities.length}</span>
-                          <span className="head-metric-sub">Live Real-time Log</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Section 1: Registered Accounts Directory */}
-                    <div className="card" style={{ padding: 18 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                        <div>
-                          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>Registered Student Accounts</h3>
-                          <span style={{ fontSize: 12, color: 'var(--muted)' }}>Manage student access, view registration details, or delete accounts</span>
-                        </div>
-                        <button
-                          type="button"
-                          className="secondary-button"
-                          style={{ fontSize: 12, padding: '5px 12px' }}
-                          onClick={refreshAdminData}
-                        >
-                          🔄 Refresh
-                        </button>
-                      </div>
-
-                      <div className="head-users-list">
-                        {Object.values(registeredUsersList).map((user) => {
-                          const isThisHead = isHeadAccount(user.email);
-                          return (
-                            <div key={user.email} className={`head-user-card ${isThisHead ? 'is-head-account' : ''}`}>
-                              <div className="head-user-left">
-                                <div className="head-user-avatar">
-                                  {isThisHead ? '👑' : (user.name[0] || 'U').toUpperCase()}
-                                </div>
-                                <div className="head-user-info">
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                                    <strong style={{ color: 'var(--ink)' }}>{user.name}</strong>
-                                    {isThisHead && <span className="head-badge">Head Master</span>}
-                                    <span className="head-roll-badge">{user.rollNo || 'No Roll'}</span>
-                                  </div>
-                                  <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>{user.email}</div>
-                                  <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
-                                    {user.department || 'AU Engineering'} • {user.year || '4th Yr'}
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="head-user-right">
-                                {isThisHead ? (
-                                  <span className="head-locked-pill">Protected (Head)</span>
-                                ) : (
-                                  <button
-                                    type="button"
-                                    className="danger-button-outline"
-                                    onClick={() => handleDeleteUserAccount(user.email, user.name)}
-                                  >
-                                    🗑️ Remove
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Section 2: Everyone's Activity Audit Feed */}
-                    <div className="card" style={{ padding: 18 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                        <div>
-                          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>Everyone's Live Activity Stream</h3>
-                          <span style={{ fontSize: 12, color: 'var(--muted)' }}>Real-time audit log of campus actions, logins, and submissions</span>
-                        </div>
-                        {platformActivities.length > 0 && (
-                          <button
-                            type="button"
-                            className="secondary-button"
-                            style={{ fontSize: 12, padding: '5px 12px' }}
-                            onClick={() => {
-                              if (typeof window !== 'undefined' && window.confirm('Clear all recorded activity history?')) {
-                                clearPlatformActivities();
-                                refreshAdminData();
-                                setToast('Activity history cleared.');
-                              }
-                            }}
-                          >
-                            Clear Log
-                          </button>
-                        )}
-                      </div>
-
-                      {platformActivities.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--muted)', fontSize: 13 }}>
-                          No platform activities recorded yet. Actions like signups, posts, logins, and applications will appear here in real-time.
-                        </div>
-                      ) : (
-                        <div className="head-activity-list">
-                          {platformActivities.map((act) => (
-                            <div key={act.id} className="head-activity-item">
-                              <div className="head-activity-dot" />
-                              <div className="head-activity-content">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
-                                  <strong style={{ fontSize: 13, color: 'var(--ink)' }}>{act.action}</strong>
-                                  <span style={{ fontSize: 11, color: 'var(--muted)' }}>
-                                    {new Date(act.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                  </span>
-                                </div>
-                                <div style={{ fontSize: 12, color: 'var(--secondary)', marginTop: 2 }}>{act.actor}</div>
-                                {act.details && (
-                                  <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4, background: 'var(--hover-subtle)', padding: '4px 8px', borderRadius: 6 }}>
-                                    {act.details}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
                   </div>
                 )}
               </div>

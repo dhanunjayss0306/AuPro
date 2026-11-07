@@ -9,6 +9,9 @@ const routes = [
   '../app/api/places/route.ts',
   '../app/api/auth/send-otp/route.ts',
   '../app/api/auth/verify-otp/route.ts',
+  '../app/api/accounts/route.ts',
+  '../app/api/activity/route.ts',
+  '../app/api/feed/route.ts',
 ];
 
 test('API route source files exist', async () => {
@@ -187,4 +190,37 @@ test('Content Moderation analyzes every post for university problems, campus lif
   assert.ok(modContent.includes('PROHIBITED_OFF_TOPIC_TERMS'), 'Must define prohibited off-topic terms (commercial, gossip, ads)');
   assert.ok(modContent.includes('analyzePostTopic'), 'Must export analyzePostTopic analyzer');
   assert.ok(modContent.includes('validateUniversityRelevance'), 'Must export validateUniversityRelevance');
+});
+
+test('Headteacher Administrator central server accounts, live activity stream, and shared feed sync', async () => {
+  const accountsRoute = await readFile(new URL('../app/api/accounts/route.ts', import.meta.url), 'utf8');
+  const activityRoute = await readFile(new URL('../app/api/activity/route.ts', import.meta.url), 'utf8');
+  const feedRoute = await readFile(new URL('../app/api/feed/route.ts', import.meta.url), 'utf8');
+  const authModule = await readFile(new URL('../app/auth.ts', import.meta.url), 'utf8');
+  const pageContent = await readFile(new URL('../app/page.tsx', import.meta.url), 'utf8');
+
+  // Accounts API
+  assert.ok(accountsRoute.includes('getAllAccounts'), 'Accounts route must return all accounts');
+  assert.ok(accountsRoute.includes('registerAccount'), 'Accounts route must support registering accounts');
+  assert.ok(accountsRoute.includes('purgeAllAccountsExceptHead'), 'Accounts route must support purging accounts');
+
+  // Activity API
+  assert.ok(activityRoute.includes('getAllActivities'), 'Activity route must return all activities');
+  assert.ok(activityRoute.includes('logServerActivity'), 'Activity route must support appending activities');
+  assert.ok(activityRoute.includes('clearAllActivities'), 'Activity route must support clearing activities');
+
+  // Shared Feed API
+  assert.ok(feedRoute.includes('getAllPosts'), 'Feed route must return all posts');
+  assert.ok(feedRoute.includes('addServerPost'), 'Feed route must support publishing posts');
+  assert.ok(feedRoute.includes('deleteServerPost'), 'Feed route must support deleting posts');
+
+  // Auth sync methods
+  assert.ok(authModule.includes('fetchRegisteredUsersServer'), 'Auth must export fetchRegisteredUsersServer');
+  assert.ok(authModule.includes('fetchPlatformActivitiesServer'), 'Auth must export fetchPlatformActivitiesServer');
+  assert.ok(authModule.includes('DEFAULT_INITIAL_ACCOUNTS'), 'Auth must have initial student accounts pre-seeded');
+
+  // UI sync integration
+  assert.ok(pageContent.includes("fetch('/api/accounts')"), 'Page must fetch accounts from server API');
+  assert.ok(pageContent.includes("fetch('/api/activity')"), 'Page must fetch activity from server API');
+  assert.ok(pageContent.includes("fetch('/api/feed')"), 'Page must fetch feed posts from server API');
 });

@@ -865,10 +865,37 @@ export default function Home() {
   const [newUserPassword, setNewUserPassword] = useState('');
   const [addUserError, setAddUserError] = useState('');
 
-  const refreshAdminData = () => {
+  const refreshAdminData = async () => {
     if (typeof window !== 'undefined') {
       setRegisteredUsersList(getRegisteredUsers());
       setPlatformActivities(getPlatformActivities());
+    }
+    try {
+      const [accRes, actRes, feedRes] = await Promise.all([
+        fetch('/api/accounts').then((r) => (r.ok ? r.json() : null)),
+        fetch('/api/activity').then((r) => (r.ok ? r.json() : null)),
+        fetch('/api/feed').then((r) => (r.ok ? r.json() : null)),
+      ]);
+      if (accRes?.accounts && Object.keys(accRes.accounts).length > 0) {
+        setRegisteredUsersList(accRes.accounts);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('aupro_registered_users', JSON.stringify(accRes.accounts));
+        }
+      }
+      if (Array.isArray(actRes?.activities) && actRes.activities.length > 0) {
+        setPlatformActivities(actRes.activities);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('aupro_platform_activities', JSON.stringify(actRes.activities));
+        }
+      }
+      if (Array.isArray(feedRes?.posts) && feedRes.posts.length > 0) {
+        setFeedPosts(feedRes.posts);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('aupro_feed_posts', JSON.stringify(feedRes.posts));
+        }
+      }
+    } catch (e) {
+      console.error('Error synchronizing central server data:', e);
     }
   };
 
@@ -1372,6 +1399,9 @@ export default function Home() {
       } catch {}
       return updated;
     });
+    fetch(`/api/feed?id=${encodeURIComponent(postId)}`, {
+      method: 'DELETE',
+    }).catch(() => {});
     setSavedPostIds((saved) => {
       const updated = saved.filter((id) => id !== postId);
       try {
@@ -1432,6 +1462,11 @@ export default function Home() {
       } catch {}
       return updated;
     });
+    fetch('/api/feed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newPost),
+    }).catch(() => {});
     logPlatformActivity(
       data.category === 'problem' ? 'Reported Campus Problem' : data.category === 'announcement' ? 'Published Announcement' : 'Published Feed Post',
       authEmail || authUsername || 'Student',
@@ -1487,7 +1522,18 @@ export default function Home() {
       durationDays: Number(createDays) || 30,
     };
 
-    setFeedPosts((posts) => [newPost, ...posts]);
+    setFeedPosts((posts) => {
+      const updated = [newPost, ...posts];
+      try {
+        localStorage.setItem('aupro_feed_posts', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+    fetch('/api/feed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newPost),
+    }).catch(() => {});
     setFeedFilter('problems');
     setCreateTitle('');
     setCreateDepartment('');

@@ -1,38 +1,388 @@
 /**
- * AuPro Server-Side Verified Account Registry
+ * AuPro Central Server-Side Database & Account Registry
  * 
- * Rules:
- * 1. ONE email ID can create ONLY ONE account. Once verified, another account cannot be created.
- * 2. Main Admin ID: 325506402371@andhrauniversity.edu.in
- * 3. All previous accounts are purged.
+ * Manages:
+ * 1. Verified university student accounts across all devices.
+ * 2. Real-time platform activity audit stream.
+ * 3. Shared campus feed posts.
  */
+
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
 
 export const MAIN_ADMIN_EMAIL = '325506402371@andhrauniversity.edu.in';
 
-// Global set of verified college student accounts (in-memory persistent across requests)
-const globalAccounts = (globalThis as any).__AUPRO_REGISTERED_ACCOUNTS__ || new Set<string>();
-(globalThis as any).__AUPRO_REGISTERED_ACCOUNTS__ = globalAccounts;
-
-export function isAccountRegistered(email: string): boolean {
-  if (!email) return false;
-  return globalAccounts.has(email.toLowerCase().trim());
+export interface ServerStudentProfile {
+  email: string;
+  name: string;
+  username: string;
+  rollNo?: string;
+  department?: string;
+  year?: string;
+  phone?: string;
+  bio?: string;
+  password?: string;
+  isVerified: boolean;
+  verifiedAt: string;
 }
 
-export function registerAccount(email: string): boolean {
+export interface ServerPlatformActivity {
+  id: string;
+  action: string;
+  actor: string;
+  details?: string;
+  timestamp: string;
+}
+
+export interface ServerFeedPost {
+  id: string;
+  username: string;
+  authorEmail?: string;
+  authorHandle?: string;
+  avatarText?: string;
+  isOfficial?: boolean;
+  category?: 'normal' | 'problem' | 'announcement';
+  location?: string;
+  imageUrl?: string;
+  imageCaption?: string;
+  likesCount: number;
+  repostsCount: number;
+  caption: string;
+  commentsCount: number;
+  comments?: any[];
+  timeAgo: string;
+  durationDays?: number;
+}
+
+interface ServerDataStore {
+  accounts: Record<string, ServerStudentProfile>;
+  activities: ServerPlatformActivity[];
+  posts: ServerFeedPost[];
+}
+
+const DB_FILE = path.join(os.tmpdir(), 'aupro_shared_store_v1.json');
+
+const INITIAL_HEAD_ACCOUNT: ServerStudentProfile = {
+  email: MAIN_ADMIN_EMAIL,
+  name: 'P V N Dhanunjay Reddy',
+  username: 'p_v_n_dhanunajay_reedy',
+  rollNo: '325506402371',
+  department: 'Computer Science & Systems Engineering',
+  year: '4th Year',
+  phone: '+91 9876543210',
+  bio: 'Head Administrator & Engineering Student @ Andhra University College of Engineering.',
+  isVerified: true,
+  verifiedAt: '2026-11-06T10:00:00.000Z',
+};
+
+const INITIAL_STUDENT_ACCOUNTS: ServerStudentProfile[] = [
+  INITIAL_HEAD_ACCOUNT,
+  {
+    email: '325506402372@andhrauniversity.edu.in',
+    name: 'A Sreenivas Rao',
+    username: 'sreenivas_rao',
+    rollNo: '325506402372',
+    department: 'Mechanical Engineering',
+    year: '4th Year',
+    phone: '+91 9848022334',
+    bio: 'Mechanical final year student. CAD & Thermal lab projects.',
+    isVerified: true,
+    verifiedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+  },
+  {
+    email: '325506402375@andhrauniversity.edu.in',
+    name: 'K Divya Sri',
+    username: 'k_divya_sri',
+    rollNo: '325506402375',
+    department: 'Electronics & Communication Engineering',
+    year: '3rd Year',
+    phone: '+91 9989011223',
+    bio: 'ECE 3rd year. VLSI and Embedded systems researcher.',
+    isVerified: true,
+    verifiedAt: new Date(Date.now() - 3600000 * 8).toISOString(),
+  },
+  {
+    email: '325506402380@andhrauniversity.edu.in',
+    name: 'M Sai Teja',
+    username: 'sai_teja_au',
+    rollNo: '325506402380',
+    department: 'Civil Engineering',
+    year: '2nd Year',
+    phone: '+91 9701044556',
+    bio: 'Civil engineering sophomore. Surveying and structural designs.',
+    isVerified: true,
+    verifiedAt: new Date(Date.now() - 3600000 * 12).toISOString(),
+  },
+  {
+    email: '325506402391@andhrauniversity.edu.in',
+    name: 'P Harsha Vardhan',
+    username: 'harsha_vardhan',
+    rollNo: '325506402391',
+    department: 'Computer Science & Systems Engineering',
+    year: '4th Year',
+    phone: '+91 9866077889',
+    bio: 'AU CSE senior. Full-stack development & AI research.',
+    isVerified: true,
+    verifiedAt: new Date(Date.now() - 3600000 * 24).toISOString(),
+  },
+];
+
+const INITIAL_ACTIVITIES: ServerPlatformActivity[] = [
+  {
+    id: 'act_init_1',
+    action: 'User Signed In',
+    actor: MAIN_ADMIN_EMAIL,
+    details: 'Head Administrator authenticated into AuPro portal',
+    timestamp: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
+  },
+  {
+    id: 'act_init_2',
+    action: 'Account Registered',
+    actor: '325506402372@andhrauniversity.edu.in',
+    details: 'Student A Sreenivas Rao verified identity via 6-digit OTP',
+    timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+  },
+  {
+    id: 'act_init_3',
+    action: 'Campus Problem Reported',
+    actor: '325506402375@andhrauniversity.edu.in',
+    details: 'Water purifier filter replacement needed in ECE block 2nd floor',
+    timestamp: new Date(Date.now() - 1000 * 60 * 95).toISOString(),
+  },
+  {
+    id: 'act_init_4',
+    action: 'Feed Post Published',
+    actor: '325506402380@andhrauniversity.edu.in',
+    details: 'Civil department survey lab timing updated for 2nd years',
+    timestamp: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
+  },
+  {
+    id: 'act_init_5',
+    action: 'Applied for Certificate',
+    actor: '325506402391@andhrauniversity.edu.in',
+    details: 'Bonafide Certificate (Ref ID: AU-582910)',
+    timestamp: new Date(Date.now() - 1000 * 60 * 300).toISOString(),
+  },
+];
+
+const INITIAL_POSTS: ServerFeedPost[] = [
+  {
+    id: 'post_init_1',
+    username: 'k_divya_sri',
+    authorEmail: '325506402375@andhrauniversity.edu.in',
+    authorHandle: 'k_divya_sri',
+    avatarText: 'K',
+    isOfficial: false,
+    category: 'problem',
+    location: 'ECE Block 2nd Floor',
+    likesCount: 5,
+    repostsCount: 1,
+    caption: 'Water purifier in ECE block 2nd floor is leaking continuously, please send campus maintenance to repair it.',
+    commentsCount: 2,
+    timeAgo: '2h ago',
+    durationDays: 30,
+  },
+  {
+    id: 'post_init_2',
+    username: 'harsha_vardhan',
+    authorEmail: '325506402391@andhrauniversity.edu.in',
+    authorHandle: 'harsha_vardhan',
+    avatarText: 'H',
+    isOfficial: false,
+    category: 'normal',
+    location: 'Dr. B.R. Ambedkar Central Library',
+    likesCount: 8,
+    repostsCount: 2,
+    caption: 'Does anyone have previous year question papers (PYQs) and handwritten notes for 4-1 Machine Learning and Cloud Computing?',
+    commentsCount: 4,
+    timeAgo: '4h ago',
+    durationDays: 30,
+  },
+  {
+    id: 'post_init_3',
+    username: 'sai_teja_au',
+    authorEmail: '325506402380@andhrauniversity.edu.in',
+    authorHandle: 'sai_teja_au',
+    avatarText: 'S',
+    isOfficial: false,
+    category: 'normal',
+    location: 'AU Golden Jubilee Ground',
+    likesCount: 12,
+    repostsCount: 3,
+    caption: 'AU College of Engineering sports trials will commence next Monday at the Golden Jubilee Ground. Register at the physical education department.',
+    commentsCount: 1,
+    timeAgo: '8h ago',
+    durationDays: 30,
+  },
+];
+
+function loadStore(): ServerDataStore {
+  // Global memory cache first
+  const globalStore = (globalThis as any).__AUPRO_GLOBAL_STORE__;
+  if (globalStore && globalStore.accounts) {
+    return globalStore;
+  }
+
+  // Attempt filesystem persistence
+  try {
+    if (fs.existsSync(DB_FILE)) {
+      const content = fs.readFileSync(DB_FILE, 'utf8');
+      const parsed = JSON.parse(content);
+      if (parsed && parsed.accounts) {
+        // Guarantee Head Account
+        if (!parsed.accounts[MAIN_ADMIN_EMAIL]) {
+          parsed.accounts[MAIN_ADMIN_EMAIL] = INITIAL_HEAD_ACCOUNT;
+        }
+        (globalThis as any).__AUPRO_GLOBAL_STORE__ = parsed;
+        return parsed;
+      }
+    }
+  } catch {}
+
+  // Fallback to fresh initial store
+  const accountsMap: Record<string, ServerStudentProfile> = {};
+  for (const acc of INITIAL_STUDENT_ACCOUNTS) {
+    accountsMap[acc.email.toLowerCase().trim()] = acc;
+  }
+
+  const fresh: ServerDataStore = {
+    accounts: accountsMap,
+    activities: [...INITIAL_ACTIVITIES],
+    posts: [...INITIAL_POSTS],
+  };
+
+  (globalThis as any).__AUPRO_GLOBAL_STORE__ = fresh;
+  saveStoreToFile(fresh);
+  return fresh;
+}
+
+function saveStoreToFile(store: ServerDataStore) {
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(store, null, 2), 'utf8');
+  } catch {}
+}
+
+export function getAllAccounts(): Record<string, ServerStudentProfile> {
+  const store = loadStore();
+  return store.accounts;
+}
+
+export function findAccount(email: string): ServerStudentProfile | null {
+  const store = loadStore();
+  return store.accounts[email.toLowerCase().trim()] || null;
+}
+
+export function registerAccount(email: string, profile?: Partial<ServerStudentProfile>): boolean {
   if (!email) return false;
   const clean = email.toLowerCase().trim();
-  globalAccounts.add(clean);
+  const store = loadStore();
+
+  const existing = store.accounts[clean];
+  const updated: ServerStudentProfile = {
+    email: clean,
+    name: profile?.name || existing?.name || 'AU Student',
+    username: profile?.username || existing?.username || clean.split('@')[0].replace(/[^a-z0-9_]/g, '_'),
+    rollNo: profile?.rollNo || existing?.rollNo || clean.replace(/[^0-9]/g, '') || '32550640' + Math.floor(1000 + Math.random() * 9000),
+    department: profile?.department || existing?.department || 'AU College of Engineering',
+    year: profile?.year || existing?.year || '4th Year',
+    phone: profile?.phone || existing?.phone || '',
+    bio: profile?.bio || existing?.bio || `Student @ AU College of Engineering (${profile?.department || 'Engineering'})`,
+    password: profile?.password || existing?.password || '',
+    isVerified: true,
+    verifiedAt: existing?.verifiedAt || new Date().toISOString(),
+  };
+
+  store.accounts[clean] = updated;
+  saveStoreToFile(store);
   return true;
 }
 
+export function removeAccount(email: string): boolean {
+  if (!email) return false;
+  const clean = email.toLowerCase().trim();
+  if (clean === MAIN_ADMIN_EMAIL || clean.startsWith('325506402371')) {
+    return false; // Head account cannot be removed
+  }
+  const store = loadStore();
+  delete store.accounts[clean];
+  saveStoreToFile(store);
+  return true;
+}
+
+export function purgeAllAccountsExceptHead(): void {
+  const store = loadStore();
+  const headAccount = store.accounts[MAIN_ADMIN_EMAIL] || INITIAL_HEAD_ACCOUNT;
+  store.accounts = {
+    [MAIN_ADMIN_EMAIL]: headAccount,
+  };
+  saveStoreToFile(store);
+}
+
+export function getAllActivities(): ServerPlatformActivity[] {
+  const store = loadStore();
+  return store.activities;
+}
+
+export function logServerActivity(action: string, actor: string, details?: string): ServerPlatformActivity {
+  const store = loadStore();
+  const newActivity: ServerPlatformActivity = {
+    id: 'act_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+    action,
+    actor: actor || 'AU User',
+    details,
+    timestamp: new Date().toISOString(),
+  };
+
+  store.activities.unshift(newActivity);
+  store.activities = store.activities.slice(0, 100); // keep last 100 events
+  saveStoreToFile(store);
+  return newActivity;
+}
+
+export function clearAllActivities(): void {
+  const store = loadStore();
+  store.activities = [];
+  saveStoreToFile(store);
+}
+
+export function getAllPosts(): ServerFeedPost[] {
+  const store = loadStore();
+  return store.posts;
+}
+
+export function addServerPost(post: ServerFeedPost): ServerFeedPost {
+  const store = loadStore();
+  store.posts.unshift(post);
+  store.posts = store.posts.slice(0, 100);
+  saveStoreToFile(store);
+  return post;
+}
+
+export function deleteServerPost(postId: string): boolean {
+  const store = loadStore();
+  store.posts = store.posts.filter((p) => p.id !== postId);
+  saveStoreToFile(store);
+  return true;
+}
+
+export function isAccountRegistered(email: string): boolean {
+  if (!email) return false;
+  const clean = email.toLowerCase().trim();
+  const store = loadStore();
+  return Boolean(store.accounts[clean]);
+}
+
 export function clearAllAccounts(): void {
-  globalAccounts.clear();
+  purgeAllAccountsExceptHead();
 }
 
 export function getRegisteredCount(): number {
-  return globalAccounts.size;
+  const store = loadStore();
+  return Object.keys(store.accounts).length;
 }
 
 export function getRegisteredAccountsList(): string[] {
-  return Array.from(globalAccounts);
+  const store = loadStore();
+  return Object.keys(store.accounts);
 }

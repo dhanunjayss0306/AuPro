@@ -207,6 +207,162 @@ const campusLandmarks: CampusLandmark[] = [
   },
 ];
 
+interface NearbyHub {
+  id: string;
+  name: string;
+  shortName: string;
+  query: string;
+  lat: number;
+  lng: number;
+  distanceKm: number;
+  alias: string[];
+}
+
+const AU_NEARBY_HUBS: NearbyHub[] = [
+  {
+    id: 'sivaji-hostel',
+    name: 'AU Sivaji Hostel (North Campus)',
+    shortName: 'Shiva Jay Hostel',
+    query: 'AU Sivaji Hostel, Andhra University, Visakhapatnam',
+    lat: 17.7312,
+    lng: 83.3228,
+    distanceKm: 0.2,
+    alias: ['sivaji', 'shiva jay', 'hostel', 'north campus'],
+  },
+  {
+    id: 'au-main-gate',
+    name: 'AU Main Gate (Engineering Campus)',
+    shortName: 'AU Main Gate',
+    query: 'Andhra University College of Engineering Main Gate, Visakhapatnam',
+    lat: 17.7285,
+    lng: 83.3210,
+    distanceKm: 0.4,
+    alias: ['main gate', 'gate', 'outgate', 'entrance'],
+  },
+  {
+    id: 'siripuram',
+    name: 'Siripuram Junction (AU Circle)',
+    shortName: 'Sripuram Junction',
+    query: 'Siripuram Junction, Visakhapatnam',
+    lat: 17.7248,
+    lng: 83.3175,
+    distanceKm: 0.8,
+    alias: ['siripuram', 'sripuram', 'circle', 'junction'],
+  },
+  {
+    id: 'chinna-waltair',
+    name: 'Chinna Waltair (Waltair Gate / Thero)',
+    shortName: 'Channawal Thero',
+    query: 'Chinna Waltair, Visakhapatnam',
+    lat: 17.7265,
+    lng: 83.3305,
+    distanceKm: 1.2,
+    alias: ['chinna waltair', 'channawal thero', 'waltair', 'pedda waltair'],
+  },
+  {
+    id: 'maddilapalem',
+    name: 'Maddilapalem Bus Depot & Junction',
+    shortName: 'Madhylapalam',
+    query: 'Maddilapalem Bus Depot, Visakhapatnam',
+    lat: 17.7385,
+    lng: 83.3325,
+    distanceKm: 1.8,
+    alias: ['maddilapalem', 'madhylapalam', 'depot', 'bus station'],
+  },
+  {
+    id: 'au-convention',
+    name: 'AU Convention Center (Beach Road)',
+    shortName: 'AU Convention Center',
+    query: 'Andhra University Convention Centre, Beach Road, Visakhapatnam',
+    lat: 17.7210,
+    lng: 83.3340,
+    distanceKm: 2.5,
+    alias: ['convention center', 'beach road convention', 'au convention'],
+  },
+  {
+    id: 'rk-beach',
+    name: 'RK Beach (Ramakrishna Beach)',
+    shortName: 'RK Beach',
+    query: 'Ramakrishna Beach, Visakhapatnam',
+    lat: 17.7125,
+    lng: 83.3220,
+    distanceKm: 3.0,
+    alias: ['rk beach', 'beach', 'submarine', 'novotel'],
+  },
+  {
+    id: 'rtc-complex',
+    name: 'RTC Complex (Dwaraka Central Bus Station)',
+    shortName: 'RTC Complex',
+    query: 'RTC Complex Dwaraka Bus Station, Visakhapatnam',
+    lat: 17.7240,
+    lng: 83.3030,
+    distanceKm: 4.2,
+    alias: ['rtc complex', 'complex', 'dwaraka bus station', 'bus stand'],
+  },
+];
+
+function calculateHaversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c * 10) / 10;
+}
+
+function findNearestHub(userLat: number, userLng: number) {
+  let nearest = AU_NEARBY_HUBS[0];
+  let minKm = Infinity;
+  for (const hub of AU_NEARBY_HUBS) {
+    const km = calculateHaversineKm(userLat, userLng, hub.lat, hub.lng);
+    if (km < minKm) {
+      minKm = km;
+      nearest = hub;
+    }
+  }
+  return { hub: nearest, distanceKm: minKm };
+}
+
+function resolveLocationQuery(locName: string): string {
+  if (!locName || locName === 'Your location') {
+    return 'Andhra University Visakhapatnam';
+  }
+  const hub = AU_NEARBY_HUBS.find(
+    (h) =>
+      h.shortName.toLowerCase() === locName.toLowerCase() ||
+      h.name.toLowerCase() === locName.toLowerCase() ||
+      h.alias.some((a) => locName.toLowerCase().includes(a))
+  );
+  if (hub) return hub.query;
+
+  if (!locName.includes(',') && !locName.toLowerCase().includes('visakhapatnam')) {
+    return `${locName}, Visakhapatnam`;
+  }
+  return locName;
+}
+
+function resolveDestinationQuery(destName: string, selected?: CampusLandmark | null): string {
+  if (destName) {
+    const hub = AU_NEARBY_HUBS.find(
+      (h) =>
+        h.shortName.toLowerCase() === destName.toLowerCase() ||
+        h.name.toLowerCase() === destName.toLowerCase()
+    );
+    if (hub) return hub.query;
+    if (!destName.includes(',') && !destName.toLowerCase().includes('visakhapatnam')) {
+      return `${destName}, Andhra University, Visakhapatnam`;
+    }
+    return destName;
+  }
+  if (selected) return selected.query;
+  return 'AU College of Engineering, Andhra University, Visakhapatnam';
+}
+
 const initialPosts: MomentPost[] = [];
 
 const services = [
@@ -404,33 +560,275 @@ export default function Home() {
   const [directionsStart, setDirectionsStart] = useState('Your location');
   const [directionsEnd, setDirectionsEnd] = useState('AU College of Engineering (Main & Admin Block)');
   const [transportMode, setTransportMode] = useState<'w' | 'm' | 'd' | 'r'>('w');
+  const [isLocationFar, setIsLocationFar] = useState(false);
+  const [nearestHub, setNearestHub] = useState<NearbyHub | null>(null);
+  const [userDistanceToAu, setUserDistanceToAu] = useState<number | null>(null);
 
-  const campusNavSteps = [
-    {
-      instruction: `Head northeast on AU North Campus Avenue towards ${directionsEnd || selectedLandmark?.name || 'campus destination'}`,
-      distance: '80 m',
-      turnIcon: '⬆',
-      subText: 'Walk past Sivaji Hostel & Department avenue',
-    },
-    {
-      instruction: 'In 120m, turn right at Engineering Library junction',
-      distance: '120 m',
-      turnIcon: '↱',
-      subText: 'Follow paved student walkway',
-    },
-    {
-      instruction: `Turn left towards ${directionsEnd || selectedLandmark?.name || 'Department Block'}`,
-      distance: '110 m',
-      turnIcon: '↰',
-      subText: 'Walk past the lawn and seminar hall',
-    },
-    {
-      instruction: `Arrived at ${directionsEnd || selectedLandmark?.name || 'Campus Destination'}`,
-      distance: '40 m',
-      turnIcon: '📍',
-      subText: 'Your destination is on the right',
-    },
-  ];
+  const getNavSteps = () => {
+    const startLower = (directionsStart || '').toLowerCase();
+    const endName = directionsEnd || selectedLandmark?.name || 'AU College of Engineering';
+
+    if (startLower.includes('rtc complex') || startLower.includes('complex')) {
+      return [
+        {
+          instruction: 'Head east on Station Road towards Asilmetta Flyover',
+          distance: '1.1 km',
+          turnIcon: '⬆',
+          subText: 'Follow Waltair Main Road',
+        },
+        {
+          instruction: 'Continue straight past Siripuram Junction towards AU Circle',
+          distance: '1.9 km',
+          turnIcon: '⬆',
+          subText: 'Pass AU Ingate and Library circle',
+        },
+        {
+          instruction: 'Turn left at Andhra University Outgate into North Campus',
+          distance: '800 m',
+          turnIcon: '↰',
+          subText: 'Enter campus avenue past Sivaji Hostel',
+        },
+        {
+          instruction: `Arrive at ${endName}`,
+          distance: '150 m',
+          turnIcon: '🏁',
+          subText: 'Destination reached on campus',
+        },
+      ];
+    }
+
+    if (startLower.includes('maddilapalem') || startLower.includes('madhylapalam')) {
+      return [
+        {
+          instruction: 'Head south on AU Avenue from Maddilapalem Bus Depot',
+          distance: '700 m',
+          turnIcon: '⬆',
+          subText: 'Pass AU Platinum Jubilee Guest House',
+        },
+        {
+          instruction: 'Proceed straight past Sivaji Hostel into College of Engineering',
+          distance: '600 m',
+          turnIcon: '⬆',
+          subText: 'Follow paved student walkway',
+        },
+        {
+          instruction: `Turn right towards ${endName}`,
+          distance: '300 m',
+          turnIcon: '↱',
+          subText: 'Department block entrance',
+        },
+        {
+          instruction: `Arrive at ${endName}`,
+          distance: '100 m',
+          turnIcon: '🏁',
+          subText: 'Destination reached',
+        },
+      ];
+    }
+
+    if (startLower.includes('siripuram') || startLower.includes('sripuram')) {
+      return [
+        {
+          instruction: 'Head northeast from Siripuram Circle towards AU Main Gate',
+          distance: '450 m',
+          turnIcon: '⬆',
+          subText: 'Follow Siripuram AU link road',
+        },
+        {
+          instruction: 'Enter AU Engineering Campus through North Gate',
+          distance: '350 m',
+          turnIcon: '↱',
+          subText: 'Proceed towards Academic Quadrangle',
+        },
+        {
+          instruction: `Turn left towards ${endName}`,
+          distance: '180 m',
+          turnIcon: '↰',
+          subText: 'Follow walkway towards department',
+        },
+        {
+          instruction: `Arrive at ${endName}`,
+          distance: '50 m',
+          turnIcon: '🏁',
+          subText: 'Destination reached',
+        },
+      ];
+    }
+
+    if (startLower.includes('chinna waltair') || startLower.includes('channawal')) {
+      return [
+        {
+          instruction: 'Head west on Chinna Waltair Road towards AU East Gate',
+          distance: '850 m',
+          turnIcon: '⬆',
+          subText: 'Walk past AU staff quarters',
+        },
+        {
+          instruction: 'Turn right onto Campus Perimeter Avenue',
+          distance: '450 m',
+          turnIcon: '↱',
+          subText: 'Follow avenue towards Engineering blocks',
+        },
+        {
+          instruction: `Turn left towards ${endName}`,
+          distance: '200 m',
+          turnIcon: '↰',
+          subText: 'Department courtyard',
+        },
+        {
+          instruction: `Arrive at ${endName}`,
+          distance: '50 m',
+          turnIcon: '🏁',
+          subText: 'Destination reached',
+        },
+      ];
+    }
+
+    if (startLower.includes('rk beach') || startLower.includes('beach')) {
+      return [
+        {
+          instruction: 'Head north on Beach Road towards Novotel Junction',
+          distance: '1.2 km',
+          turnIcon: '⬆',
+          subText: 'Coastal roadway',
+        },
+        {
+          instruction: 'Turn left onto Waltair Uplands Road towards Siripuram',
+          distance: '1.5 km',
+          turnIcon: '↰',
+          subText: 'Proceed uphill towards AU Circle',
+        },
+        {
+          instruction: 'Turn right at AU Outgate into Engineering Campus',
+          distance: '600 m',
+          turnIcon: '↱',
+          subText: 'Enter campus avenue',
+        },
+        {
+          instruction: `Arrive at ${endName}`,
+          distance: '120 m',
+          turnIcon: '🏁',
+          subText: 'Destination reached',
+        },
+      ];
+    }
+
+    if (startLower.includes('convention') || startLower.includes('au convention')) {
+      return [
+        {
+          instruction: 'Head north along Beach Road towards AU East Gate',
+          distance: '900 m',
+          turnIcon: '⬆',
+          subText: 'Pass AU convention grounds',
+        },
+        {
+          instruction: 'Turn left into University Campus Avenue',
+          distance: '700 m',
+          turnIcon: '↰',
+          subText: 'Proceed towards North Campus',
+        },
+        {
+          instruction: `Arrive at ${endName}`,
+          distance: '250 m',
+          turnIcon: '🏁',
+          subText: 'Destination reached',
+        },
+      ];
+    }
+
+    if (startLower.includes('sivaji') || startLower.includes('shiva jay')) {
+      return [
+        {
+          instruction: 'Head south on Sivaji Hostel Avenue towards Engineering Library',
+          distance: '120 m',
+          turnIcon: '⬆',
+          subText: 'Walk along North Campus avenue',
+        },
+        {
+          instruction: `Turn right at Central Library Junction towards ${endName}`,
+          distance: '100 m',
+          turnIcon: '↱',
+          subText: 'Follow paved student walkway',
+        },
+        {
+          instruction: `Arrive at ${endName}`,
+          distance: '60 m',
+          turnIcon: '🏁',
+          subText: 'Destination reached',
+        },
+      ];
+    }
+
+    // Default campus navigation steps
+    return [
+      {
+        instruction: `Head northeast on AU North Campus Avenue towards ${endName}`,
+        distance: '80 m',
+        turnIcon: '⬆',
+        subText: 'Walk past Sivaji Hostel & Department avenue',
+      },
+      {
+        instruction: 'In 120m, turn right at Engineering Library junction',
+        distance: '120 m',
+        turnIcon: '↱',
+        subText: 'Follow paved student walkway',
+      },
+      {
+        instruction: `Turn left towards ${endName}`,
+        distance: '110 m',
+        turnIcon: '↰',
+        subText: 'Walk past the lawn and seminar hall',
+      },
+      {
+        instruction: `Arrived at ${endName}`,
+        distance: '40 m',
+        turnIcon: '📍',
+        subText: 'Your destination is on the right',
+      },
+    ];
+  };
+
+  const getRouteMetrics = () => {
+    const startLower = (directionsStart || '').toLowerCase();
+    let baseDistKm = 0.5;
+
+    if (startLower.includes('rtc complex') || startLower.includes('complex')) baseDistKm = 4.2;
+    else if (startLower.includes('rk beach') || startLower.includes('beach')) baseDistKm = 3.0;
+    else if (startLower.includes('convention')) baseDistKm = 2.5;
+    else if (startLower.includes('maddilapalem') || startLower.includes('madhylapalam')) baseDistKm = 1.8;
+    else if (startLower.includes('chinna waltair') || startLower.includes('channawal')) baseDistKm = 1.2;
+    else if (startLower.includes('siripuram') || startLower.includes('sripuram')) baseDistKm = 0.8;
+    else if (startLower.includes('sivaji') || startLower.includes('shiva jay')) baseDistKm = 0.3;
+    else if (userDistanceToAu && userDistanceToAu > 0.5) baseDistKm = userDistanceToAu;
+
+    let timeMin = 4;
+    let distStr = '350 m';
+    let modeLabel = 'Walking';
+
+    if (transportMode === 'w') {
+      modeLabel = 'Walking';
+      timeMin = Math.max(1, Math.round((baseDistKm / 4.5) * 60));
+    } else if (transportMode === 'm') {
+      modeLabel = 'Bike';
+      timeMin = Math.max(1, Math.round((baseDistKm / 28) * 60));
+    } else if (transportMode === 'd') {
+      modeLabel = 'Drive';
+      timeMin = Math.max(1, Math.round((baseDistKm / 24) * 60));
+    } else if (transportMode === 'r') {
+      modeLabel = 'Bus';
+      timeMin = Math.max(2, Math.round((baseDistKm / 16) * 60) + 4);
+    }
+
+    if (baseDistKm >= 1) {
+      distStr = `${baseDistKm.toFixed(1)} km`;
+    } else {
+      distStr = `${Math.round(baseDistKm * 1000)} m`;
+    }
+
+    return { timeStr: `${timeMin} min`, metaStr: `${distStr} • ${modeLabel} • GPS Active` };
+  };
+
+  const campusNavSteps = getNavSteps();
 
   // GPS & Live Geolocation Auto-Tracking State
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number; accuracy?: number } | null>(null);
@@ -712,9 +1110,27 @@ export default function Home() {
         setIsGpsTracking(true);
         setGpsError('');
         setIsLocating(false);
-        setMapLocationQuery(`${latitude},${longitude}`);
-        setDirectionsStart('Your location');
-        setToast(`📍 GPS Locked: ${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E (±${Math.round(accuracy)}m)`);
+
+        // Proximity calculation from Andhra University Center (17.7295, 83.3218)
+        const distKm = calculateHaversineKm(latitude, longitude, 17.7295, 83.3218);
+        setUserDistanceToAu(distKm);
+
+        if (distKm > 5) {
+          const found = findNearestHub(latitude, longitude);
+          setNearestHub(found.hub);
+          setIsLocationFar(true);
+          setDirectionsStart('Your location');
+          setMapLocationQuery(`${latitude},${longitude}`);
+          setToast(`📍 You are ${distKm}km from AU. Select a campus hub or route directly.`);
+          if (transportMode === 'w') {
+            setTransportMode('d');
+          }
+        } else {
+          setIsLocationFar(false);
+          setMapLocationQuery(`${latitude},${longitude}`);
+          setDirectionsStart('Your location');
+          setToast(`📍 GPS Locked: ${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E (±${Math.round(accuracy)}m)`);
+        }
       },
       (err) => {
         setIsLocating(false);
@@ -1902,12 +2318,16 @@ export default function Home() {
               src={
                 isNavigating || showDirections
                   ? `https://www.google.com/maps?saddr=${encodeURIComponent(
-                      directionsStart === 'Your location' && userCoords
-                        ? `${userCoords.lat},${userCoords.lng}`
-                        : directionsStart === 'Your location'
-                        ? 'Andhra University Visakhapatnam'
-                        : directionsStart
-                    )}&daddr=${encodeURIComponent(directionsEnd || selectedLandmark?.query || 'AU College of Engineering')}&dirflg=${transportMode === 'm' ? 'w' : transportMode}&output=embed`
+                      resolveLocationQuery(
+                        directionsStart === 'Your location' && userCoords
+                          ? `${userCoords.lat},${userCoords.lng}`
+                          : directionsStart
+                      )
+                    )}&daddr=${encodeURIComponent(
+                      resolveDestinationQuery(directionsEnd, selectedLandmark)
+                    )}&dirflg=${
+                      transportMode === 'w' ? 'w' : transportMode === 'r' ? 'r' : 'd'
+                    }&output=embed`
                   : `https://www.google.com/maps?q=${encodeURIComponent(mapLocationQuery)}&t=${mapLayer}&z=17&output=embed`
               }
               allowFullScreen
@@ -1918,7 +2338,32 @@ export default function Home() {
             {/* IN-APP TURN-BY-TURN NAVIGATION HUD */}
             {isNavigating ? (
               <>
-                {/* Top Green Navigation HUD Banner */}
+                {/* Step Preview Navigator Controls on TOP */}
+                <div className="gmaps-nav-step-controls">
+                  <button
+                    type="button"
+                    className="gmaps-nav-step-btn"
+                    disabled={navStepIndex <= 0}
+                    onClick={() => setNavStepIndex((prev) => Math.max(0, prev - 1))}
+                    style={{ opacity: navStepIndex <= 0 ? 0.4 : 1 }}
+                  >
+                    ◀ Prev Step
+                  </button>
+                  <span style={{ fontSize: 12.5, alignSelf: 'center', fontWeight: 600 }}>
+                    Turn {navStepIndex + 1} of {campusNavSteps.length}
+                  </span>
+                  <button
+                    type="button"
+                    className="gmaps-nav-step-btn"
+                    disabled={navStepIndex >= campusNavSteps.length - 1}
+                    onClick={() => setNavStepIndex((prev) => Math.min(campusNavSteps.length - 1, prev + 1))}
+                    style={{ opacity: navStepIndex >= campusNavSteps.length - 1 ? 0.4 : 1 }}
+                  >
+                    Next Step ▶
+                  </button>
+                </div>
+
+                {/* Green Navigation HUD Banner at the BOTTOM */}
                 <div className="gmaps-nav-hud-top">
                   <div className="gmaps-nav-turn-icon">
                     {campusNavSteps[navStepIndex]?.turnIcon || '⬆'}
@@ -1931,31 +2376,6 @@ export default function Home() {
                       {campusNavSteps[navStepIndex]?.subText} • {campusNavSteps[navStepIndex]?.distance}
                     </div>
                   </div>
-                </div>
-
-                {/* Step Preview Navigator Controls */}
-                <div className="gmaps-nav-step-controls">
-                  <button
-                    type="button"
-                    className="gmaps-nav-step-btn"
-                    disabled={navStepIndex <= 0}
-                    onClick={() => setNavStepIndex((prev) => Math.max(0, prev - 1))}
-                    style={{ opacity: navStepIndex <= 0 ? 0.4 : 1 }}
-                  >
-                    ◀ Prev Step
-                  </button>
-                  <span style={{ fontSize: 12, color: '#ffffff', alignSelf: 'center', fontWeight: 600 }}>
-                    Turn {navStepIndex + 1} of {campusNavSteps.length}
-                  </span>
-                  <button
-                    type="button"
-                    className="gmaps-nav-step-btn"
-                    disabled={navStepIndex >= campusNavSteps.length - 1}
-                    onClick={() => setNavStepIndex((prev) => Math.min(campusNavSteps.length - 1, prev + 1))}
-                    style={{ opacity: navStepIndex >= campusNavSteps.length - 1 ? 0.4 : 1 }}
-                  >
-                    Next Step ▶
-                  </button>
                 </div>
 
                 {/* Step-by-Step Route Drawer */}
@@ -1995,8 +2415,8 @@ export default function Home() {
                 {/* Bottom Navigation Control Bar */}
                 <div className="gmaps-nav-hud-bottom">
                   <div className="gmaps-nav-eta-block">
-                    <div className="gmaps-nav-eta-time">4 min</div>
-                    <div className="gmaps-nav-eta-meta">350 m • Walking • GPS active</div>
+                    <div className="gmaps-nav-eta-time">{getRouteMetrics().timeStr}</div>
+                    <div className="gmaps-nav-eta-meta">{getRouteMetrics().metaStr}</div>
                   </div>
                   <div className="gmaps-nav-hud-actions">
                     <button
@@ -2227,16 +2647,22 @@ export default function Home() {
                     <span style={{ fontSize: 11, color: 'var(--muted)', alignSelf: 'center', whiteSpace: 'nowrap' }}>Start:</span>
                     {[
                       'Your location',
+                      'Shiva Jay Hostel',
+                      'Sripuram Junction',
+                      'Madhylapalam',
+                      'Channawal Thero',
                       'AU Main Gate',
-                      'Siripuram Junction',
-                      'Sivaji Hostel',
                       'RTC Complex',
+                      'AU Convention Center',
+                      'RK Beach',
                     ].map((preset) => (
                       <button
                         key={preset}
+                        type="button"
                         className={`gmaps-preset-pill ${directionsStart === preset ? 'active' : ''}`}
                         onClick={() => {
                           setDirectionsStart(preset);
+                          setIsLocationFar(false);
                           if (preset === 'Your location') {
                             handleLocateMe();
                           }
@@ -2250,6 +2676,65 @@ export default function Home() {
                       </button>
                     ))}
                   </div>
+
+                  {/* Proximity / Far Location Detection Prompt */}
+                  {isLocationFar && userDistanceToAu && (
+                    <div className="gmaps-far-location-prompt">
+                      <div className="gmaps-far-header">
+                        <span style={{ fontSize: 16 }}>📍</span>
+                        <div>
+                          <strong>You are {userDistanceToAu} km from Andhra University</strong>
+                          <p>Choose a nearby campus entry hub below, or route directly from anywhere with Google Maps.</p>
+                        </div>
+                      </div>
+
+                      <div className="gmaps-far-actions">
+                        {nearestHub && (
+                          <button
+                            type="button"
+                            className="gmaps-far-btn primary"
+                            onClick={() => {
+                              setDirectionsStart(nearestHub.shortName);
+                              setIsLocationFar(false);
+                              setToast(`Starting route from nearest campus hub: ${nearestHub.shortName}`);
+                            }}
+                          >
+                            ⭐ Start from {nearestHub.shortName} (~{nearestHub.distanceKm} km to AU)
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          className="gmaps-far-btn secondary"
+                          onClick={() => {
+                            setDirectionsStart('Your location');
+                            setIsLocationFar(false);
+                            setToast(`Routing directly from your current location (${userDistanceToAu} km away)`);
+                          }}
+                        >
+                          🚗 Route from current location ({userDistanceToAu} km)
+                        </button>
+                      </div>
+
+                      <div className="gmaps-far-hubs-label">Or choose a campus transit hub:</div>
+                      <div className="gmaps-far-hubs-chips">
+                        {AU_NEARBY_HUBS.map((hub) => (
+                          <button
+                            key={hub.id}
+                            type="button"
+                            className={`gmaps-far-hub-chip ${directionsStart === hub.shortName ? 'active' : ''}`}
+                            onClick={() => {
+                              setDirectionsStart(hub.shortName);
+                              setIsLocationFar(false);
+                              setToast(`Selected: ${hub.shortName}`);
+                            }}
+                          >
+                            {hub.shortName}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -2388,10 +2873,10 @@ export default function Home() {
               <div className="gmaps-trip-sheet">
                 <div>
                   <div className="gmaps-trip-time">
-                    {transportMode === 'w' ? '4 min' : transportMode === 'm' ? '2 min' : transportMode === 'd' ? '3 min' : '5 min'}
+                    {getRouteMetrics().timeStr}
                   </div>
                   <div className="gmaps-trip-meta">
-                    {transportMode === 'w' ? '350 m • via AU North Campus Ave' : 'Fastest route inside AU campus'}
+                    {getRouteMetrics().metaStr}
                   </div>
                 </div>
                 <button

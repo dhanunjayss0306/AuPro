@@ -15,6 +15,7 @@ import {
   DarkenedAboutIcon,
   InstagramProfileIcon,
   BigPlusIcon,
+  GoogleGLogo,
   GoogleMapsPinIcon,
   DirectionsDiamondIcon,
   LayersIcon,
@@ -55,6 +56,8 @@ interface CampusLandmark {
   description: string;
   timings: string;
   ext: string;
+  built?: string;
+  tags?: string[];
 }
 
 const campusLandmarks: CampusLandmark[] = [
@@ -67,6 +70,8 @@ const campusLandmarks: CampusLandmark[] = [
     description: 'Principal Office, Dean of Academic Affairs, and Administrative Counters.',
     timings: '10:00 AM – 5:00 PM',
     ext: 'Ext: 201 / 202',
+    built: 'Built in 1950',
+    tags: ['History', 'Built in 1950', 'Visakhapatnam', 'Vaddadi', 'Administration'],
   },
   {
     id: 'cse-dept',
@@ -77,6 +82,8 @@ const campusLandmarks: CampusLandmark[] = [
     description: 'AI & Data Science Labs, Software Engineering Centre, and HOD Office.',
     timings: '9:00 AM – 5:00 PM',
     ext: 'Ext: 310',
+    built: 'Built in 1985',
+    tags: ['Visakhapatnam', 'Departments'],
   },
   {
     id: 'ece-dept',
@@ -87,6 +94,8 @@ const campusLandmarks: CampusLandmark[] = [
     description: 'VLSI Design Lab, DSP Centre, Microwave Lab, and Seminar Halls.',
     timings: '9:00 AM – 5:00 PM',
     ext: 'Ext: 320',
+    built: 'Built in 1968',
+    tags: ['Visakhapatnam', 'Departments'],
   },
   {
     id: 'mech-dept',
@@ -97,6 +106,8 @@ const campusLandmarks: CampusLandmark[] = [
     description: 'Thermal Engineering Lab, CAD/CAM Studio, and Machine Shops.',
     timings: '9:00 AM – 5:00 PM',
     ext: 'Ext: 330',
+    built: 'Built in 1955',
+    tags: ['History', 'Visakhapatnam', 'Departments'],
   },
   {
     id: 'civil-dept',
@@ -107,6 +118,8 @@ const campusLandmarks: CampusLandmark[] = [
     description: 'Structural Analysis Lab, Surveying Lab, and Environmental Engineering Lab.',
     timings: '9:00 AM – 5:00 PM',
     ext: 'Ext: 340',
+    built: 'Built in 1950',
+    tags: ['History', 'Built in 1950', 'Visakhapatnam', 'Departments'],
   },
   {
     id: 'library',
@@ -117,6 +130,8 @@ const campusLandmarks: CampusLandmark[] = [
     description: 'Multi-floor central library with over 500,000 volumes, e-journals, and study halls.',
     timings: '8:00 AM – 8:00 PM',
     ext: 'Ext: 115',
+    built: 'Built in 1950',
+    tags: ['History', 'Built in 1950', 'Visakhapatnam', 'Library', 'Vaddadi'],
   },
   {
     id: 'exam-cell',
@@ -127,6 +142,8 @@ const campusLandmarks: CampusLandmark[] = [
     description: 'Semester hall tickets, grade cards, transcripts, and re-evaluation counters.',
     timings: '10:30 AM – 4:30 PM',
     ext: 'Ext: 102',
+    built: 'Built in 1950',
+    tags: ['History', 'Visakhapatnam', 'Administration'],
   },
   {
     id: 'hostels',
@@ -137,6 +154,8 @@ const campusLandmarks: CampusLandmark[] = [
     description: 'Residential hostels for engineering students with mess and recreation facilities.',
     timings: 'Curfew: 8:30 PM',
     ext: 'Ext: 401',
+    built: 'Built in 1952',
+    tags: ['History', 'Visakhapatnam', 'Hostels'],
   },
   {
     id: 'canteen',
@@ -147,6 +166,8 @@ const campusLandmarks: CampusLandmark[] = [
     description: 'Student cafeteria, breakfast, meals, tea counters, and student seating.',
     timings: '7:30 AM – 7:30 PM',
     ext: 'Ext: 501',
+    built: 'Built in 1976',
+    tags: ['Visakhapatnam'],
   },
   {
     id: 'main-gate',
@@ -157,6 +178,8 @@ const campusLandmarks: CampusLandmark[] = [
     description: 'Main campus gate connecting to Siripuram Junction and Maddilapalem road.',
     timings: 'Open 24 Hours',
     ext: 'Security Post 1',
+    built: 'Built in 1950',
+    tags: ['History', 'Built in 1950', 'Visakhapatnam', 'Vaddadi'],
   },
   {
     id: 'eee-dept',
@@ -167,6 +190,8 @@ const campusLandmarks: CampusLandmark[] = [
     description: 'Power Systems Lab, Control Systems Centre, and High Voltage Laboratory.',
     timings: '9:00 AM – 5:00 PM',
     ext: 'Ext: 350',
+    built: 'Built in 1960',
+    tags: ['Visakhapatnam', 'Departments'],
   },
   {
     id: 'sports-ground',
@@ -177,6 +202,8 @@ const campusLandmarks: CampusLandmark[] = [
     description: 'Track and field grounds, cricket/football grounds, indoor badminton, and gym.',
     timings: '6:00 AM – 7:00 PM',
     ext: 'Physical Ed: Ext 601',
+    built: 'Built in 1950',
+    tags: ['History', 'Visakhapatnam'],
   },
 ];
 
@@ -263,7 +290,7 @@ export default function Home() {
   const [authMode, setAuthMode] = useState<AuthMode>('landing');
   const [authEmail, setAuthEmail] = useState('');
   const [authName, setAuthName] = useState('');
-  const [authUsername, setAuthUsername] = useState('dhanunjay_au');
+  const [authUsername, setAuthUsername] = useState('');
   const [authRollNo, setAuthRollNo] = useState('');
   const [authDept, setAuthDept] = useState('Computer Science & Systems Engineering');
   const [authYear, setAuthYear] = useState('3rd Year');
@@ -282,6 +309,9 @@ export default function Home() {
 
   // Dark Mode Theme State ('light' | 'dark')
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  // Single consistent student handle across New Thread and Profile
+  const studentHandle = authName ? authName.toLowerCase().replace(/\s+/g, '_') : (authUsername || 'p_v_n_dhanunajay_reedy');
 
   // Theme management & persistence
   useEffect(() => {
@@ -318,11 +348,6 @@ export default function Home() {
   // Instagram Profile Edit Mode State
   const [isEditingProfile, setIsEditingProfile] = useState(false);
 
-  // In-App Turn-by-Turn Navigation System State
-  const [isNavigating, setIsNavigating] = useState(false);
-  const [navStepIndex, setNavStepIndex] = useState(0);
-  const [showNavStepsSheet, setShowNavStepsSheet] = useState(false);
-
   // Scroll-driven auto-hiding / appearing bottom navigation bar
   const [isNavVisible, setIsNavVisible] = useState(true);
   const lastScrollYRef = useRef(0);
@@ -355,6 +380,11 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // In-App Turn-by-Turn Navigation System State
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [navStepIndex, setNavStepIndex] = useState(0);
+  const [showNavStepsSheet, setShowNavStepsSheet] = useState(false);
+
   // Application Dedicated Page State
   const [activeApplication, setActiveApplication] = useState<{ title: string; icon: ServiceIconKind; detail: string } | null>(null);
   const [clickedApplyId, setClickedApplyId] = useState<string | null>(null);
@@ -367,8 +397,9 @@ export default function Home() {
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [mapSearchInput, setMapSearchInput] = useState('');
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
-  const [mapCategory, setMapCategory] = useState<'all' | 'departments' | 'admin' | 'library' | 'hostels' | 'canteen' | 'gates'>('all');
-  const [showPlaceSheet, setShowPlaceSheet] = useState(true);
+  const [mapFilterChip, setMapFilterChip] = useState<'all' | 'history' | 'built-1950' | 'visakhapatnam' | 'vaddadi' | 'library' | 'departments' | 'hostels'>('all');
+  const [isSheetExpanded, setIsSheetExpanded] = useState(false);
+  const [isMapLoading, setIsMapLoading] = useState(true);
   const [showDirections, setShowDirections] = useState(false);
   const [directionsStart, setDirectionsStart] = useState('Your location');
   const [directionsEnd, setDirectionsEnd] = useState('AU College of Engineering (Main & Admin Block)');
@@ -688,7 +719,7 @@ export default function Home() {
       (err) => {
         setIsLocating(false);
         setGpsError(err.message);
-        setToast(`GPS notice: ${err.message}. Showing campus map.`);
+        setToast('Location access was denied. You can still search places above.');
       },
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 3000 }
     );
@@ -753,12 +784,30 @@ export default function Home() {
   );
 
   const filteredLandmarks = campusLandmarks.filter((loc) => {
+    // 1. Filter by chip
+    if (mapFilterChip !== 'all') {
+      const lowerChip = mapFilterChip.toLowerCase();
+      if (lowerChip === 'built-1950') {
+        const yr = parseInt(loc.built?.replace(/\D/g, '') || '9999', 10);
+        if (yr > 1950) return false;
+      } else {
+        const matchesTag = loc.tags?.some((t) => t.toLowerCase().includes(lowerChip));
+        const matchesCat = loc.category.toLowerCase().includes(lowerChip);
+        const matchesName = loc.name.toLowerCase().includes(lowerChip);
+        const matchesDesc = loc.description?.toLowerCase().includes(lowerChip);
+        if (!matchesTag && !matchesCat && !matchesName && !matchesDesc) return false;
+      }
+    }
+
+    // 2. Filter by search input
     if (!mapSearchInput.trim()) return true;
     const s = mapSearchInput.toLowerCase();
     return (
       loc.name.toLowerCase().includes(s) ||
       loc.category.toLowerCase().includes(s) ||
-      loc.code.toLowerCase().includes(s)
+      loc.code.toLowerCase().includes(s) ||
+      (loc.tags && loc.tags.some((t) => t.toLowerCase().includes(s))) ||
+      (loc.description && loc.description.toLowerCase().includes(s))
     );
   });
 
@@ -927,14 +976,14 @@ export default function Home() {
       <main className="shell">
         <section className="content" style={{ paddingTop: '12vh' }}>
           <div className="card auth-card">
-            <div className="eyebrow" style={{ color: '#701d32', marginBottom: 6 }}>Andhra University</div>
-            <h1 style={{ fontSize: 32, marginBottom: 12 }}>Welcome to AuPro</h1>
-            <p className="lead" style={{ fontSize: 14, marginBottom: 22 }}>
+            <div className="eyebrow" style={{ color: 'var(--secondary)', letterSpacing: '0.08em', textTransform: 'uppercase', fontSize: 12, fontWeight: 600, lineHeight: 1.4, marginBottom: 4 }}>ANDHRA UNIVERSITY</div>
+            <h1 style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.25, marginBottom: 8, color: 'var(--ink)' }}>Welcome to AuPro</h1>
+            <p className="lead" style={{ fontSize: 15, fontWeight: 400, lineHeight: 1.5, marginBottom: 20 }}>
               Campus updates, verified applications, student problems, and the engineering campus map.
             </p>
 
             {authError && (
-              <div style={{ background: '#fee2e2', border: '1px solid #fecaca', color: '#991b1b', padding: '10px 14px', borderRadius: 10, fontSize: 12, marginBottom: 16 }}>
+              <div className="error" style={{ marginBottom: 16 }}>
                 {authError}
               </div>
             )}
@@ -942,13 +991,25 @@ export default function Home() {
             {authMode === 'landing' && (
               <div className="stack">
                 <button className="google-button" onClick={handleGoogleSignIn}>
-                  <span className="google-mark">G</span> Continue with Google
+                  <GoogleGLogo size={18} /> Continue with Google
                 </button>
 
                 <div className="auth-divider"><span>or with university credentials</span></div>
                 <div className="auth-actions">
-                  <button className="secondary-button" onClick={() => { setAuthError(''); setAuthMode('email-login'); }}>Log in with email</button>
-                  <button className="secondary-button" onClick={() => { setAuthError(''); setAuthMode('signup'); }}>Create student account</button>
+                  <button
+                    className="secondary-button"
+                    style={{ width: '100%', padding: '13px 16px', fontSize: 15 }}
+                    onClick={() => { setAuthError(''); setAuthMode('email-login'); }}
+                  >
+                    Log in with email
+                  </button>
+                  <button
+                    className="text-button"
+                    style={{ width: '100%', textAlign: 'center', marginTop: 8 }}
+                    onClick={() => { setAuthError(''); setAuthMode('signup'); }}
+                  >
+                    Create student account
+                  </button>
                 </div>
               </div>
             )}
@@ -1391,7 +1452,7 @@ export default function Home() {
               </div>
               <div className="profile-dropdown-user">
                 <h3>{authName || 'AU Student'}</h3>
-                <span>@{authUsername || 'au.student'}</span>
+                <span>@{studentHandle}</span>
                 <span className="profile-dropdown-email">{authEmail}</span>
               </div>
             </div>
@@ -1440,37 +1501,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* CREATE POST MODAL: ONLY "Announcement Post" and "Problem" */}
-        {showCreateMenu && (
-          <div className="create-menu-backdrop" role="presentation" onClick={() => setShowCreateMenu(false)}>
-            <section className="create-menu" role="dialog" aria-modal="true" aria-labelledby="create-menu-title" onClick={(event) => event.stopPropagation()}>
-              <div className="create-menu-header">
-                <div>
-                  <div className="eyebrow">AuPro</div>
-                  <h2 id="create-menu-title">Select Post Type</h2>
-                </div>
-                <button className="icon-button" aria-label="Close menu" onClick={() => setShowCreateMenu(false)}>×</button>
-              </div>
-              <button
-                className="create-menu-option"
-                style={{ opacity: 0.65 }}
-                onClick={() => {
-                  setToast('Official Announcement posting is temporarily locked by administration.');
-                }}
-              >
-                <strong>🔒 Announcement Post (Blocked)</strong>
-                <span>Official circulars are temporarily restricted to university admin.</span>
-              </button>
-              <button
-                className="create-menu-option"
-                onClick={() => { setCreateKind('problem'); setShowCreateMenu(false); setTab('create'); }}
-              >
-                <strong>⚠️ Report Campus Problem</strong>
-                <span>Report an infrastructure, lab, classroom, or hostel issue directly to administration.</span>
-              </button>
-            </section>
-          </div>
-        )}
 
         {/* TAB 1: FEED / MOMENTS */}
         {tab === 'feed' && (
@@ -1575,28 +1605,47 @@ export default function Home() {
                   >
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
                       <div>
-                        <label className="field-label" style={{ fontSize: 12 }}>Applicant Full Name</label>
-                        <input className="search" value={authName || 'Student Name'} readOnly style={{ background: '#f8fafc' }} />
+                        <label className="field-label" style={{ fontSize: 14, fontWeight: 500 }}>Applicant Full Name</label>
+                        <input className="search" value={authName || 'Student Name'} readOnly style={{ background: 'var(--input-bg)', color: 'var(--text-main)' }} />
                       </div>
                       <div>
-                        <label className="field-label" style={{ fontSize: 12 }}>Roll / Registration Number</label>
-                        <input className="search" value={authRollNo || '321101234'} readOnly style={{ background: '#f8fafc' }} />
+                        <label className="field-label" style={{ fontSize: 14, fontWeight: 500 }}>Roll / Registration Number</label>
+                        <input className="search" value={authRollNo || '321101234'} readOnly style={{ background: 'var(--input-bg)', color: 'var(--text-main)' }} />
                       </div>
                       <div>
-                        <label className="field-label" style={{ fontSize: 12 }}>Department & Branch</label>
-                        <input className="search" value={authDept} readOnly style={{ background: '#f8fafc' }} />
+                        <label className="field-label" style={{ fontSize: 14, fontWeight: 500 }}>Department & Branch</label>
+                        <div
+                          className="search"
+                          style={{
+                            background: 'var(--input-bg)',
+                            color: 'var(--text-main)',
+                            minHeight: 44,
+                            height: 'auto',
+                            display: 'flex',
+                            alignItems: 'center',
+                            lineHeight: 1.35,
+                            padding: '8px 14px',
+                            wordBreak: 'break-word',
+                            whiteSpace: 'normal',
+                            borderRadius: 12,
+                            fontSize: 15,
+                            fontWeight: 400,
+                          }}
+                        >
+                          {authDept}
+                        </div>
                       </div>
                       <div>
-                        <label className="field-label" style={{ fontSize: 12 }}>Year of Study</label>
-                        <input className="search" value={authYear} readOnly style={{ background: '#f8fafc' }} />
+                        <label className="field-label" style={{ fontSize: 14, fontWeight: 500 }}>Year of Study</label>
+                        <input className="search" value={authYear} readOnly style={{ background: 'var(--input-bg)', color: 'var(--text-main)' }} />
                       </div>
                       <div>
-                        <label className="field-label" style={{ fontSize: 12 }}>University College Email</label>
-                        <input className="search" value={authEmail} readOnly style={{ background: '#f8fafc' }} />
+                        <label className="field-label" style={{ fontSize: 14, fontWeight: 500 }}>University College Email</label>
+                        <input className="search" value={authEmail} readOnly style={{ background: 'var(--input-bg)', color: 'var(--text-main)' }} />
                       </div>
                       <div>
-                        <label className="field-label" style={{ fontSize: 12 }}>Contact Phone</label>
-                        <input className="search" value={authPhone || '+91 9876543210'} readOnly style={{ background: '#f8fafc' }} />
+                        <label className="field-label" style={{ fontSize: 14, fontWeight: 500 }}>Contact Phone</label>
+                        <input className="search" value={authPhone || '+91 9876543210'} readOnly style={{ background: 'var(--input-bg)', color: 'var(--text-main)' }} />
                       </div>
                     </div>
 
@@ -1684,7 +1733,7 @@ export default function Home() {
 
             <form className="card create-form" onSubmit={handleCreatePost}>
               {createKind === 'announcement' ? (
-                <div style={{ background: '#fef2f2', border: '1px solid #fee2e2', borderRadius: 10, padding: 14, color: '#991b1b', fontSize: 13, lineHeight: 1.5, marginBottom: 8 }}>
+                <div style={{ background: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(220, 38, 38, 0.3)', borderRadius: 12, padding: 14, color: 'var(--error)', fontSize: 13, lineHeight: 1.5, marginBottom: 8 }}>
                   <strong>🔒 Announcements Temporarily Blocked</strong>
                   <p style={{ margin: '4px 0 0 0', fontSize: 12 }}>
                     Official announcement publishing is currently locked by university administration. Please report your campus concern as a <strong>Problem</strong>.
@@ -1840,9 +1889,16 @@ export default function Home() {
         {tab === 'location' && (
           <div className={`gmaps-container maps-environment-wrapper ${isMapFullscreen ? 'fullscreen' : ''}`}>
             {/* The Google Maps Embedded Background Canvas */}
+            {isMapLoading && (
+              <div className="gmaps-skeleton-loader">
+                <div className="gmaps-skeleton-spinner" />
+                <span>Loading Andhra University Map...</span>
+              </div>
+            )}
             <iframe
               className="gmaps-iframe"
               title="Google Maps Andhra University"
+              onLoad={() => setIsMapLoading(false)}
               src={
                 isNavigating || showDirections
                   ? `https://www.google.com/maps?saddr=${encodeURIComponent(
@@ -1988,7 +2044,7 @@ export default function Home() {
                     </div>
                     <input
                       className="gmaps-search-input"
-                      placeholder="Search here"
+                      placeholder="Search Andhra University..."
                       value={mapSearchInput}
                       onChange={(e) => {
                         setMapSearchInput(e.target.value);
@@ -2011,7 +2067,7 @@ export default function Home() {
                         }}
                         aria-label="Clear search"
                       >
-                        ×
+                        ✕
                       </button>
                     )}
                     <div className="gmaps-search-divider" />
@@ -2021,7 +2077,6 @@ export default function Home() {
                       aria-label="Directions"
                       onClick={() => {
                         setShowDirections(true);
-                        setShowPlaceSheet(false);
                         if (selectedLandmark) {
                           setDirectionsEnd(selectedLandmark.name);
                         }
@@ -2042,7 +2097,6 @@ export default function Home() {
                               setMapLocationQuery(loc.query);
                               setMapSearchInput(loc.name);
                               setShowSearchSuggestions(false);
-                              setShowPlaceSheet(true);
                             }}
                           >
                             <GoogleMapsPinIcon size={18} />
@@ -2054,7 +2108,7 @@ export default function Home() {
                         ))}
                         {filteredLandmarks.length === 0 && (
                           <div style={{ padding: '12px 16px', fontSize: 13, color: 'var(--muted)' }}>
-                            No matching AU landmark. Press Enter to search on Map.
+                            No places match. Try another search.
                           </div>
                         )}
                       </div>
@@ -2064,39 +2118,32 @@ export default function Home() {
                   {/* Google Maps Category Filter Chips */}
                   <div className="gmaps-chips-scroll">
                     {[
-                      { id: 'all', label: 'All Places' },
-                      { id: 'departments', label: '🏢 Departments' },
-                      { id: 'admin', label: '🏛️ Administration' },
-                      { id: 'library', label: '📚 Library' },
-                      { id: 'hostels', label: '🛏️ Hostels' },
-                      { id: 'canteen', label: '🍽️ Canteen' },
-                      { id: 'gates', label: '🚪 Campus Gates' },
-                    ].map((chip) => (
-                      <button
-                        key={chip.id}
-                        className={`gmaps-chip ${mapCategory === chip.id ? 'active' : ''}`}
-                        onClick={() => {
-                          setMapCategory(chip.id as any);
-                          const target = campusLandmarks.find((l) => {
-                            if (chip.id === 'all') return true;
-                            if (chip.id === 'departments') return l.category === 'Department';
-                            if (chip.id === 'admin') return l.category === 'Administration';
-                            if (chip.id === 'library') return l.category === 'Library';
-                            if (chip.id === 'hostels') return l.category === 'Hostel';
-                            if (chip.id === 'canteen') return l.category === 'Amenities';
-                            if (chip.id === 'gates') return l.category === 'Campus Gate';
-                            return true;
-                          });
-                          if (target) {
-                            setSelectedLandmark(target);
-                            setMapLocationQuery(target.query);
-                            setShowPlaceSheet(true);
-                          }
-                        }}
-                      >
-                        {chip.label}
-                      </button>
-                    ))}
+                      { id: 'all', label: 'All' },
+                      { id: 'history', label: 'History' },
+                      { id: 'built-1950', label: 'Built <1950' },
+                      { id: 'visakhapatnam', label: 'Visakhapatnam' },
+                      { id: 'vaddadi', label: 'Vaddadi' },
+                      { id: 'library', label: 'Library' },
+                      { id: 'departments', label: 'Departments' },
+                      { id: 'hostels', label: 'Hostels' },
+                    ].map((chip) => {
+                      const isActive = mapFilterChip === chip.id;
+                      return (
+                        <button
+                          key={chip.id}
+                          className={`gmaps-chip ${isActive ? 'active' : ''}`}
+                          onClick={() => {
+                            if (isActive) {
+                              setMapFilterChip('all');
+                            } else {
+                              setMapFilterChip(chip.id as any);
+                            }
+                          }}
+                        >
+                          {chip.label}
+                        </button>
+                      );
+                    })}
                   </div>
                 </>
               ) : (
@@ -2207,8 +2254,14 @@ export default function Home() {
               )}
             </div>
 
-            {/* Floating Action Buttons (Right side: Layers, GPS, Fullscreen) */}
-            <div className="gmaps-fab-column">
+            {/* Floating Action Buttons (Right side: Layers, My Location, Fullscreen) */}
+            <div
+              className="gmaps-fab-column"
+              style={{
+                bottom: !showDirections ? (isSheetExpanded ? 'calc(70% + 16px)' : '240px') : '100px',
+                transition: 'bottom 0.28s cubic-bezier(0.16, 1, 0.3, 1)',
+              }}
+            >
               <button
                 className="gmaps-fab-btn"
                 title={mapLayer === 'm' ? 'Switch to Satellite View' : 'Switch to Street Map'}
@@ -2218,9 +2271,9 @@ export default function Home() {
               </button>
               <button
                 className={`gmaps-fab-btn ${isGpsTracking ? 'gps-active' : ''}`}
-                title={isGpsTracking ? "GPS Auto-Tracking Active • Tap to center" : "Acquire Live GPS Location"}
+                title="My location"
                 onClick={handleLocateMe}
-                aria-label="Auto-track location via GPS"
+                aria-label="My location"
               >
                 <CrosshairGpsIcon size={20} />
               </button>
@@ -2233,73 +2286,99 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Google Maps Bottom Place Sheet (When landmark selected and directions not active) */}
-            {showPlaceSheet && selectedLandmark && !showDirections && (
-              <div className="gmaps-place-sheet">
-                <div className="gmaps-sheet-header">
-                  <div>
-                    <h3>{selectedLandmark.name}</h3>
-                    <div className="gmaps-sheet-rating">
-                      <strong>★ 4.7</strong>
-                      <span>(1,420) • {selectedLandmark.category} • {selectedLandmark.code}</span>
+            {/* Layer 4: Bottom Sheet (peek / expanded) */}
+            {!showDirections && (
+              <div className={`gmaps-bottom-sheet ${isSheetExpanded ? 'expanded' : 'peek'}`}>
+                {/* Drag Handle & Place Count Header */}
+                <button
+                  type="button"
+                  className="gmaps-sheet-handle-bar"
+                  onClick={() => setIsSheetExpanded((prev) => !prev)}
+                  aria-label={isSheetExpanded ? 'Collapse places sheet' : 'Expand places sheet'}
+                >
+                  <div className="gmaps-sheet-handle-pill" />
+                </button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px 8px' }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--muted)' }}>
+                    {filteredLandmarks.length} {filteredLandmarks.length === 1 ? 'place' : 'places'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsSheetExpanded((prev) => !prev)}
+                    style={{ background: 'transparent', border: 'none', color: 'var(--secondary)', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}
+                  >
+                    {isSheetExpanded ? 'Collapse' : 'View all'}
+                  </button>
+                </div>
+
+                {/* Cards List inside Sheet */}
+                <div className="gmaps-sheet-cards-list">
+                  {filteredLandmarks.length === 0 ? (
+                    <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--muted)', fontSize: 14 }}>
+                      No places match. Try another search.
                     </div>
-                  </div>
-                  <button
-                    className="gmaps-sheet-close"
-                    onClick={() => setShowPlaceSheet(false)}
-                    aria-label="Close"
-                  >
-                    ✕
-                  </button>
-                </div>
+                  ) : (
+                    filteredLandmarks.map((loc) => {
+                      const isSelected = selectedLandmark?.id === loc.id;
+                      return (
+                        <div
+                          key={loc.id}
+                          className={`gmaps-sheet-place-card ${isSelected ? 'selected' : ''}`}
+                          onClick={() => {
+                            setSelectedLandmark(loc);
+                            setMapLocationQuery(loc.query);
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                            <div className="gmaps-sheet-place-title">
+                              {loc.name}
+                            </div>
+                            <span style={{ fontSize: 16 }}>
+                              {loc.category === 'Department' ? '🏢' : loc.category === 'Library' ? '📚' : loc.category === 'Hostel' ? '🛏️' : '🏛️'}
+                            </span>
+                          </div>
 
-                {/* Google Maps Action Pills */}
-                <div className="gmaps-sheet-actions">
-                  <button
-                    className="gmaps-action-pill primary"
-                    onClick={() => {
-                      setShowDirections(true);
-                      setDirectionsEnd(selectedLandmark.name);
-                    }}
-                  >
-                    <DirectionsDiamondIcon size={16} />
-                    <span>Directions</span>
-                  </button>
-                  <button
-                    className="gmaps-action-pill"
-                    onClick={() => {
-                      if (navigator.clipboard) {
-                        navigator.clipboard.writeText(selectedLandmark.query);
-                        setToast('Copied campus landmark location!');
-                      }
-                    }}
-                  >
-                    <span>📋</span>
-                    <span>Copy Info</span>
-                  </button>
-                  <button
-                    className="gmaps-action-pill"
-                    onClick={() => setIsMapFullscreen((prev) => !prev)}
-                  >
-                    <span>⛶</span>
-                    <span>{isMapFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</span>
-                  </button>
-                </div>
+                          <div className="gmaps-sheet-place-detail">
+                            {loc.category} • {loc.code}
+                          </div>
 
-                {/* Place Details */}
-                <div className="gmaps-sheet-details">
-                  <div className="gmaps-sheet-detail-row">
-                    <span>📍</span>
-                    <span>Andhra University College of Engineering, Visakhapatnam, Andhra Pradesh 530003</span>
-                  </div>
-                  <div className="gmaps-sheet-detail-row">
-                    <span>🕒</span>
-                    <span>Open • {selectedLandmark.timings}</span>
-                  </div>
-                  <div className="gmaps-sheet-detail-row">
-                    <span>ℹ️</span>
-                    <span>{selectedLandmark.description} ({selectedLandmark.ext})</span>
-                  </div>
+                          <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>
+                            {loc.built} {loc.tags && loc.tags.length > 0 ? `• ${loc.tags.join(', ')}` : ''}
+                          </div>
+
+                          <div style={{ display: 'flex', gap: 8, marginTop: 8 }} onClick={(e) => e.stopPropagation()}>
+                            <button
+                              type="button"
+                              className="gmaps-action-pill primary"
+                              style={{ padding: '4px 10px', fontSize: 12 }}
+                              onClick={() => {
+                                setSelectedLandmark(loc);
+                                setDirectionsEnd(loc.name);
+                                setShowDirections(true);
+                              }}
+                            >
+                              <DirectionsDiamondIcon size={14} />
+                              <span>Directions</span>
+                            </button>
+                            <button
+                              type="button"
+                              className="gmaps-action-pill"
+                              style={{ padding: '4px 10px', fontSize: 12 }}
+                              onClick={() => {
+                                if (navigator.clipboard) {
+                                  navigator.clipboard.writeText(loc.name);
+                                  setToast(`Copied "${loc.name}" to clipboard`);
+                                }
+                              }}
+                            >
+                              <span>📋</span>
+                              <span>Copy</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
             )}
@@ -2320,7 +2399,6 @@ export default function Home() {
                   onClick={() => {
                     setIsNavigating(true);
                     setNavStepIndex(0);
-                    setShowPlaceSheet(false);
                     setToast(`Starting in-app navigation to ${directionsEnd || selectedLandmark?.name || 'campus destination'}...`);
                   }}
                 >
@@ -2385,9 +2463,9 @@ export default function Home() {
                     <span className="stat-number">12+</span>
                     <span className="stat-label">B.Tech / M.Tech Branches</span>
                   </div>
-                  <div className="college-stat-card">
-                    <span className="stat-number">A++</span>
-                    <span className="stat-label">NAAC Grade (3.74 CGPA)</span>
+                  <div className="college-stat-card naac-stat-card" style={{ background: 'rgba(198, 155, 69, 0.12)', border: '1px solid rgba(198, 155, 69, 0.3)', borderTop: '3px solid var(--gold)' }}>
+                    <span className="stat-number" style={{ color: 'var(--gold)' }}>A++</span>
+                    <span className="stat-label" style={{ color: 'var(--gold)' }}>NAAC Grade (3.74 CGPA)</span>
                   </div>
                 </div>
 
@@ -2403,14 +2481,14 @@ export default function Home() {
 
                 {/* Campus Helplines & Key Offices */}
                 <div className="card" style={{ padding: 20 }}>
-                  <h3 style={{ margin: '0 0 12px 0', fontSize: 16, color: 'var(--ink)' }}>Campus Key Contacts & Helplines</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, fontSize: 13 }}>
-                    <div><strong>Principal Office:</strong> principal.aucoe@andhrauniversity.edu.in</div>
-                    <div><strong>Dean Academic Affairs:</strong> dean.academic@andhrauniversity.edu.in</div>
-                    <div><strong>Examination Cell:</strong> examcell@andhrauniversity.edu.in</div>
-                    <div><strong>Central Library Desk:</strong> library@andhrauniversity.edu.in</div>
-                    <div><strong>Hostel Office:</strong> hostels@andhrauniversity.edu.in</div>
-                    <div><strong>Emergency Security:</strong> 0891-2844000</div>
+                  <h3 style={{ margin: '0 0 14px 0', fontSize: 17, fontWeight: 600, color: 'var(--ink)' }}>Campus Key Contacts & Helplines</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 15, fontWeight: 400, color: 'var(--text-main)', lineHeight: 1.5 }}>
+                    <div style={{ wordBreak: 'break-all' }}><strong style={{ fontWeight: 600 }}>Principal Office:</strong> principal.aucoe@andhrauniversity.edu.in</div>
+                    <div style={{ wordBreak: 'break-all' }}><strong style={{ fontWeight: 600 }}>Dean Academic Affairs:</strong> dean.academic@andhrauniversity.edu.in</div>
+                    <div style={{ wordBreak: 'break-all' }}><strong style={{ fontWeight: 600 }}>Examination Cell:</strong> examcell@andhrauniversity.edu.in</div>
+                    <div style={{ wordBreak: 'break-all' }}><strong style={{ fontWeight: 600 }}>Central Library Desk:</strong> library@andhrauniversity.edu.in</div>
+                    <div style={{ wordBreak: 'break-all' }}><strong style={{ fontWeight: 600 }}>Hostel Office:</strong> hostels@andhrauniversity.edu.in</div>
+                    <div style={{ wordBreak: 'break-all' }}><strong style={{ fontWeight: 600 }}>Emergency Security:</strong> 0891-2844000</div>
                   </div>
                 </div>
               </div>
@@ -2421,7 +2499,7 @@ export default function Home() {
                 <div className="insta-profile-topbar">
                   <div className="insta-topbar-username">
                     <span className="lock-icon" style={{ fontSize: 13 }}>🔒</span>
-                    <span>@{authUsername || (authName ? authName.toLowerCase().replace(/\s+/g, '_') : 'au.student')}</span>
+                    <span>@{studentHandle}</span>
                     <span className="verified-badge" title="Official Student Identity Verified">✓</span>
                   </div>
                   <div className="insta-topbar-actions">
@@ -2480,17 +2558,19 @@ export default function Home() {
 
                 {/* 3. BIO & DETAILS SECTION */}
                 <div className="insta-bio-section">
-                  <h1 className="insta-bio-fullname">{authName || 'AU Student'}</h1>
-                  <div className="insta-bio-college">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    <h1 className="insta-bio-fullname" style={{ margin: 0, fontSize: 22, fontWeight: 700, lineHeight: 1.25 }}>{authName || 'AU Student'}</h1>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, fontWeight: 600, color: 'var(--gold)', background: 'rgba(198, 155, 69, 0.12)', padding: '2px 6px', borderRadius: 4 }}>
+                      ✓ Verified
+                    </span>
+                  </div>
+                  <div className="insta-bio-college" style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>
                     🎓 AU College of Engineering (Autonomous)
                   </div>
-                  <div className="insta-bio-meta">
-                    <span>🆔 Roll: <strong>{authRollNo || '325506402371'}</strong></span>
-                    <span>•</span>
-                    <span>✉️ {authEmail || 'student@andhrauniversity.edu.in'}</span>
-                  </div>
-                  <div className="insta-bio-phone">
-                    📞 {authPhone || '+91 9876543210'}
+                  <div className="profile-identity-stack" style={{ display: 'flex', flexDirection: 'column', gap: 4, margin: '8px 0', fontSize: 13, fontWeight: 400, color: 'var(--muted)', lineHeight: 1.4 }}>
+                    <span>Roll: {authRollNo || '325506402371'}</span>
+                    <span style={{ wordBreak: 'break-all' }}>{authEmail || 'student@andhrauniversity.edu.in'}</span>
+                    <span>{authPhone || '+91 9876543210'}</span>
                   </div>
                   <p className="insta-bio-text">
                     {authBio || 'Engineering Student @ Andhra University. Passionate about technology, projects, and campus collaboration.'}
@@ -2855,7 +2935,7 @@ export default function Home() {
         <ThreadsComposer
           initialKind={threadsInitialKind}
           userName={authName || 'AU Student'}
-          userHandle={authName ? authName.toLowerCase().replace(/\s+/g, '_') : 'au.student'}
+          userHandle={studentHandle}
           userEmail={authEmail}
           onClose={() => setShowThreadsComposer(false)}
           onSubmit={handleThreadsPost}

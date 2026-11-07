@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   icons: {
     icon: '/icon.svg',
   },
-  metadataBase: new URL('https://web-rust-one-pk6jjs5pbw.vercel.app'),
+  metadataBase: new URL('https://aupro1.vercel.app'),
   alternates: {
     canonical: '/',
   },

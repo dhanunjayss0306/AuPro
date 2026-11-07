@@ -26,13 +26,13 @@ export default function NotFound() {
           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
         }}
       >
-        <div style={{ fontSize: '48px', fontWeight: '800', color: 'var(--primary, #701d32)', marginBottom: '8px' }}>
+        <div style={{ fontSize: '48px', fontWeight: '700', color: 'var(--primary, #701d32)', marginBottom: '8px' }}>
           404
         </div>
         <h1 style={{ fontSize: '20px', fontWeight: '700', margin: '0 0 8px 0' }}>
           Campus Page Not Found
         </h1>
-        <p style={{ fontSize: '14px', color: 'var(--muted, #667085)', margin: '0 0 24px 0', lineHeight: 1.5 }}>
+        <p style={{ fontSize: '14px', color: 'var(--muted, rgba(31, 41, 55, 0.6))', margin: '0 0 24px 0', lineHeight: 1.5 }}>
           The requested Andhra University resource or link could not be located.
         </p>
         <Link
@@ -42,7 +42,7 @@ export default function NotFound() {
             padding: '12px 24px',
             background: 'var(--primary, #701d32)',
             color: '#ffffff',
-            borderRadius: '8px',
+            borderRadius: '12px',
             textDecoration: 'none',
             fontWeight: '600',
             fontSize: '14px',

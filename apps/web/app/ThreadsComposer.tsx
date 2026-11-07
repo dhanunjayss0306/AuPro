@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { InstagramLocationIcon } from './icons';
-import { validateTextContent, validateImageSafety } from './content_moderation';
+import { validateTextContent, validateImageSafety, analyzePostTopic } from './content_moderation';
 
 export interface ThreadsPostData {
   category: 'normal' | 'problem' | 'announcement';
@@ -132,10 +132,10 @@ export function ThreadsComposer({
       return;
     }
 
-    // 2. Strict content moderation (bad words, profanity, vulgarity, abuse)
-    const textCheck = validateTextContent(`${caption} ${location}`);
+    // 2. Strict content & topic moderation (safety + university/studies relevance)
+    const textCheck = validateTextContent(`${caption} ${location}`, kind);
     if (!textCheck.isValid) {
-      setError(textCheck.reason || 'Post blocked: Inappropriate language detected.');
+      setError(textCheck.reason || 'Post blocked: Inappropriate or off-topic content detected.');
       return;
     }
 
@@ -268,9 +268,29 @@ export function ThreadsComposer({
                 rows={3}
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
-                placeholder="Start a thread..."
+                placeholder={kind === 'problem' ? "What's the issue? Describe what's broken or needs repair..." : "Share university updates, academic queries, or study notes..."}
                 autoFocus
               />
+
+              {/* Real-time University & Academic Topic Analysis Pill */}
+              <div style={{ margin: '4px 0 6px 0' }}>
+                {caption.trim().length < 3 ? (
+                  <div className="threads-topic-pill neutral">
+                    <span style={{ fontSize: 12 }}>🎓</span>
+                    <span>AuPro Focus: Posts must relate to AU campus problems, college life, or studies</span>
+                  </div>
+                ) : analyzePostTopic(`${caption} ${location}`, kind).isRelevant ? (
+                  <div className="threads-topic-pill valid">
+                    <span style={{ fontSize: 12 }}>✓</span>
+                    <span>Verified: {analyzePostTopic(`${caption} ${location}`, kind).categoryName} topic</span>
+                  </div>
+                ) : (
+                  <div className="threads-topic-pill warning">
+                    <span style={{ fontSize: 12 }}>⚠️</span>
+                    <span>Must be related to AU problems, campus life, or academic studies</span>
+                  </div>
+                )}
+              </div>
 
               {/* Attached Image Preview */}
               {imagePreview && (

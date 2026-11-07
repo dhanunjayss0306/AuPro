@@ -5985,3 +5985,58 @@ textarea, select { font: inherit; }
   border-color: rgba(212, 168, 87, 0.3) !important;
 }
 
+/* ========================================================
+   THREADS COMPOSER TOPIC RELEVANCE LIVE INDICATOR
+   ======================================================== */
+.threads-topic-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  margin-top: 4px;
+  transition: all 0.18s ease;
+  line-height: 1.3;
+}
+
+.threads-topic-pill.neutral {
+  background: var(--hover-subtle);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.threads-topic-pill.valid {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.threads-topic-pill.warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+[data-theme='dark'] .threads-topic-pill.neutral,
+.dark .threads-topic-pill.neutral {
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: #94a3b8 !important;
+  border-color: #243044 !important;
+}
+
+[data-theme='dark'] .threads-topic-pill.valid,
+.dark .threads-topic-pill.valid {
+  color: #34d399 !important;
+  background: rgba(16, 185, 129, 0.16) !important;
+  border-color: rgba(52, 211, 153, 0.3) !important;
+}
+
+[data-theme='dark'] .threads-topic-pill.warning,
+.dark .threads-topic-pill.warning {
+  color: #fbbf24 !important;
+  background: rgba(245, 158, 11, 0.16) !important;
+  border-color: rgba(251, 191, 36, 0.3) !important;
+}
+

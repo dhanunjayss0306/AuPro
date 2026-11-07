@@ -1397,10 +1397,11 @@ export default function Home() {
   };
 
   const handleThreadsPost = (data: ThreadsPostData) => {
-    // Content Moderation check
-    const textCheck = validateTextContent(`${data.caption} ${data.title || ''} ${data.location || ''}`);
+    // Content Moderation check (Profanity, safety, and University/Studies Relevance)
+    const textCheck = validateTextContent(`${data.caption} ${data.title || ''} ${data.location || ''}`, data.category);
     if (!textCheck.isValid) {
-      setToast(textCheck.reason || 'Post blocked: Inappropriate language detected.');
+      logPlatformActivity('Post Rejected (Off-Topic/Policy)', authEmail || 'Student', textCheck.reason || 'Off-topic post attempt blocked');
+      setToast(textCheck.reason || 'Post blocked: Content must be related to university problems, campus life, or studies.');
       return;
     }
 
@@ -1457,10 +1458,11 @@ export default function Home() {
       return;
     }
 
-    // 2. Automated Bad Words & Profanity Filter
-    const textCheck = validateTextContent(`${createTitle} ${createCaption} ${createLocation}`);
+    // 2. Automated Bad Words & University/Study Relevance Filter
+    const textCheck = validateTextContent(`${createTitle} ${createCaption} ${createLocation}`, createKind);
     if (!textCheck.isValid) {
-      setCreateError(textCheck.reason || 'Post blocked: Inappropriate language detected.');
+      logPlatformActivity('Post Rejected (Off-Topic/Policy)', authEmail || 'Student', textCheck.reason || 'Off-topic post attempt blocked');
+      setCreateError(textCheck.reason || 'Post blocked: Content must be related to university problems, campus life, or studies.');
       return;
     }
 

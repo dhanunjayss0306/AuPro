@@ -177,3 +177,14 @@ test('Threads Feed & Check About post management requirements', async () => {
   assert.ok(!pageContent.includes("window.open("), 'Must NOT redirect out to external window for navigation');
   assert.ok(pageContent.includes("au-info-fullpage"), 'Must open whole page for AU Info');
 });
+
+test('Content Moderation analyzes every post for university problems, campus life, and academic studies', async () => {
+  const modContent = await readFile(new URL('../app/content_moderation.ts', import.meta.url), 'utf8');
+
+  assert.ok(modContent.includes('CAMPUS_PROBLEM_KEYWORDS'), 'Must define campus problem keyword dictionary');
+  assert.ok(modContent.includes('UNIVERSITY_CAMPUS_KEYWORDS'), 'Must define university campus keyword dictionary');
+  assert.ok(modContent.includes('ACADEMIC_STUDY_KEYWORDS'), 'Must define academic study keyword dictionary');
+  assert.ok(modContent.includes('PROHIBITED_OFF_TOPIC_TERMS'), 'Must define prohibited off-topic terms (commercial, gossip, ads)');
+  assert.ok(modContent.includes('analyzePostTopic'), 'Must export analyzePostTopic analyzer');
+  assert.ok(modContent.includes('validateUniversityRelevance'), 'Must export validateUniversityRelevance');
+});

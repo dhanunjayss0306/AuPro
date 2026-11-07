@@ -39,6 +39,16 @@ import {
   verifyUniversityOtp,
   findRegisteredUser,
   saveRegisteredUser,
+  HEAD_ACCOUNT_EMAIL,
+  isHeadAccount,
+  getRegisteredUsers,
+  deleteRegisteredUser,
+  purgeAllExceptHeadAccount,
+  logPlatformActivity,
+  getPlatformActivities,
+  clearPlatformActivities,
+  PlatformActivity,
+  StudentProfile,
 } from './auth';
 import { auVectorDB } from './vector_search';
 import { validateTextContent, validateImageSafety } from './content_moderation';
@@ -836,12 +846,31 @@ export default function Home() {
   const [gpsError, setGpsError] = useState('');
   const [isLocating, setIsLocating] = useState(false);
 
-  // About tab sub-navigation & settings (My Posts, Saved Bookmarks, Profile, AU College Info)
-  const [aboutSubTab, setAboutSubTab] = useState<'posts' | 'saved' | 'profile' | 'college'>('posts');
+  // About tab sub-navigation & settings (My Posts, Saved Bookmarks, Profile, AU College Info, Head Admin Console)
+  const [aboutSubTab, setAboutSubTab] = useState<'posts' | 'saved' | 'profile' | 'college' | 'admin'>('posts');
   const [savedPostIds, setSavedPostIds] = useState<string[]>([]);
   const [settingsNotifications, setSettingsNotifications] = useState(true);
   const [settingsProblemAlerts, setSettingsProblemAlerts] = useState(true);
   const [settingsCompactView, setSettingsCompactView] = useState(false);
+
+  // Head Account Master Administrator State (Only for 325506402371@andhrauniversity.edu.in)
+  const [registeredUsersList, setRegisteredUsersList] = useState<Record<string, StudentProfile>>({});
+  const [platformActivities, setPlatformActivities] = useState<PlatformActivity[]>([]);
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [newUserName, setNewUserName] = useState('');
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserRoll, setNewUserRoll] = useState('');
+  const [newUserDept, setNewUserDept] = useState('Computer Science & Systems Engineering');
+  const [newUserYear, setNewUserYear] = useState('1st Year');
+  const [newUserPassword, setNewUserPassword] = useState('');
+  const [addUserError, setAddUserError] = useState('');
+
+  const refreshAdminData = () => {
+    if (typeof window !== 'undefined') {
+      setRegisteredUsersList(getRegisteredUsers());
+      setPlatformActivities(getPlatformActivities());
+    }
+  };
 
   // Load saved post IDs and user posts from persistent client storage
   useEffect(() => {
@@ -941,6 +970,11 @@ export default function Home() {
       console.error('Failed to restore session', e);
     }
   }, []);
+
+  // Synchronize registered accounts and live activity stream for Head Account
+  useEffect(() => {
+    refreshAdminData();
+  }, [signedIn, aboutSubTab]);
 
   // Countdown timer for OTP resend
   useEffect(() => {
@@ -1145,25 +1179,101 @@ export default function Home() {
     const q = questionText.trim();
     if (!q) return;
 
-    // Semantic Vector Database Query
+    // University Knowledge Base Query
     const vectorMatches = auVectorDB.query(q, 3);
     const topMatch = vectorMatches[0];
 
     let response = 'I have noted your query for Andhra University College of Engineering administration. If you require immediate in-person help, visit Room 102 in the Main Administration Block or tap "Forward to WhatsApp" below.';
-    let matchTag = '';
 
     if (topMatch && topMatch.confidencePercent >= 25) {
       response = topMatch.entry.answer;
-      matchTag = `⚡ Vector Match: ${topMatch.confidencePercent}% confidence (${topMatch.entry.category})`;
     }
 
     setChatMessages((prev) => [
       ...prev,
       { role: 'user', text: q, time: 'Just now' },
-      { role: 'assistant', text: matchTag ? `${response}\n\n${matchTag}` : response, time: 'Just now' },
+      { role: 'assistant', text: response, time: 'Just now' },
     ]);
     setChatInput('');
-    setChatStatus('Answer retrieved from Vector Search.');
+    setChatStatus('');
+  };
+
+  // Head Account Administrative Handlers
+  const handleAddStudentAccount = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAddUserError('');
+    const cleanEmail = newUserEmail.toLowerCase().trim();
+    if (!cleanEmail.endsWith('@andhrauniversity.edu.in')) {
+      setAddUserError('Registration is restricted to official @andhrauniversity.edu.in addresses.');
+      return;
+    }
+    if (!newUserName.trim()) {
+      setAddUserError('Student full name is required.');
+      return;
+    }
+    if (newUserPassword.length < 6) {
+      setAddUserError('Initial password must be at least 6 characters.');
+      return;
+    }
+    const currentUsers = getRegisteredUsers();
+    if (currentUsers[cleanEmail]) {
+      setAddUserError('An account already exists for this university email.');
+      return;
+    }
+
+    const studentProfile: StudentProfile = {
+      email: cleanEmail,
+      name: newUserName.trim(),
+      username: newUserName.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, ''),
+      rollNo: newUserRoll.trim() || '32550640' + Math.floor(1000 + Math.random() * 9000),
+      department: newUserDept,
+      year: newUserYear,
+      phone: '',
+      bio: `AU Student @ ${newUserDept}. Verified by Head Administrator.`,
+      password: newUserPassword,
+      isVerified: true,
+      verifiedAt: new Date().toISOString(),
+    };
+
+    saveRegisteredUser(studentProfile);
+    logPlatformActivity('Account Created (Admin)', authEmail, `Created account for ${newUserName} (${cleanEmail})`);
+    refreshAdminData();
+    setShowAddUserModal(false);
+    setNewUserName('');
+    setNewUserEmail('');
+    setNewUserRoll('');
+    setNewUserPassword('');
+    setToast(`Account created for ${newUserName.trim()} successfully.`);
+  };
+
+  const handleDeleteUserAccount = (targetEmail: string, targetName: string) => {
+    if (isHeadAccount(targetEmail)) {
+      setToast('The Head Administrator account is protected and cannot be removed.');
+      return;
+    }
+    const confirmed = typeof window !== 'undefined' ? window.confirm(`Are you sure you want to remove the account for ${targetName} (${targetEmail})?`) : false;
+    if (!confirmed) return;
+
+    const success = deleteRegisteredUser(targetEmail);
+    if (success) {
+      logPlatformActivity('Account Removed (Admin)', authEmail, `Removed account for ${targetName} (${targetEmail})`);
+      refreshAdminData();
+      setToast(`Account for ${targetName} has been removed.`);
+    } else {
+      setToast('Failed to remove account.');
+    }
+  };
+
+  const handlePurgeAllAccounts = () => {
+    const confirmed = typeof window !== 'undefined' ? window.confirm(
+      '⚠️ DANGER: Are you sure you want to remove ALL registered accounts except your Head Administrator account? All other student accounts will be deleted immediately.'
+    ) : false;
+    if (!confirmed) return;
+
+    purgeAllExceptHeadAccount();
+    logPlatformActivity('Purged All Accounts (Admin)', authEmail, 'Reset platform registry to Head Account only');
+    refreshAdminData();
+    setToast('All other student accounts have been purged. Only the Head Account remains.');
   };
 
   useEffect(() => {
@@ -1321,6 +1431,11 @@ export default function Home() {
       } catch {}
       return updated;
     });
+    logPlatformActivity(
+      data.category === 'problem' ? 'Reported Campus Problem' : data.category === 'announcement' ? 'Published Announcement' : 'Published Feed Post',
+      authEmail || authUsername || 'Student',
+      data.caption.slice(0, 90)
+    );
     setFeedFilter('all');
     setShowThreadsComposer(false);
     setToast(data.category === 'problem' ? 'Problem reported to campus administration.' : 'Post published to AuPro feed.');
@@ -1455,6 +1570,7 @@ export default function Home() {
                   if (existing.bio) setAuthBio(existing.bio);
                   setSignedIn(true);
                   setShowIntro(false);
+                  logPlatformActivity('User Signed In', clean, `Logged in as ${existing.name || 'Student'}`);
                   setToast(`Welcome back, ${existing.name}!`);
                   return;
                 }
@@ -1477,6 +1593,7 @@ export default function Home() {
                     localStorage.setItem('aupro_session', JSON.stringify(sessionData));
                     setSignedIn(true);
                     setShowIntro(false);
+                    logPlatformActivity('User Signed In', clean, `Authenticated via college portal`);
                     setToast('Signed in successfully.');
                     return;
                   }
@@ -1661,6 +1778,8 @@ export default function Home() {
 
                   setSignedIn(true);
                   setShowIntro(false);
+                  logPlatformActivity('Account Registered', authEmail, `Verified identity for ${authName} (${authRollNo}, ${authDept})`);
+                  refreshAdminData();
                   setToast(`Welcome to AuPro, ${authName || 'Student'}! Official email verified successfully.`);
                 } catch (err: any) {
                   setAuthError(err?.message || 'Invalid or expired verification code. Please request a new code.');
@@ -2011,6 +2130,7 @@ export default function Home() {
                     onSubmit={(e) => {
                       e.preventDefault();
                       const refId = `AU-${Math.floor(100000 + Math.random() * 900000)}`;
+                      logPlatformActivity('Applied for Certificate', authEmail || 'Student', `${activeApplication.title} (Ref ID: ${refId})`);
                       setToast(`Application for ${activeApplication.title} submitted! Ref ID: ${refId}`);
                       setApplicationStatus(`Application submitted for ${activeApplication.title} (Ref ID: ${refId}). Track at Academic Section Counter 3.`);
                       setActiveApplication(null);
@@ -2296,7 +2416,6 @@ export default function Home() {
                   </a>
                 </div>
               </form>
-              {chatStatus && <div className="feedback-banner" role="status">{chatStatus}</div>}
             </div>
           </div>
         )}
@@ -3048,6 +3167,11 @@ export default function Home() {
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, fontWeight: 600, color: 'var(--gold)', background: 'rgba(198, 155, 69, 0.12)', padding: '2px 6px', borderRadius: 4 }}>
                       ✓ Verified
                     </span>
+                    {isHeadAccount(authEmail) && (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#f59e0b', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.35)', padding: '2px 8px', borderRadius: 9999 }}>
+                        👑 Head Administrator
+                      </span>
+                    )}
                   </div>
                   <div className="insta-bio-college" style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>
                     🎓 AU College of Engineering (Autonomous)
@@ -3060,6 +3184,25 @@ export default function Home() {
                   <p className="insta-bio-text">
                     {authBio || 'Engineering Student @ Andhra University. Passionate about technology, projects, and campus collaboration.'}
                   </p>
+                  {isHeadAccount(authEmail) && (
+                    <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(212, 168, 87, 0.1)', border: '1px solid rgba(212, 168, 87, 0.35)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                      <div>
+                        <strong style={{ fontSize: 13, color: 'var(--ink)', display: 'block' }}>👑 Master Head Account</strong>
+                        <span style={{ fontSize: 12, color: 'var(--muted)' }}>Manage student accounts, authorize logins, & live audit stream</span>
+                      </div>
+                      <button
+                        type="button"
+                        className="primary-button"
+                        style={{ fontSize: 12, padding: '6px 14px', whiteSpace: 'nowrap' }}
+                        onClick={() => {
+                          refreshAdminData();
+                          setAboutSubTab('admin');
+                        }}
+                      >
+                        Head Console →
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* 4. ACTION BUTTONS ROW (Edit Bio, Share, Sign Out) */}
@@ -3222,6 +3365,49 @@ export default function Home() {
                             <span className="settings-toggle-thumb" />
                           </button>
                         </div>
+
+                        {/* Master Head Account Admin Controls inside Settings Drawer */}
+                        {isHeadAccount(authEmail) && (
+                          <div style={{ marginTop: 14, padding: 14, borderRadius: 12, background: 'var(--surface-elevated)', border: '1px solid rgba(212, 168, 87, 0.35)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                              <strong style={{ fontSize: 13, color: 'var(--gold)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                👑 Head Account Master Controls
+                              </strong>
+                              <span style={{ fontSize: 11, background: 'rgba(212, 168, 87, 0.15)', color: 'var(--gold)', padding: '2px 8px', borderRadius: 9999, fontWeight: 600 }}>
+                                Master Admin
+                              </span>
+                            </div>
+                            <p style={{ fontSize: 12, color: 'var(--muted)', margin: '0 0 10px 0' }}>
+                              Authorized Master: {HEAD_ACCOUNT_EMAIL}. You can add student accounts, delete accounts, or review live activity.
+                            </p>
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                              <button
+                                type="button"
+                                className="primary-button"
+                                style={{ fontSize: 12, padding: '7px 14px' }}
+                                onClick={() => {
+                                  setIsEditingProfile(false);
+                                  refreshAdminData();
+                                  setShowAddUserModal(true);
+                                }}
+                              >
+                                ➕ Add Another One
+                              </button>
+                              <button
+                                type="button"
+                                className="secondary-button"
+                                style={{ fontSize: 12, padding: '7px 14px' }}
+                                onClick={() => {
+                                  setIsEditingProfile(false);
+                                  refreshAdminData();
+                                  setAboutSubTab('admin');
+                                }}
+                              >
+                                👑 Open Head Console
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       <button className="signout-button" onClick={handleSignOut} style={{ marginTop: 8 }}>
@@ -3232,7 +3418,7 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* 5. INSTAGRAM PROFILE SUBTABS: Posts | Saved | AU Info */}
+                {/* 5. INSTAGRAM PROFILE SUBTABS: Posts | Saved | AU Info | Head Console */}
                 <div className="insta-profile-tabs" role="tablist" aria-label="Profile navigation">
                   <button
                     role="tab"
@@ -3263,6 +3449,22 @@ export default function Home() {
                     <span className="tab-icon">🏛️</span>
                     <span className="tab-label">AU Info</span>
                   </button>
+
+                  {isHeadAccount(authEmail) && (
+                    <button
+                      role="tab"
+                      aria-selected={aboutSubTab === 'admin'}
+                      className={`insta-tab-btn ${aboutSubTab === 'admin' ? 'active' : ''}`}
+                      style={{ color: aboutSubTab === 'admin' ? 'var(--gold)' : undefined, borderTopColor: aboutSubTab === 'admin' ? 'var(--gold)' : undefined }}
+                      onClick={() => {
+                        refreshAdminData();
+                        setAboutSubTab('admin');
+                      }}
+                    >
+                      <span className="tab-icon">👑</span>
+                      <span className="tab-label">Head Console</span>
+                    </button>
+                  )}
                 </div>
 
                 {/* 6. "DOWN YOUR POSTS" / TAB CONTENT */}
@@ -3358,6 +3560,175 @@ export default function Home() {
                     )}
                   </div>
                 )}
+
+                {/* SUBTAB 3: HEAD ADMINISTRATOR CONSOLE (ONLY VISIBLE TO HEAD ACCOUNT) */}
+                {aboutSubTab === 'admin' && isHeadAccount(authEmail) && (
+                  <div className="head-admin-console stack" style={{ gap: 18 }}>
+                    {/* Head Console Header */}
+                    <div className="card" style={{ padding: 18, background: 'var(--surface-elevated)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ fontSize: 24 }}>👑</span>
+                            <div>
+                              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>Head Administrator Console</h2>
+                              <span style={{ fontSize: 13, color: 'var(--muted)' }}>Master Account: {HEAD_ACCOUNT_EMAIL}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            className="primary-button"
+                            style={{ fontSize: 13, padding: '8px 16px' }}
+                            onClick={() => setShowAddUserModal(true)}
+                          >
+                            ➕ Add Another One
+                          </button>
+                          <button
+                            type="button"
+                            className="danger-button"
+                            style={{ fontSize: 13, padding: '8px 14px' }}
+                            onClick={handlePurgeAllAccounts}
+                            title="Delete all accounts except the Head Account"
+                          >
+                            🧹 Purge All Other Accounts
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Summary Metrics */}
+                      <div className="head-metrics-grid">
+                        <div className="head-metric-card">
+                          <span className="head-metric-label">Registered Accounts</span>
+                          <span className="head-metric-value">{Object.keys(registeredUsersList).length}</span>
+                          <span className="head-metric-sub">1 Master Head ID</span>
+                        </div>
+                        <div className="head-metric-card">
+                          <span className="head-metric-label">Total Feed Posts</span>
+                          <span className="head-metric-value">{feedPosts.length}</span>
+                          <span className="head-metric-sub">Campus Wide</span>
+                        </div>
+                        <div className="head-metric-card">
+                          <span className="head-metric-label">Activity Log Events</span>
+                          <span className="head-metric-value">{platformActivities.length}</span>
+                          <span className="head-metric-sub">Live Real-time Log</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 1: Registered Accounts Directory */}
+                    <div className="card" style={{ padding: 18 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                        <div>
+                          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>Registered Student Accounts</h3>
+                          <span style={{ fontSize: 12, color: 'var(--muted)' }}>Manage student access, view registration details, or delete accounts</span>
+                        </div>
+                        <button
+                          type="button"
+                          className="secondary-button"
+                          style={{ fontSize: 12, padding: '5px 12px' }}
+                          onClick={refreshAdminData}
+                        >
+                          🔄 Refresh
+                        </button>
+                      </div>
+
+                      <div className="head-users-list">
+                        {Object.values(registeredUsersList).map((user) => {
+                          const isThisHead = isHeadAccount(user.email);
+                          return (
+                            <div key={user.email} className={`head-user-card ${isThisHead ? 'is-head-account' : ''}`}>
+                              <div className="head-user-left">
+                                <div className="head-user-avatar">
+                                  {isThisHead ? '👑' : (user.name[0] || 'U').toUpperCase()}
+                                </div>
+                                <div className="head-user-info">
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                                    <strong style={{ color: 'var(--ink)' }}>{user.name}</strong>
+                                    {isThisHead && <span className="head-badge">Head Master</span>}
+                                    <span className="head-roll-badge">{user.rollNo || 'No Roll'}</span>
+                                  </div>
+                                  <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>{user.email}</div>
+                                  <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
+                                    {user.department || 'AU Engineering'} • {user.year || '4th Yr'}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="head-user-right">
+                                {isThisHead ? (
+                                  <span className="head-locked-pill">Protected (Head)</span>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className="danger-button-outline"
+                                    onClick={() => handleDeleteUserAccount(user.email, user.name)}
+                                  >
+                                    🗑️ Remove
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Section 2: Everyone's Activity Audit Feed */}
+                    <div className="card" style={{ padding: 18 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                        <div>
+                          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>Everyone's Live Activity Stream</h3>
+                          <span style={{ fontSize: 12, color: 'var(--muted)' }}>Real-time audit log of campus actions, logins, and submissions</span>
+                        </div>
+                        {platformActivities.length > 0 && (
+                          <button
+                            type="button"
+                            className="secondary-button"
+                            style={{ fontSize: 12, padding: '5px 12px' }}
+                            onClick={() => {
+                              if (typeof window !== 'undefined' && window.confirm('Clear all recorded activity history?')) {
+                                clearPlatformActivities();
+                                refreshAdminData();
+                                setToast('Activity history cleared.');
+                              }
+                            }}
+                          >
+                            Clear Log
+                          </button>
+                        )}
+                      </div>
+
+                      {platformActivities.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--muted)', fontSize: 13 }}>
+                          No platform activities recorded yet. Actions like signups, posts, logins, and applications will appear here in real-time.
+                        </div>
+                      ) : (
+                        <div className="head-activity-list">
+                          {platformActivities.map((act) => (
+                            <div key={act.id} className="head-activity-item">
+                              <div className="head-activity-dot" />
+                              <div className="head-activity-content">
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8 }}>
+                                  <strong style={{ fontSize: 13, color: 'var(--ink)' }}>{act.action}</strong>
+                                  <span style={{ fontSize: 11, color: 'var(--muted)' }}>
+                                    {new Date(act.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  </span>
+                                </div>
+                                <div style={{ fontSize: 12, color: 'var(--secondary)', marginTop: 2 }}>{act.actor}</div>
+                                {act.details && (
+                                  <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4, background: 'var(--hover-subtle)', padding: '4px 8px', borderRadius: 6 }}>
+                                    {act.details}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </>
@@ -3425,6 +3796,123 @@ export default function Home() {
           onClose={() => setShowThreadsComposer(false)}
           onSubmit={handleThreadsPost}
         />
+      )}
+
+      {/* HEAD ADMINISTRATOR: ADD ANOTHER STUDENT ACCOUNT MODAL */}
+      {showAddUserModal && (
+        <div className="insta-modal-backdrop" onClick={() => setShowAddUserModal(false)}>
+          <div className="insta-modal-sheet head-modal-sheet" style={{ maxWidth: 460, padding: 22 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 22 }}>👑</span>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>Add Another Student Account</h3>
+                  <span style={{ fontSize: 12, color: 'var(--muted)' }}>Authorize a student under Andhra University</span>
+                </div>
+              </div>
+              <button className="icon-button" onClick={() => setShowAddUserModal(false)} aria-label="Close dialog">✕</button>
+            </div>
+
+            {addUserError && (
+              <div className="auth-error-banner" style={{ marginBottom: 12, padding: '8px 12px', fontSize: 12 }}>
+                {addUserError}
+              </div>
+            )}
+
+            <form onSubmit={handleAddStudentAccount} className="stack" style={{ gap: 12 }}>
+              <div>
+                <label className="field-label" style={{ fontSize: 12 }}>Student Full Name *</label>
+                <input
+                  type="text"
+                  className="search"
+                  placeholder="e.g. Ramesh Kumar"
+                  value={newUserName}
+                  onChange={(e) => setNewUserName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="field-label" style={{ fontSize: 12 }}>University Email *</label>
+                <input
+                  type="email"
+                  className="search"
+                  placeholder="rollno@andhrauniversity.edu.in"
+                  value={newUserEmail}
+                  onChange={(e) => setNewUserEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div>
+                  <label className="field-label" style={{ fontSize: 12 }}>Roll Number</label>
+                  <input
+                    type="text"
+                    className="search"
+                    placeholder="e.g. 325506402375"
+                    value={newUserRoll}
+                    onChange={(e) => setNewUserRoll(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="field-label" style={{ fontSize: 12 }}>Year</label>
+                  <select
+                    className="search"
+                    value={newUserYear}
+                    onChange={(e) => setNewUserYear(e.target.value)}
+                    style={{ padding: '8px 10px', fontSize: 13 }}
+                  >
+                    <option value="1st Year">1st Year</option>
+                    <option value="2nd Year">2nd Year</option>
+                    <option value="3rd Year">3rd Year</option>
+                    <option value="4th Year">4th Year</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="field-label" style={{ fontSize: 12 }}>Department</label>
+                <select
+                  className="search"
+                  value={newUserDept}
+                  onChange={(e) => setNewUserDept(e.target.value)}
+                  style={{ padding: '8px 10px', fontSize: 13 }}
+                >
+                  <option value="Computer Science & Systems Engineering">CSE</option>
+                  <option value="Electronics & Communication Engineering">ECE</option>
+                  <option value="Mechanical Engineering">Mechanical</option>
+                  <option value="Civil Engineering">Civil</option>
+                  <option value="Electrical & Electronics Engineering">EEE</option>
+                  <option value="Chemical Engineering">Chemical</option>
+                  <option value="Marine Engineering">Marine</option>
+                  <option value="Information Technology">IT</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="field-label" style={{ fontSize: 12 }}>Initial Password *</label>
+                <input
+                  type="password"
+                  className="search"
+                  placeholder="Minimum 6 characters"
+                  value={newUserPassword}
+                  onChange={(e) => setNewUserPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                <button type="submit" className="primary-button" style={{ flex: 1 }}>
+                  Create Student Account
+                </button>
+                <button type="button" className="secondary-button" onClick={() => setShowAddUserModal(false)}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
       {toast && <div className="toast" role="status">{toast}</div>}

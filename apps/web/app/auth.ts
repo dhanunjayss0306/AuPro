@@ -125,6 +125,14 @@ export async function verifyUniversityOtp(email: string, otp: string, token: str
   return data;
 }
 
+export const HEAD_ACCOUNT_EMAIL = '325506402371@andhrauniversity.edu.in';
+
+export function isHeadAccount(email?: string): boolean {
+  if (!email) return false;
+  const clean = email.toLowerCase().trim();
+  return clean === HEAD_ACCOUNT_EMAIL || clean.startsWith('325506402371');
+}
+
 /**
  * Client Registry of Verified Students (Local + Supabase sync)
  */
@@ -132,7 +140,24 @@ export function getRegisteredUsers(): Record<string, StudentProfile> {
   if (typeof window === 'undefined') return {};
   try {
     const raw = localStorage.getItem('aupro_registered_users');
-    return raw ? JSON.parse(raw) : {};
+    const users: Record<string, StudentProfile> = raw ? JSON.parse(raw) : {};
+    // Ensure the Head Account always exists in registry
+    if (!users[HEAD_ACCOUNT_EMAIL]) {
+      users[HEAD_ACCOUNT_EMAIL] = {
+        email: HEAD_ACCOUNT_EMAIL,
+        name: 'P V N Dhanunjay Reddy',
+        username: 'p_v_n_dhanunajay_reedy',
+        rollNo: '325506402371',
+        department: 'Computer Science & Systems Engineering',
+        year: '4th Year',
+        phone: '+91 9876543210',
+        bio: 'Head Administrator & Engineering Student @ Andhra University College of Engineering.',
+        isVerified: true,
+        verifiedAt: new Date().toISOString(),
+      };
+      localStorage.setItem('aupro_registered_users', JSON.stringify(users));
+    }
+    return users;
   } catch {
     return {};
   }
@@ -153,9 +178,94 @@ export function saveRegisteredUser(profile: StudentProfile) {
   }
 }
 
+export function deleteRegisteredUser(email: string): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const clean = email.toLowerCase().trim();
+    if (isHeadAccount(clean)) {
+      console.warn('Cannot delete Head Account');
+      return false;
+    }
+    const users = getRegisteredUsers();
+    delete users[clean];
+    localStorage.setItem('aupro_registered_users', JSON.stringify(users));
+    return true;
+  } catch (e) {
+    console.error('Failed to delete registered user:', e);
+    return false;
+  }
+}
+
+export function purgeAllExceptHeadAccount(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const users = getRegisteredUsers();
+    const headProfile = users[HEAD_ACCOUNT_EMAIL] || {
+      email: HEAD_ACCOUNT_EMAIL,
+      name: 'P V N Dhanunjay Reddy',
+      username: 'p_v_n_dhanunajay_reedy',
+      rollNo: '325506402371',
+      department: 'Computer Science & Systems Engineering',
+      year: '4th Year',
+      phone: '+91 9876543210',
+      bio: 'Head Administrator & Engineering Student @ Andhra University College of Engineering.',
+      isVerified: true,
+      verifiedAt: new Date().toISOString(),
+    };
+    const purged: Record<string, StudentProfile> = {
+      [HEAD_ACCOUNT_EMAIL]: headProfile,
+    };
+    localStorage.setItem('aupro_registered_users', JSON.stringify(purged));
+  } catch (e) {
+    console.error('Failed to purge accounts:', e);
+  }
+}
+
 export function findRegisteredUser(email: string): StudentProfile | null {
   const users = getRegisteredUsers();
   return users[email.toLowerCase().trim()] || null;
+}
+
+export interface PlatformActivity {
+  id: string;
+  action: string;
+  actor: string;
+  details?: string;
+  timestamp: string;
+}
+
+export function logPlatformActivity(action: string, actor: string, details?: string) {
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = localStorage.getItem('aupro_platform_activities');
+    const list: PlatformActivity[] = raw ? JSON.parse(raw) : [];
+    const newEntry: PlatformActivity = {
+      id: 'act_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+      action,
+      actor: actor || 'AU User',
+      details,
+      timestamp: new Date().toISOString(),
+    };
+    list.unshift(newEntry);
+    localStorage.setItem('aupro_platform_activities', JSON.stringify(list.slice(0, 60)));
+  } catch {}
+}
+
+export function getPlatformActivities(): PlatformActivity[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem('aupro_platform_activities');
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function clearPlatformActivities(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem('aupro_platform_activities');
+  } catch {}
 }
 
 export async function supabaseSignUp(data: {

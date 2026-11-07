@@ -224,3 +224,29 @@ test('Headteacher Administrator central server accounts, live activity stream, a
   assert.ok(pageContent.includes("fetch('/api/activity')"), 'Page must fetch activity from server API');
   assert.ok(pageContent.includes("fetch('/api/feed')"), 'Page must fetch feed posts from server API');
 });
+
+test('Real interactions & strict delete permission enforcement', async () => {
+  const cardContent = await readFile(new URL('../app/MomentCard.tsx', import.meta.url), 'utf8');
+  const feedRoute = await readFile(new URL('../app/api/feed/route.ts', import.meta.url), 'utf8');
+  const registryContent = await readFile(new URL('../app/api/auth/account-registry.ts', import.meta.url), 'utf8');
+  const layoutContent = await readFile(new URL('../app/layout.tsx', import.meta.url), 'utf8');
+
+  // 1. Strict Delete: only post author or master admin can see delete option
+  assert.ok(cardContent.includes('canDelete = Boolean(onDelete) && (isPostAuthor || isMajorAdmin)'), 'Delete must be strictly guarded to author or admin');
+  assert.ok(cardContent.includes('{canDelete && ('), 'Delete button must be rendered conditionally on canDelete');
+  assert.ok(!cardContent.includes('{(isOwner || Boolean(onDelete)) && ('), 'Must not allow delete option to non-owners in feed');
+
+  // 2. Real Likes, Comments, and Reposts in Feed API
+  assert.ok(feedRoute.includes('export async function PATCH'), 'Feed API must export PATCH method');
+  assert.ok(feedRoute.includes("action === 'like'"), 'Feed API PATCH must handle real likes');
+  assert.ok(feedRoute.includes("action === 'comment'"), 'Feed API PATCH must handle real comments');
+  assert.ok(feedRoute.includes("action === 'repost'"), 'Feed API PATCH must handle real reposts');
+
+  // 3. Central store methods for real interactions
+  assert.ok(registryContent.includes('togglePostLike'), 'Registry must export togglePostLike');
+  assert.ok(registryContent.includes('addPostComment'), 'Registry must export addPostComment');
+  assert.ok(registryContent.includes('repostFeedPost'), 'Registry must export repostFeedPost');
+
+  // 4. Smooth scrolling with Lenis integrated
+  assert.ok(layoutContent.includes('SmoothScroll'), 'Layout must integrate SmoothScroll component with Lenis');
+});

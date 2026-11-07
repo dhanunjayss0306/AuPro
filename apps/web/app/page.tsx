@@ -1512,7 +1512,7 @@ export default function Home() {
       location: createLocation.trim() || 'College of Engineering, Visakhapatnam',
       imageUrl: createPreview || undefined,
       imageCaption: createTitle || 'Campus Problem Report',
-      likesCount: 1,
+      likesCount: 0,
       repostsCount: 0,
       likedBy: undefined,
       caption: createTitle ? `${createTitle}: ${createCaption.trim()}` : createCaption.trim(),

@@ -47,7 +47,10 @@ export interface ServerFeedPost {
   imageUrl?: string;
   imageCaption?: string;
   likesCount: number;
+  likedBy?: string[];
   repostsCount: number;
+  repostedBy?: string[];
+  repostedFrom?: string;
   caption: string;
   commentsCount: number;
   comments?: any[];
@@ -385,4 +388,120 @@ export function getRegisteredCount(): number {
 export function getRegisteredAccountsList(): string[] {
   const store = loadStore();
   return Object.keys(store.accounts);
+}
+
+
+export function togglePostLike(postId: string, userEmail: string): { likesCount: number; liked: boolean; likedBy: string[] } {
+  const store = loadStore();
+  const post = store.posts.find((p) => p.id === postId);
+  if (!post) {
+    return { likesCount: 0, liked: false, likedBy: [] };
+  }
+  const cleanEmail = (userEmail || 'student@andhrauniversity.edu.in').toLowerCase().trim();
+  post.likedBy = Array.isArray(post.likedBy) ? post.likedBy : [];
+  const idx = post.likedBy.indexOf(cleanEmail);
+  let liked = false;
+  if (idx >= 0) {
+    post.likedBy.splice(idx, 1);
+    post.likesCount = Math.max(0, post.likedBy.length);
+    liked = false;
+  } else {
+    post.likedBy.push(cleanEmail);
+    post.likesCount = post.likedBy.length;
+    liked = true;
+  }
+  saveStoreToFile(store);
+  return { likesCount: post.likesCount, liked, likedBy: post.likedBy };
+}
+
+export function addPostComment(
+  postId: string,
+  comment: {
+    id?: string;
+    username: string;
+    authorEmail?: string;
+    avatarText?: string;
+    text: string;
+    timeAgo?: string;
+    imageUrl?: string;
+  }
+): { comments: any[]; commentsCount: number } {
+  const store = loadStore();
+  const post = store.posts.find((p) => p.id === postId);
+  if (!post) {
+    return { comments: [], commentsCount: 0 };
+  }
+  post.comments = Array.isArray(post.comments) ? post.comments : [];
+  const newComment = {
+    id: comment.id || 'cmt_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+    username: comment.username || 'AU Student',
+    authorEmail: comment.authorEmail || '',
+    avatarText: comment.avatarText || (comment.username ? comment.username[0].toUpperCase() : 'A'),
+    text: comment.text,
+    timeAgo: comment.timeAgo || 'Just now',
+    ...(comment.imageUrl ? { imageUrl: comment.imageUrl } : {}),
+  };
+  post.comments.push(newComment);
+  post.commentsCount = post.comments.length;
+  saveStoreToFile(store);
+
+  logServerActivity(
+    'Comment Added',
+    comment.authorEmail || comment.username,
+    'Replied: "' + comment.text.slice(0, 60) + '"'
+  );
+
+  return { comments: post.comments, commentsCount: post.commentsCount };
+}
+
+export function repostFeedPost(
+  postId: string,
+  user: { email?: string; name?: string; username?: string }
+): ServerFeedPost | null {
+  const store = loadStore();
+  const original = store.posts.find((p) => p.id === postId);
+  if (!original) return null;
+
+  original.repostsCount = (original.repostsCount || 0) + 1;
+  original.repostedBy = Array.isArray(original.repostedBy) ? original.repostedBy : [];
+  if (user.email && !original.repostedBy.includes(user.email.toLowerCase().trim())) {
+    original.repostedBy.push(user.email.toLowerCase().trim());
+  }
+
+  const repostUsername = user.username || (user.name ? user.name.toLowerCase().replace(/\s+/g, '_') : 'au.student');
+  const repostUserEmail = user.email || '';
+
+  const newPost = {
+    id: 'repost_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+    username: repostUsername,
+    authorEmail: repostUserEmail,
+    authorHandle: repostUsername,
+    avatarText: user.name ? user.name[0].toUpperCase() : 'R',
+    isOfficial: false,
+    category: original.category || 'normal',
+    location: original.location,
+    imageUrl: original.imageUrl,
+    imageCaption: original.imageCaption,
+    likesCount: 0,
+    likedBy: [],
+    repostsCount: 0,
+    repostedFrom: original.authorHandle || original.username,
+    caption: '🔁 Reposted from @' + (original.authorHandle || original.username) + ':\n\n' + original.caption,
+    commentsCount: 0,
+    comments: [],
+    timeAgo: 'Just now',
+    durationDays: 30,
+  };
+
+  store.posts.unshift(newPost);
+  store.posts = store.posts.slice(0, 100);
+  saveStoreToFile(store);
+
+  logServerActivity(
+    'Post Reposted',
+    repostUserEmail || repostUsername,
+    'Reposted post by @' + (original.authorHandle || original.username)
+  );
+
+  return newPost;
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { Trash2, Heart, MessageCircle, Repeat2, Bookmark, Share2 } from 'lucide-react';
 import {
   InstagramLikeIcon,
   InstagramCommentIcon,
@@ -44,6 +45,10 @@ export interface MomentPost {
 }
 
 export interface MomentCardProps {
+  currentUserEmail?: string;
+  currentUsername?: string;
+  isAdmin?: boolean;
+  onRepost?: (post: MomentPost) => void;
   post: MomentPost;
   onToast?: (message: string) => void;
   isSaved?: boolean;
@@ -54,6 +59,10 @@ export interface MomentCardProps {
 
 export function MomentCard({
   post,
+  currentUserEmail,
+  currentUsername,
+  isAdmin = false,
+  onRepost,
   onToast,
   isSaved: externalIsSaved,
   onSaveToggle,
@@ -81,6 +90,21 @@ export function MomentCard({
   const [following, setFollowing] = useState(true);
   const [hidden, setHidden] = useState(false);
   const [localToast, setLocalToast] = useState('');
+
+  const cleanUserEmail = (currentUserEmail || '').toLowerCase().trim();
+  const cleanPostEmail = (post.authorEmail || '').toLowerCase().trim();
+  const isPostAuthor = Boolean(
+    isOwner ||
+    (cleanPostEmail && cleanUserEmail && cleanPostEmail === cleanUserEmail) ||
+    (post.username && currentUsername && post.username.toLowerCase() === currentUsername.toLowerCase()) ||
+    post.username === 'you'
+  );
+  const isMajorAdmin = Boolean(
+    isAdmin ||
+    cleanUserEmail === '325506402371@andhrauniversity.edu.in' ||
+    cleanUserEmail.startsWith('325506402371')
+  );
+  const canDelete = Boolean(onDelete) && (isPostAuthor || isMajorAdmin);
 
   const notify = (message: string) => {
     if (onToast) onToast(message);
@@ -112,14 +136,29 @@ export function MomentCard({
     return () => window.clearTimeout(timeout);
   }, [localToast]);
 
-  const handleLikeToggle = () => {
-    if (liked) {
-      setLiked(false);
-      setLikes((prev) => Math.max(0, prev - 1));
-    } else {
-      setLiked(true);
-      setLikes((prev) => prev + 1);
-    }
+  const handleLikeToggle = async () => {
+    const nextLiked = !liked;
+    setLiked(nextLiked);
+    setLikes((prev) => Math.max(0, prev + (nextLiked ? 1 : -1)));
+
+    try {
+      const res = await fetch('/api/feed', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'like',
+          postId: post.id,
+          userEmail: cleanUserEmail || 'student@andhrauniversity.edu.in',
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (typeof data.likesCount === 'number') {
+          setLikes(data.likesCount);
+          setLiked(Boolean(data.liked));
+        }
+      }
+    } catch {}
   };
 
   const handleDoubleTap = () => {
@@ -194,11 +233,37 @@ export function MomentCard({
     }
   };
 
-  const handleRepost = () => {
+  const handleRepost = async () => {
     const wasReposted = reposted;
     setReposted(!wasReposted);
     setReposts((count) => Math.max(0, count + (wasReposted ? -1 : 1)));
     notify(wasReposted ? 'Repost removed.' : 'Post reposted to campus.');
+
+    if (!wasReposted) {
+      try {
+        const res = await fetch('/api/feed', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'repost',
+            postId: post.id,
+            user: {
+              email: cleanUserEmail,
+              name: currentUsername || 'AU Student',
+              username: currentUsername || 'au.student',
+            },
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (onRepost && data.repost) {
+            onRepost(data.repost);
+          }
+        }
+      } catch (e) {
+        console.error('Failed to sync repost with server', e);
+      }
+    }
   };
 
   const handleCommentImage = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -228,26 +293,48 @@ export function MomentCard({
     reader.readAsDataURL(file);
   };
 
-  const handleCommentSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleCommentSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const text = comment.trim();
     if (!text && !commentImage) return;
 
-    setComments((existing) => [
-      ...existing,
-      {
-        id: `${Date.now()}`,
-        username: 'you',
-        avatarText: 'Y',
-        text,
-        timeAgo: 'now',
-        ...(commentImage ? { imageUrl: commentImage } : {}),
-      },
-    ]);
+    const newCommentItem: MomentComment = {
+      id: `${Date.now()}`,
+      username: currentUsername || 'you',
+      avatarText: currentUsername ? currentUsername[0].toUpperCase() : 'Y',
+      text,
+      timeAgo: 'now',
+      ...(commentImage ? { imageUrl: commentImage } : {}),
+    };
+    setComments((existing) => [...existing, newCommentItem]);
     setCommentsCount((count) => count + 1);
     setComment('');
     setCommentImage('');
     setCommentError('');
+
+    try {
+      const res = await fetch('/api/feed', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'comment',
+          postId: post.id,
+          comment: {
+            ...newCommentItem,
+            authorEmail: cleanUserEmail,
+          },
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.comments)) {
+          setComments(data.comments);
+          setCommentsCount(data.comments.length);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to sync comment with server', e);
+    }
   };
 
   if (hidden) return null;
@@ -309,7 +396,7 @@ export function MomentCard({
             </div>
 
             <div className="threads-post-header-actions">
-              {(isOwner || Boolean(onDelete)) && (
+              {canDelete && (
                 <button
                   type="button"
                   className="threads-quick-delete-btn"
@@ -527,7 +614,7 @@ export function MomentCard({
                 <button className="insta-modal-item" onClick={handleShare}>
                   ↗ Share Post
                 </button>
-                {(isOwner || Boolean(onDelete)) && (
+                {canDelete && (
                   <button
                     className="insta-modal-item danger"
                     onClick={handleDelete}

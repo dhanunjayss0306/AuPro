@@ -339,11 +339,29 @@ export default function Home() {
   const [gpsError, setGpsError] = useState('');
   const [isLocating, setIsLocating] = useState(false);
 
-  // About tab sub-navigation & settings
-  const [aboutSubTab, setAboutSubTab] = useState<'profile' | 'college'>('profile');
+  // About tab sub-navigation & settings (My Posts, Saved Bookmarks, Profile, AU College Info)
+  const [aboutSubTab, setAboutSubTab] = useState<'posts' | 'saved' | 'profile' | 'college'>('posts');
+  const [savedPostIds, setSavedPostIds] = useState<string[]>([]);
   const [settingsNotifications, setSettingsNotifications] = useState(true);
   const [settingsProblemAlerts, setSettingsProblemAlerts] = useState(true);
   const [settingsCompactView, setSettingsCompactView] = useState(false);
+
+  // Load saved post IDs and user posts from persistent client storage
+  useEffect(() => {
+    try {
+      const storedSaved = localStorage.getItem('aupro_saved_posts');
+      if (storedSaved) {
+        setSavedPostIds(JSON.parse(storedSaved));
+      }
+      const storedPosts = localStorage.getItem('aupro_feed_posts');
+      if (storedPosts) {
+        const parsed = JSON.parse(storedPosts);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setFeedPosts(parsed);
+        }
+      }
+    } catch {}
+  }, []);
 
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
@@ -646,6 +664,22 @@ export default function Home() {
     return true;
   });
 
+  const myPosts = feedPosts.filter((post) => {
+    const cleanAuth = authEmail.toLowerCase().trim();
+    const cleanPostAuth = (post.authorEmail || '').toLowerCase().trim();
+    const cleanUser = authUsername.toLowerCase().trim();
+    const cleanPostUser = post.username.toLowerCase().trim();
+    const cleanName = authName.toLowerCase().replace(/\s+/g, '_');
+    return (
+      (cleanAuth && cleanPostAuth === cleanAuth) ||
+      (cleanUser && cleanPostUser === cleanUser) ||
+      (cleanName && cleanPostUser === cleanName) ||
+      cleanPostUser === 'you'
+    );
+  });
+
+  const savedPosts = feedPosts.filter((post) => savedPostIds.includes(post.id));
+
   const filteredServices = services.filter((service) =>
     service.title.toLowerCase().includes(query.toLowerCase())
   );
@@ -687,6 +721,38 @@ export default function Home() {
     setCreatePreview(null);
   };
 
+  const handleDeletePost = (postId: string) => {
+    setFeedPosts((posts) => {
+      const updated = posts.filter((p) => p.id !== postId);
+      try {
+        localStorage.setItem('aupro_feed_posts', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+    setSavedPostIds((saved) => {
+      const updated = saved.filter((id) => id !== postId);
+      try {
+        localStorage.setItem('aupro_saved_posts', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+    setToast('Post deleted successfully');
+  };
+
+  const handleSaveToggle = (postId: string) => {
+    setSavedPostIds((prev) => {
+      const isAlreadySaved = prev.includes(postId);
+      const next = isAlreadySaved
+        ? prev.filter((id) => id !== postId)
+        : [...prev, postId];
+      try {
+        localStorage.setItem('aupro_saved_posts', JSON.stringify(next));
+      } catch {}
+      setToast(isAlreadySaved ? 'Removed from saved posts' : 'Post saved to bookmarks');
+      return next;
+    });
+  };
+
   const handleThreadsPost = (data: ThreadsPostData) => {
     // Content Moderation check
     const textCheck = validateTextContent(`${data.caption} ${data.title || ''} ${data.location}`);
@@ -697,23 +763,31 @@ export default function Home() {
 
     const newPost: MomentPost = {
       id: `${Date.now()}`,
-      username: data.isAnonymous ? 'anonymous.au' : (authName ? authName.toLowerCase().replace(/\s+/g, '_') : 'au.student'),
+      username: data.isAnonymous ? 'anonymous.au' : (authUsername || (authName ? authName.toLowerCase().replace(/\s+/g, '_') : 'au.student')),
+      authorEmail: authEmail,
+      authorHandle: authUsername || 'au.student',
       avatarText: data.isAnonymous ? '?' : (authName[0] || 'A').toUpperCase(),
       isOfficial: data.category === 'announcement',
       category: data.category,
       location: data.location,
       imageUrl: data.imageUrl,
       imageCaption: data.title || (data.category === 'problem' ? 'Problem Report' : 'Official Notice'),
-      likesCount: 1,
+      likesCount: 0,
       repostsCount: 0,
       caption: data.caption,
       commentsCount: 0,
       comments: [],
-      timeAgo: 'JUST NOW',
+      timeAgo: 'now',
       durationDays: 30,
     };
 
-    setFeedPosts((posts) => [newPost, ...posts]);
+    setFeedPosts((posts) => {
+      const updated = [newPost, ...posts];
+      try {
+        localStorage.setItem('aupro_feed_posts', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
     setFeedFilter(data.category === 'problem' ? 'problems' : data.category === 'announcement' ? 'announcements' : 'normal');
     setShowThreadsComposer(false);
     setToast(data.category === 'problem' ? 'Problem reported to campus administration.' : 'Post published to AuPro feed.');
@@ -1345,7 +1419,20 @@ export default function Home() {
             </div>
 
             {filteredFeedPosts.map((post) => (
-              <MomentCard key={post.id} post={post} onToast={setToast} />
+              <MomentCard
+                key={post.id}
+                post={post}
+                onToast={setToast}
+                isSaved={savedPostIds.includes(post.id)}
+                onSaveToggle={handleSaveToggle}
+                isOwner={
+                  (post.authorEmail && post.authorEmail === authEmail) ||
+                  post.username === authUsername ||
+                  post.username === (authName ? authName.toLowerCase().replace(/\s+/g, '_') : '') ||
+                  post.username === 'you'
+                }
+                onDelete={handleDeletePost}
+              />
             ))}
 
             {filteredFeedPosts.length === 0 ? (
@@ -2096,12 +2183,30 @@ export default function Home() {
             <div className="about-subtab-bar" role="tablist">
               <button
                 role="tab"
+                aria-selected={aboutSubTab === 'posts'}
+                className={`about-subtab-btn ${aboutSubTab === 'posts' ? 'active' : ''}`}
+                onClick={() => setAboutSubTab('posts')}
+              >
+                <span>📝</span>
+                <span>My Posts {myPosts.length > 0 ? `(${myPosts.length})` : ''}</span>
+              </button>
+              <button
+                role="tab"
+                aria-selected={aboutSubTab === 'saved'}
+                className={`about-subtab-btn ${aboutSubTab === 'saved' ? 'active' : ''}`}
+                onClick={() => setAboutSubTab('saved')}
+              >
+                <span>★</span>
+                <span>Saved {savedPosts.length > 0 ? `(${savedPosts.length})` : ''}</span>
+              </button>
+              <button
+                role="tab"
                 aria-selected={aboutSubTab === 'profile'}
                 className={`about-subtab-btn ${aboutSubTab === 'profile' ? 'active' : ''}`}
                 onClick={() => setAboutSubTab('profile')}
               >
                 <span>👤</span>
-                <span>My Profile & Settings</span>
+                <span>Profile</span>
               </button>
               <button
                 role="tab"
@@ -2110,9 +2215,111 @@ export default function Home() {
                 onClick={() => setAboutSubTab('college')}
               >
                 <span>🏛️</span>
-                <span>AU College Info</span>
+                <span>AU Info</span>
               </button>
             </div>
+
+            {/* SUBTAB 1: USER'S PUBLISHED POSTS (VIEW & DELETE) */}
+            {aboutSubTab === 'posts' && (
+              <div className="stack" style={{ gap: 14 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>Your Published Posts</h2>
+                    <p className="lead" style={{ margin: '2px 0 0', fontSize: 12 }}>Manage, review, or delete posts you shared on AuPro</p>
+                  </div>
+                  <button
+                    className="primary-button"
+                    style={{ fontSize: 12, padding: '7px 14px', borderRadius: 9999 }}
+                    onClick={() => setShowThreadsComposer(true)}
+                  >
+                    + New Post
+                  </button>
+                </div>
+
+                {myPosts.length === 0 ? (
+                  <div className="profile-feed-empty card">
+                    <div style={{ fontSize: 36, marginBottom: 10 }}>📝</div>
+                    <h3>No Posts Published Yet</h3>
+                    <p className="lead">You haven't posted anything to the campus feed yet. Share updates, questions, or report campus issues.</p>
+                    <button
+                      className="primary-button"
+                      style={{ fontSize: 13, padding: '8px 18px', margin: '0 auto' }}
+                      onClick={() => setShowThreadsComposer(true)}
+                    >
+                      Create Your First Post
+                    </button>
+                  </div>
+                ) : (
+                  myPosts.map((post) => (
+                    <div key={post.id} className="profile-post-wrapper">
+                      <MomentCard
+                        post={post}
+                        onToast={setToast}
+                        isSaved={savedPostIds.includes(post.id)}
+                        onSaveToggle={handleSaveToggle}
+                        isOwner={true}
+                        onDelete={handleDeletePost}
+                      />
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            {/* SUBTAB 2: SAVED BOOKMARKS (VIEW & UNSAVE) */}
+            {aboutSubTab === 'saved' && (
+              <div className="stack" style={{ gap: 14 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>Saved Bookmarks</h2>
+                    <p className="lead" style={{ margin: '2px 0 0', fontSize: 12 }}>Posts, circulars, and notices bookmarked for quick access</p>
+                  </div>
+                </div>
+
+                {savedPosts.length === 0 ? (
+                  <div className="profile-feed-empty card">
+                    <div style={{ fontSize: 36, marginBottom: 10 }}>★</div>
+                    <h3>No Saved Posts</h3>
+                    <p className="lead">Tap the bookmark ribbon icon on any post in the feed to save it here for reference.</p>
+                    <button
+                      className="secondary-button"
+                      style={{ fontSize: 13, padding: '8px 18px', margin: '0 auto' }}
+                      onClick={() => setTab('feed')}
+                    >
+                      Browse Campus Feed
+                    </button>
+                  </div>
+                ) : (
+                  savedPosts.map((post) => (
+                    <div key={post.id} className="profile-post-wrapper">
+                      <div className="post-action-banner">
+                        <button
+                          type="button"
+                          className="unsave-btn"
+                          onClick={() => handleSaveToggle(post.id)}
+                          title="Remove bookmark"
+                        >
+                          ✕ Remove from Saved
+                        </button>
+                      </div>
+                      <MomentCard
+                        post={post}
+                        onToast={setToast}
+                        isSaved={true}
+                        onSaveToggle={handleSaveToggle}
+                        isOwner={
+                          (post.authorEmail && post.authorEmail === authEmail) ||
+                          post.username === authUsername ||
+                          post.username === (authName ? authName.toLowerCase().replace(/\s+/g, '_') : '') ||
+                          post.username === 'you'
+                        }
+                        onDelete={handleDeletePost}
+                      />
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
 
             {aboutSubTab === 'profile' && (
               <div className="stack">

@@ -140,3 +140,25 @@ test('Dark mode support and profile email wrapping', async () => {
   assert.ok(cssContent.includes('word-break: break-all'), 'Must break email word across lines');
   assert.ok(cssContent.includes('[data-theme=\'dark\']'), 'Must have dark theme CSS rules');
 });
+
+test('Threads Feed & Check About post management requirements', async () => {
+  const cardContent = await readFile(new URL('../app/MomentCard.tsx', import.meta.url), 'utf8');
+  const pageContent = await readFile(new URL('../app/page.tsx', import.meta.url), 'utf8');
+  const cssContent = await readFile(new URL('../app/globals.css', import.meta.url), 'utf8');
+
+  // 1. Text-first feed: No media fallback when no picture
+  assert.ok(!cardContent.includes('insta-media-fallback'), 'Must NOT show random black picture/media fallback when no picture attached');
+  assert.ok(cardContent.includes('hasMedia = Boolean'), 'Must conditionally render media only when photo/document is present');
+
+  // 2. Dark mode posting composer visibility
+  assert.ok(cssContent.includes(".threads-composer-card"), 'Must style threads-composer-card in dark mode');
+  assert.ok(cssContent.includes(".threads-anon-label"), 'Must style threads-anon-label in dark mode');
+
+  // 3. Check About subtabs: My Posts and Saved with delete and unsave
+  assert.ok(pageContent.includes("aboutSubTab === 'posts'"), 'Must have My Posts subtab in About section');
+  assert.ok(pageContent.includes("aboutSubTab === 'saved'"), 'Must have Saved Bookmarks subtab in About section');
+  assert.ok(pageContent.includes("handleDeletePost"), 'Must support deleting user posts');
+  assert.ok(pageContent.includes("handleSaveToggle"), 'Must support saving and unsaving posts');
+  assert.ok(cardContent.includes("onDelete"), 'MomentCard must accept onDelete callback');
+  assert.ok(cardContent.includes("onSaveToggle"), 'MomentCard must accept onSaveToggle callback');
+});

@@ -13,6 +13,7 @@ import {
   ApplicationsIcon,
   ChatbotIcon,
   DarkenedAboutIcon,
+  InstagramProfileIcon,
   BigPlusIcon,
   GoogleMapsPinIcon,
   DirectionsDiamondIcon,
@@ -317,6 +318,11 @@ export default function Home() {
   // Instagram Profile Edit Mode State
   const [isEditingProfile, setIsEditingProfile] = useState(false);
 
+  // In-App Turn-by-Turn Navigation System State
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [navStepIndex, setNavStepIndex] = useState(0);
+  const [showNavStepsSheet, setShowNavStepsSheet] = useState(false);
+
   // Scroll-driven auto-hiding / appearing bottom navigation bar
   const [isNavVisible, setIsNavVisible] = useState(true);
   const lastScrollYRef = useRef(0);
@@ -367,6 +373,33 @@ export default function Home() {
   const [directionsStart, setDirectionsStart] = useState('Your location');
   const [directionsEnd, setDirectionsEnd] = useState('AU College of Engineering (Main & Admin Block)');
   const [transportMode, setTransportMode] = useState<'w' | 'm' | 'd' | 'r'>('w');
+
+  const campusNavSteps = [
+    {
+      instruction: `Head northeast on AU North Campus Avenue towards ${directionsEnd || selectedLandmark?.name || 'campus destination'}`,
+      distance: '80 m',
+      turnIcon: '⬆',
+      subText: 'Walk past Sivaji Hostel & Department avenue',
+    },
+    {
+      instruction: 'In 120m, turn right at Engineering Library junction',
+      distance: '120 m',
+      turnIcon: '↱',
+      subText: 'Follow paved student walkway',
+    },
+    {
+      instruction: `Turn left towards ${directionsEnd || selectedLandmark?.name || 'Department Block'}`,
+      distance: '110 m',
+      turnIcon: '↰',
+      subText: 'Walk past the lawn and seminar hall',
+    },
+    {
+      instruction: `Arrived at ${directionsEnd || selectedLandmark?.name || 'Campus Destination'}`,
+      distance: '40 m',
+      turnIcon: '📍',
+      subText: 'Your destination is on the right',
+    },
+  ];
 
   // GPS & Live Geolocation Auto-Tracking State
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number; accuracy?: number } | null>(null);
@@ -790,7 +823,7 @@ export default function Home() {
 
   const handleThreadsPost = (data: ThreadsPostData) => {
     // Content Moderation check
-    const textCheck = validateTextContent(`${data.caption} ${data.title || ''} ${data.location}`);
+    const textCheck = validateTextContent(`${data.caption} ${data.title || ''} ${data.location || ''}`);
     if (!textCheck.isValid) {
       setToast(textCheck.reason || 'Post blocked: Inappropriate language detected.');
       return;
@@ -1170,6 +1203,23 @@ export default function Home() {
                     {authEmail} • Roll No: {authRollNo || '—'}
                   </div>
                 </div>
+
+                {authOtpProviderStatus === 'delivered' && !authOtpProviderError && (
+                  <div style={{
+                    background: 'rgba(16, 185, 129, 0.08)',
+                    border: '1px solid rgba(16, 185, 129, 0.3)',
+                    borderRadius: 8,
+                    padding: '10px 14px',
+                    fontSize: 12,
+                    color: 'var(--ink)',
+                    textAlign: 'center',
+                    margin: '6px 0 10px 0',
+                    lineHeight: 1.5,
+                  }}>
+                    <div style={{ color: '#10b981', fontWeight: 700, marginBottom: 2 }}>✓ Dispatched via Resend</div>
+                    <span style={{ color: 'var(--muted)' }}>Check your university inbox (and spam folder) for the 6-digit code.</span>
+                  </div>
+                )}
 
                 {authOtpProviderError && (
                   <div style={{
@@ -1794,7 +1844,7 @@ export default function Home() {
               className="gmaps-iframe"
               title="Google Maps Andhra University"
               src={
-                showDirections
+                isNavigating || showDirections
                   ? `https://www.google.com/maps?saddr=${encodeURIComponent(
                       directionsStart === 'Your location' && userCoords
                         ? `${userCoords.lat},${userCoords.lng}`
@@ -1808,6 +1858,114 @@ export default function Home() {
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
+
+            {/* IN-APP TURN-BY-TURN NAVIGATION HUD */}
+            {isNavigating ? (
+              <>
+                {/* Top Green Navigation HUD Banner */}
+                <div className="gmaps-nav-hud-top">
+                  <div className="gmaps-nav-turn-icon">
+                    {campusNavSteps[navStepIndex]?.turnIcon || '⬆'}
+                  </div>
+                  <div className="gmaps-nav-instructions">
+                    <div className="gmaps-nav-primary-instruction">
+                      {campusNavSteps[navStepIndex]?.instruction}
+                    </div>
+                    <div className="gmaps-nav-sub-instruction">
+                      {campusNavSteps[navStepIndex]?.subText} • {campusNavSteps[navStepIndex]?.distance}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step Preview Navigator Controls */}
+                <div className="gmaps-nav-step-controls">
+                  <button
+                    type="button"
+                    className="gmaps-nav-step-btn"
+                    disabled={navStepIndex <= 0}
+                    onClick={() => setNavStepIndex((prev) => Math.max(0, prev - 1))}
+                    style={{ opacity: navStepIndex <= 0 ? 0.4 : 1 }}
+                  >
+                    ◀ Prev Step
+                  </button>
+                  <span style={{ fontSize: 12, color: '#ffffff', alignSelf: 'center', fontWeight: 600 }}>
+                    Turn {navStepIndex + 1} of {campusNavSteps.length}
+                  </span>
+                  <button
+                    type="button"
+                    className="gmaps-nav-step-btn"
+                    disabled={navStepIndex >= campusNavSteps.length - 1}
+                    onClick={() => setNavStepIndex((prev) => Math.min(campusNavSteps.length - 1, prev + 1))}
+                    style={{ opacity: navStepIndex >= campusNavSteps.length - 1 ? 0.4 : 1 }}
+                  >
+                    Next Step ▶
+                  </button>
+                </div>
+
+                {/* Step-by-Step Route Drawer */}
+                {showNavStepsSheet && (
+                  <div className="gmaps-nav-steps-modal">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                      <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--ink)' }}>Turn-by-Turn Route Guidance</h4>
+                      <button className="icon-button" onClick={() => setShowNavStepsSheet(false)}>✕</button>
+                    </div>
+                    <div className="stack" style={{ gap: 8 }}>
+                      {campusNavSteps.map((step, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => { setNavStepIndex(idx); setShowNavStepsSheet(false); }}
+                          style={{
+                            display: 'flex',
+                            gap: 12,
+                            alignItems: 'center',
+                            padding: '10px 12px',
+                            borderRadius: 10,
+                            background: navStepIndex === idx ? 'var(--hover-subtle)' : 'transparent',
+                            border: navStepIndex === idx ? '1px solid var(--primary)' : '1px solid var(--border-light)',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <span style={{ fontSize: 20 }}>{step.turnIcon}</span>
+                          <div style={{ flex: 1 }}>
+                            <strong style={{ fontSize: 13, display: 'block', color: 'var(--ink)' }}>{step.instruction}</strong>
+                            <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>{step.subText} • {step.distance}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Bottom Navigation Control Bar */}
+                <div className="gmaps-nav-hud-bottom">
+                  <div className="gmaps-nav-eta-block">
+                    <div className="gmaps-nav-eta-time">4 min</div>
+                    <div className="gmaps-nav-eta-meta">350 m • Walking • GPS active</div>
+                  </div>
+                  <div className="gmaps-nav-hud-actions">
+                    <button
+                      type="button"
+                      className="gmaps-nav-steps-btn"
+                      onClick={() => setShowNavStepsSheet(!showNavStepsSheet)}
+                    >
+                      Steps ☰
+                    </button>
+                    <button
+                      type="button"
+                      className="gmaps-nav-exit-btn"
+                      onClick={() => {
+                        setIsNavigating(false);
+                        setShowNavStepsSheet(false);
+                        setShowDirections(false);
+                        setToast('In-app navigation ended.');
+                      }}
+                    >
+                      ✕ Exit
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : null}
 
             {/* Floating Top Bar: Search Bar or Directions Header */}
             <div className="gmaps-top-overlay">
@@ -2160,11 +2318,10 @@ export default function Home() {
                 <button
                   className="gmaps-trip-start-btn"
                   onClick={() => {
-                    const originParam = directionsStart === 'Your location' && userCoords
-                      ? `${userCoords.lat},${userCoords.lng}`
-                      : encodeURIComponent(directionsStart === 'Your location' ? 'Andhra University Visakhapatnam' : directionsStart);
-                    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${originParam}&destination=${encodeURIComponent(directionsEnd)}&travelmode=${transportMode === 'w' ? 'walking' : transportMode === 'd' ? 'driving' : 'transit'}`;
-                    window.open(mapsUrl, '_blank');
+                    setIsNavigating(true);
+                    setNavStepIndex(0);
+                    setShowPlaceSheet(false);
+                    setToast(`Starting in-app navigation to ${directionsEnd || selectedLandmark?.name || 'campus destination'}...`);
                   }}
                 >
                   <span>Start Navigation</span>
@@ -2175,393 +2332,43 @@ export default function Home() {
           </div>
         )}
 
-        {/* TAB 6: ABOUT & STUDENT PROFILE (INSTAGRAM-STYLE PROFILE) */}
+        {/* TAB 6: ABOUT & STUDENT PROFILE */}
         {tab === 'about' && (
-          <div className="insta-profile-screen">
-            {/* 1. TOP USERNAME BAR */}
-            <div className="insta-profile-topbar">
-              <div className="insta-topbar-username">
-                <span className="lock-icon" style={{ fontSize: 13 }}>🔒</span>
-                <span>@{authUsername || (authName ? authName.toLowerCase().replace(/\s+/g, '_') : 'au.student')}</span>
-                <span className="verified-badge" title="Official Student Identity Verified">✓</span>
-              </div>
-              <div className="insta-topbar-actions">
-                <button
-                  className="icon-button"
-                  onClick={toggleTheme}
-                  aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                  title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                >
-                  {theme === 'dark' ? <SunIcon size={18} /> : <MoonIcon size={18} />}
-                </button>
-                <button
-                  className={`icon-button ${isEditingProfile ? 'active' : ''}`}
-                  onClick={() => setIsEditingProfile(!isEditingProfile)}
-                  aria-label="Edit Profile & Settings"
-                  title="Edit Profile & Settings"
-                >
-                  ⚙️
-                </button>
-              </div>
-            </div>
-
-            {/* 2. PROFILE HERO (AVATAR + 3 STATS) */}
-            <div className="insta-profile-hero">
-              <div className="insta-avatar-wrapper">
-                <div className="insta-avatar-ring">
-                  <div className="insta-avatar-circle">
-                    {(authName.trim()[0] || authEmail.trim()[0] || 'A').toUpperCase()}
-                  </div>
-                </div>
-              </div>
-
-              <div className="insta-stats-row">
-                <button
-                  type="button"
-                  className="insta-stat-item"
-                  onClick={() => setAboutSubTab('posts')}
-                >
-                  <span className="insta-stat-number">{myPosts.length}</span>
-                  <span className="insta-stat-label">Posts</span>
-                </button>
-                <button
-                  type="button"
-                  className="insta-stat-item"
-                  onClick={() => setAboutSubTab('saved')}
-                >
-                  <span className="insta-stat-number">{savedPosts.length}</span>
-                  <span className="insta-stat-label">Saved</span>
-                </button>
-                <div className="insta-stat-item">
-                  <span className="insta-stat-number">{authYear || '4th Yr'}</span>
-                  <span className="insta-stat-label">{authDept.includes('Science') ? 'CSE' : authDept || 'Dept'}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* 3. BIO & DETAILS SECTION */}
-            <div className="insta-bio-section">
-              <h1 className="insta-bio-fullname">{authName || 'AU Student'}</h1>
-              <div className="insta-bio-college">
-                🎓 AU College of Engineering (Autonomous)
-              </div>
-              <div className="insta-bio-meta">
-                <span>🆔 Roll: <strong>{authRollNo || '325506402371'}</strong></span>
-                <span>•</span>
-                <span>✉️ {authEmail || 'student@andhrauniversity.edu.in'}</span>
-              </div>
-              <div className="insta-bio-phone">
-                📞 {authPhone || '+91 9876543210'}
-              </div>
-              <p className="insta-bio-text">
-                {authBio || 'Engineering Student @ Andhra University. Passionate about technology, projects, and campus collaboration.'}
-              </p>
-            </div>
-
-            {/* 4. ACTION BUTTONS ROW (Edit Bio, Share, Sign Out) */}
-            <div className="insta-profile-actions-row">
-              <button
-                type="button"
-                className="insta-action-button primary"
-                onClick={() => setIsEditingProfile(!isEditingProfile)}
-              >
-                <span>{isEditingProfile ? '✕ Close Editor' : '✏️ Edit Profile / Bio'}</span>
-              </button>
-              <button
-                type="button"
-                className="insta-action-button"
-                onClick={() => {
-                  if (typeof navigator !== 'undefined' && navigator.clipboard) {
-                    navigator.clipboard.writeText(window.location.origin);
-                  }
-                  setToast('Profile link copied to clipboard!');
-                }}
-              >
-                <span>🔗 Share</span>
-              </button>
-              <button
-                type="button"
-                className="insta-action-button danger"
-                onClick={handleSignOut}
-              >
-                <span>🚪 Sign Out</span>
-              </button>
-            </div>
-
-            {/* COLLAPSIBLE EDIT PROFILE / BIO & SETTINGS DRAWER */}
-            {isEditingProfile && (
-              <div className="insta-edit-drawer card">
-                <div className="insta-edit-header">
-                  <h3>Edit Profile & Bio</h3>
-                  <button className="icon-button" onClick={() => setIsEditingProfile(false)}>✕</button>
-                </div>
-
-                <div className="stack" style={{ gap: 12 }}>
-                  <div>
-                    <label className="field-label">Full Name</label>
-                    <input
-                      type="text"
-                      className="search"
-                      value={authName}
-                      onChange={(e) => setAuthName(e.target.value)}
-                      placeholder="e.g. P V N Dhanunjay Reddy"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="field-label">Phone Number (authPhone)</label>
-                    <input
-                      type="tel"
-                      className="search"
-                      value={authPhone}
-                      onChange={(e) => setAuthPhone(e.target.value)}
-                      placeholder="+91 9876543210"
-                    />
-                  </div>
-
-                  <div className="profile-bio-card" style={{ padding: 0, border: 'none', background: 'transparent' }}>
-                    <label className="field-label">About Yourself (Bio)</label>
-                    <p className="lead" style={{ fontSize: 12, margin: '0 0 6px 0' }}>
-                      Add your academic interests, branch clubs, projects, or hostel details.
-                    </p>
-                    <textarea
-                      className="profile-bio-textarea"
-                      value={authBio}
-                      onChange={(e) => setAuthBio(e.target.value)}
-                      placeholder="Write a few lines about yourself..."
-                      rows={3}
-                    />
-                  </div>
-
-                  <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-                    <button
-                      className="primary-button"
-                      style={{ fontSize: 13, padding: '8px 18px' }}
-                      onClick={() => {
-                        try {
-                          const sess = localStorage.getItem('aupro_session');
-                          if (sess) {
-                            const parsed = JSON.parse(sess);
-                            localStorage.setItem('aupro_session', JSON.stringify({ ...parsed, name: authName, phone: authPhone, bio: authBio }));
-                          }
-                        } catch {}
-                        setIsEditingProfile(false);
-                        setToast('Bio saved to your profile!');
-                      }}
-                    >
-                      Save Bio
-                    </button>
-                    <button
-                      className="secondary-button"
-                      style={{ fontSize: 13, padding: '8px 14px' }}
-                      onClick={() => setIsEditingProfile(false)}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-
-                  {/* Account Preferences / Settings */}
-                  <div className="settings-card" style={{ marginTop: 12, padding: '16px 0 0 0', borderTop: '1px solid var(--border)' }}>
-                    <h4 style={{ margin: '0 0 10px 0', fontSize: 14, color: 'var(--ink)' }}>Account Preferences</h4>
-                    <div className="settings-row">
-                      <div className="settings-info">
-                        <strong>Dark Mode Appearance</strong>
-                        <span>Switch between collegiate light theme and modern dark mode</span>
-                      </div>
-                      <button
-                        className={`settings-toggle-btn ${theme === 'dark' ? 'active' : ''}`}
-                        onClick={toggleTheme}
-                        aria-label="Toggle dark mode"
-                      >
-                        <span className="settings-toggle-thumb" />
-                      </button>
-                    </div>
-
-                    <div className="settings-row">
-                      <div className="settings-info">
-                        <strong>Official Announcements Push</strong>
-                        <span>Receive instant alerts when college notices are published</span>
-                      </div>
-                      <button
-                        className={`settings-toggle-btn ${settingsNotifications ? 'active' : ''}`}
-                        onClick={() => setSettingsNotifications(!settingsNotifications)}
-                        aria-label="Toggle notifications"
-                      >
-                        <span className="settings-toggle-thumb" />
-                      </button>
-                    </div>
-
-                    <div className="settings-row">
-                      <div className="settings-info">
-                        <strong>Problem Ticket Updates</strong>
-                        <span>Get status updates when reported campus issues are inspected</span>
-                      </div>
-                      <button
-                        className={`settings-toggle-btn ${settingsProblemAlerts ? 'active' : ''}`}
-                        onClick={() => setSettingsProblemAlerts(!settingsProblemAlerts)}
-                        aria-label="Toggle problem alerts"
-                      >
-                        <span className="settings-toggle-thumb" />
-                      </button>
-                    </div>
-
-                    <div className="settings-row">
-                      <div className="settings-info">
-                        <strong>Compact Feed Layout</strong>
-                        <span>Display high-density feed items</span>
-                      </div>
-                      <button
-                        className={`settings-toggle-btn ${settingsCompactView ? 'active' : ''}`}
-                        onClick={() => setSettingsCompactView(!settingsCompactView)}
-                        aria-label="Toggle compact view"
-                      >
-                        <span className="settings-toggle-thumb" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <button className="signout-button" onClick={handleSignOut} style={{ marginTop: 8 }}>
-                    <span>🚪</span>
-                    <span>Sign Out of AuPro</span>
+          <>
+            {aboutSubTab === 'college' ? (
+              /* DEDICATED WHOLE-PAGE AU INFO VIEW */
+              <div className="au-info-fullpage stack">
+                <div className="au-info-topbar">
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    style={{ fontSize: 13, padding: '7px 14px', borderRadius: 9999, display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                    onClick={() => setAboutSubTab('posts')}
+                  >
+                    <span>←</span>
+                    <span>Back to Profile</span>
                   </button>
-                </div>
-              </div>
-            )}
-
-            {/* 5. INSTAGRAM PROFILE SUBTABS: Posts | Saved | AU Info */}
-            <div className="insta-profile-tabs" role="tablist" aria-label="Profile navigation">
-              <button
-                role="tab"
-                aria-selected={aboutSubTab === 'posts'}
-                className={`insta-tab-btn ${aboutSubTab === 'posts' ? 'active' : ''}`}
-                onClick={() => setAboutSubTab('posts')}
-              >
-                <span className="tab-icon">📸</span>
-                <span className="tab-label">Posts {myPosts.length > 0 ? `(${myPosts.length})` : ''}</span>
-              </button>
-
-              <button
-                role="tab"
-                aria-selected={aboutSubTab === 'saved'}
-                className={`insta-tab-btn ${aboutSubTab === 'saved' ? 'active' : ''}`}
-                onClick={() => setAboutSubTab('saved')}
-              >
-                <span className="tab-icon">🔖</span>
-                <span className="tab-label">Saved {savedPosts.length > 0 ? `(${savedPosts.length})` : ''}</span>
-              </button>
-
-              <button
-                role="tab"
-                aria-selected={aboutSubTab === 'college'}
-                className={`insta-tab-btn ${aboutSubTab === 'college' ? 'active' : ''}`}
-                onClick={() => setAboutSubTab('college')}
-              >
-                <span className="tab-icon">🏛️</span>
-                <span className="tab-label">AU Info</span>
-              </button>
-            </div>
-
-            {/* 6. "DOWN YOUR POSTS" / TAB CONTENT */}
-            {/* SUBTAB 1: USER'S PUBLISHED POSTS (DOWN YOUR POSTS) */}
-            {aboutSubTab === 'posts' && (
-              <div className="insta-down-posts-container">
-                <div className="insta-down-posts-header">
-                  <div className="eyebrow" style={{ color: 'var(--primary)', marginBottom: 2 }}>Down Your Posts</div>
-                  <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>Your Published Posts</h2>
-                  <p className="lead" style={{ margin: '2px 0 0', fontSize: 12 }}>Tap the ••• icon on any post to delete or share</p>
-                </div>
-
-                {myPosts.length === 0 ? (
-                  <div className="profile-feed-empty card">
-                    <div style={{ fontSize: 36, marginBottom: 10 }}>📝</div>
-                    <h3>No Posts Published Yet</h3>
-                    <p className="lead">You haven't posted anything to the campus feed yet. Share updates, questions, or report campus issues.</p>
-                    <button
-                      className="primary-button"
-                      style={{ fontSize: 13, padding: '8px 18px', margin: '0 auto' }}
-                      onClick={() => setShowThreadsComposer(true)}
-                    >
-                      Create Your First Post
-                    </button>
+                  <div className="au-info-title-group">
+                    <span className="eyebrow" style={{ color: 'var(--primary)', marginBottom: 0 }}>Andhra University</span>
+                    <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>College of Engineering</h2>
                   </div>
-                ) : (
-                  myPosts.map((post) => (
-                    <div key={post.id} className="profile-post-wrapper">
-                      <MomentCard
-                        post={post}
-                        onToast={setToast}
-                        isSaved={savedPostIds.includes(post.id)}
-                        onSaveToggle={handleSaveToggle}
-                        isOwner={true}
-                        onDelete={handleDeletePost}
-                      />
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-
-            {/* SUBTAB 2: SAVED BOOKMARKS */}
-            {aboutSubTab === 'saved' && (
-              <div className="insta-down-posts-container">
-                <div className="insta-down-posts-header">
-                  <div className="eyebrow" style={{ color: 'var(--primary)', marginBottom: 2 }}>Bookmarks</div>
-                  <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>Saved Posts</h2>
-                  <p className="lead" style={{ margin: '2px 0 0', fontSize: 12 }}>Posts, circulars, and notices bookmarked for quick access</p>
+                  <a
+                    href="https://andhrauniversity.edu.in"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="secondary-button"
+                    style={{ fontSize: 12, padding: '7px 12px', textDecoration: 'none' }}
+                  >
+                    Official Portal ↗
+                  </a>
                 </div>
 
-                {savedPosts.length === 0 ? (
-                  <div className="profile-feed-empty card">
-                    <div style={{ fontSize: 36, marginBottom: 10 }}>★</div>
-                    <h3>No Saved Posts</h3>
-                    <p className="lead">Tap the bookmark ribbon icon on any post in the feed to save it here for reference.</p>
-                    <button
-                      className="secondary-button"
-                      style={{ fontSize: 13, padding: '8px 18px', margin: '0 auto' }}
-                      onClick={() => setTab('feed')}
-                    >
-                      Browse Campus Feed
-                    </button>
-                  </div>
-                ) : (
-                  savedPosts.map((post) => (
-                    <div key={post.id} className="profile-post-wrapper">
-                      <div className="post-action-banner">
-                        <button
-                          type="button"
-                          className="unsave-btn"
-                          onClick={() => handleSaveToggle(post.id)}
-                          title="Remove bookmark"
-                        >
-                          ✕ Remove from Saved
-                        </button>
-                      </div>
-                      <MomentCard
-                        post={post}
-                        onToast={setToast}
-                        isSaved={true}
-                        onSaveToggle={handleSaveToggle}
-                        isOwner={
-                          (post.authorEmail && post.authorEmail === authEmail) ||
-                          post.username === authUsername ||
-                          post.username === (authName ? authName.toLowerCase().replace(/\s+/g, '_') : '') ||
-                          post.username === 'you'
-                        }
-                        onDelete={handleDeletePost}
-                      />
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-
-            {/* SUBTAB 3: AU INFO & COLLEGE */}
-            {aboutSubTab === 'college' && (
-              <div className="stack">
-                <div>
-                  <div className="eyebrow">Andhra University</div>
-                  <h1>About Andhra University</h1>
-                  <p className="lead">Andhra University, established in 1926. College of Engineering, established in 1946.</p>
+                <div className="card au-info-hero-card">
+                  <div className="eyebrow">ESTABLISHED 1926 • AUTONOMOUS SINCE 1946</div>
+                  <h1 style={{ margin: '6px 0 10px', fontSize: 22 }}>Andhra University College of Engineering (AUCoE)</h1>
+                  <p className="lead" style={{ margin: 0, fontSize: 13.5 }}>
+                    One of India's oldest and most prestigious engineering institutions, recognized as a Category-1 University by UGC with NAAC A++ Grade (3.74 / 4.0 CGPA).
+                  </p>
                 </div>
 
                 {/* University Stat Badges */}
@@ -2593,9 +2400,402 @@ export default function Home() {
                     </article>
                   ))}
                 </div>
+
+                {/* Campus Helplines & Key Offices */}
+                <div className="card" style={{ padding: 20 }}>
+                  <h3 style={{ margin: '0 0 12px 0', fontSize: 16, color: 'var(--ink)' }}>Campus Key Contacts & Helplines</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, fontSize: 13 }}>
+                    <div><strong>Principal Office:</strong> principal.aucoe@andhrauniversity.edu.in</div>
+                    <div><strong>Dean Academic Affairs:</strong> dean.academic@andhrauniversity.edu.in</div>
+                    <div><strong>Examination Cell:</strong> examcell@andhrauniversity.edu.in</div>
+                    <div><strong>Central Library Desk:</strong> library@andhrauniversity.edu.in</div>
+                    <div><strong>Hostel Office:</strong> hostels@andhrauniversity.edu.in</div>
+                    <div><strong>Emergency Security:</strong> 0891-2844000</div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* INSTAGRAM-STYLE PROFILE SCREEN (Posts and Saved) */
+              <div className="insta-profile-screen">
+                {/* 1. TOP USERNAME BAR */}
+                <div className="insta-profile-topbar">
+                  <div className="insta-topbar-username">
+                    <span className="lock-icon" style={{ fontSize: 13 }}>🔒</span>
+                    <span>@{authUsername || (authName ? authName.toLowerCase().replace(/\s+/g, '_') : 'au.student')}</span>
+                    <span className="verified-badge" title="Official Student Identity Verified">✓</span>
+                  </div>
+                  <div className="insta-topbar-actions">
+                    <button
+                      className="icon-button"
+                      onClick={toggleTheme}
+                      aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                      title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                    >
+                      {theme === 'dark' ? <SunIcon size={18} /> : <MoonIcon size={18} />}
+                    </button>
+                    <button
+                      className={`icon-button ${isEditingProfile ? 'active' : ''}`}
+                      onClick={() => setIsEditingProfile(!isEditingProfile)}
+                      aria-label="Edit Profile & Settings"
+                      title="Edit Profile & Settings"
+                    >
+                      ⚙️
+                    </button>
+                  </div>
+                </div>
+
+                {/* 2. PROFILE HERO (AVATAR + 3 STATS) */}
+                <div className="insta-profile-hero">
+                  <div className="insta-avatar-wrapper">
+                    <div className="insta-avatar-ring">
+                      <div className="insta-avatar-circle">
+                        {(authName.trim()[0] || authEmail.trim()[0] || 'A').toUpperCase()}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="insta-stats-row">
+                    <button
+                      type="button"
+                      className="insta-stat-item"
+                      onClick={() => setAboutSubTab('posts')}
+                    >
+                      <span className="insta-stat-number">{myPosts.length}</span>
+                      <span className="insta-stat-label">Posts</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="insta-stat-item"
+                      onClick={() => setAboutSubTab('saved')}
+                    >
+                      <span className="insta-stat-number">{savedPosts.length}</span>
+                      <span className="insta-stat-label">Saved</span>
+                    </button>
+                    <div className="insta-stat-item">
+                      <span className="insta-stat-number">{authYear || '4th Yr'}</span>
+                      <span className="insta-stat-label">{authDept.includes('Science') ? 'CSE' : authDept || 'Dept'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. BIO & DETAILS SECTION */}
+                <div className="insta-bio-section">
+                  <h1 className="insta-bio-fullname">{authName || 'AU Student'}</h1>
+                  <div className="insta-bio-college">
+                    🎓 AU College of Engineering (Autonomous)
+                  </div>
+                  <div className="insta-bio-meta">
+                    <span>🆔 Roll: <strong>{authRollNo || '325506402371'}</strong></span>
+                    <span>•</span>
+                    <span>✉️ {authEmail || 'student@andhrauniversity.edu.in'}</span>
+                  </div>
+                  <div className="insta-bio-phone">
+                    📞 {authPhone || '+91 9876543210'}
+                  </div>
+                  <p className="insta-bio-text">
+                    {authBio || 'Engineering Student @ Andhra University. Passionate about technology, projects, and campus collaboration.'}
+                  </p>
+                </div>
+
+                {/* 4. ACTION BUTTONS ROW (Edit Bio, Share, Sign Out) */}
+                <div className="insta-profile-actions-row">
+                  <button
+                    type="button"
+                    className="insta-action-button primary"
+                    onClick={() => setIsEditingProfile(!isEditingProfile)}
+                  >
+                    <span>{isEditingProfile ? '✕ Close Editor' : '✏️ Edit Profile / Bio'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="insta-action-button"
+                    onClick={() => {
+                      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                        navigator.clipboard.writeText(window.location.origin);
+                      }
+                      setToast('Profile link copied to clipboard!');
+                    }}
+                  >
+                    <span>🔗 Share</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="insta-action-button danger"
+                    onClick={handleSignOut}
+                  >
+                    <span>🚪 Sign Out</span>
+                  </button>
+                </div>
+
+                {/* COLLAPSIBLE EDIT PROFILE / BIO & SETTINGS DRAWER */}
+                {isEditingProfile && (
+                  <div className="insta-edit-drawer card">
+                    <div className="insta-edit-header">
+                      <h3>Edit Profile & Bio</h3>
+                      <button className="icon-button" onClick={() => setIsEditingProfile(false)}>✕</button>
+                    </div>
+
+                    <div className="stack" style={{ gap: 12 }}>
+                      <div>
+                        <label className="field-label">Full Name</label>
+                        <input
+                          type="text"
+                          className="search"
+                          value={authName}
+                          onChange={(e) => setAuthName(e.target.value)}
+                          placeholder="e.g. P V N Dhanunjay Reddy"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="field-label">Phone Number (authPhone)</label>
+                        <input
+                          type="tel"
+                          className="search"
+                          value={authPhone}
+                          onChange={(e) => setAuthPhone(e.target.value)}
+                          placeholder="+91 9876543210"
+                        />
+                      </div>
+
+                      <div className="profile-bio-card" style={{ padding: 0, border: 'none', background: 'transparent' }}>
+                        <label className="field-label">About Yourself (Bio)</label>
+                        <p className="lead" style={{ fontSize: 12, margin: '0 0 6px 0' }}>
+                          Add your academic interests, branch clubs, projects, or hostel details.
+                        </p>
+                        <textarea
+                          className="profile-bio-textarea"
+                          value={authBio}
+                          onChange={(e) => setAuthBio(e.target.value)}
+                          placeholder="Write a few lines about yourself..."
+                          rows={3}
+                        />
+                      </div>
+
+                      <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                        <button
+                          className="primary-button"
+                          style={{ fontSize: 13, padding: '8px 18px' }}
+                          onClick={() => {
+                            try {
+                              const sess = localStorage.getItem('aupro_session');
+                              if (sess) {
+                                const parsed = JSON.parse(sess);
+                                localStorage.setItem('aupro_session', JSON.stringify({ ...parsed, name: authName, phone: authPhone, bio: authBio }));
+                              }
+                            } catch {}
+                            setIsEditingProfile(false);
+                            setToast('Bio saved to your profile!');
+                          }}
+                        >
+                          Save Bio
+                        </button>
+                        <button
+                          className="secondary-button"
+                          style={{ fontSize: 13, padding: '8px 14px' }}
+                          onClick={() => setIsEditingProfile(false)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+
+                      {/* Account Preferences / Settings */}
+                      <div className="settings-card" style={{ marginTop: 12, padding: '16px 0 0 0', borderTop: '1px solid var(--border)' }}>
+                        <h4 style={{ margin: '0 0 10px 0', fontSize: 14, color: 'var(--ink)' }}>Account Preferences</h4>
+                        <div className="settings-row">
+                          <div className="settings-info">
+                            <strong>Dark Mode Appearance</strong>
+                            <span>Switch between collegiate light theme and modern dark mode</span>
+                          </div>
+                          <button
+                            className={`settings-toggle-btn ${theme === 'dark' ? 'active' : ''}`}
+                            onClick={toggleTheme}
+                            aria-label="Toggle dark mode"
+                          >
+                            <span className="settings-toggle-thumb" />
+                          </button>
+                        </div>
+
+                        <div className="settings-row">
+                          <div className="settings-info">
+                            <strong>Official Announcements Push</strong>
+                            <span>Receive instant alerts when college notices are published</span>
+                          </div>
+                          <button
+                            className={`settings-toggle-btn ${settingsNotifications ? 'active' : ''}`}
+                            onClick={() => setSettingsNotifications(!settingsNotifications)}
+                            aria-label="Toggle notifications"
+                          >
+                            <span className="settings-toggle-thumb" />
+                          </button>
+                        </div>
+
+                        <div className="settings-row">
+                          <div className="settings-info">
+                            <strong>Problem Ticket Updates</strong>
+                            <span>Get status updates when reported campus issues are inspected</span>
+                          </div>
+                          <button
+                            className={`settings-toggle-btn ${settingsProblemAlerts ? 'active' : ''}`}
+                            onClick={() => setSettingsProblemAlerts(!settingsProblemAlerts)}
+                            aria-label="Toggle problem alerts"
+                          >
+                            <span className="settings-toggle-thumb" />
+                          </button>
+                        </div>
+
+                        <div className="settings-row">
+                          <div className="settings-info">
+                            <strong>Compact Feed Layout</strong>
+                            <span>Display high-density feed items</span>
+                          </div>
+                          <button
+                            className={`settings-toggle-btn ${settingsCompactView ? 'active' : ''}`}
+                            onClick={() => setSettingsCompactView(!settingsCompactView)}
+                            aria-label="Toggle compact view"
+                          >
+                            <span className="settings-toggle-thumb" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <button className="signout-button" onClick={handleSignOut} style={{ marginTop: 8 }}>
+                        <span>🚪</span>
+                        <span>Sign Out of AuPro</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. INSTAGRAM PROFILE SUBTABS: Posts | Saved | AU Info */}
+                <div className="insta-profile-tabs" role="tablist" aria-label="Profile navigation">
+                  <button
+                    role="tab"
+                    aria-selected={aboutSubTab === 'posts'}
+                    className={`insta-tab-btn ${aboutSubTab === 'posts' ? 'active' : ''}`}
+                    onClick={() => setAboutSubTab('posts')}
+                  >
+                    <span className="tab-icon">📸</span>
+                    <span className="tab-label">Posts {myPosts.length > 0 ? `(${myPosts.length})` : ''}</span>
+                  </button>
+
+                  <button
+                    role="tab"
+                    aria-selected={aboutSubTab === 'saved'}
+                    className={`insta-tab-btn ${aboutSubTab === 'saved' ? 'active' : ''}`}
+                    onClick={() => setAboutSubTab('saved')}
+                  >
+                    <span className="tab-icon">🔖</span>
+                    <span className="tab-label">Saved {savedPosts.length > 0 ? `(${savedPosts.length})` : ''}</span>
+                  </button>
+
+                  <button
+                    role="tab"
+                    aria-selected={(aboutSubTab as string) === 'college'}
+                    className={`insta-tab-btn ${(aboutSubTab as string) === 'college' ? 'active' : ''}`}
+                    onClick={() => setAboutSubTab('college')}
+                  >
+                    <span className="tab-icon">🏛️</span>
+                    <span className="tab-label">AU Info</span>
+                  </button>
+                </div>
+
+                {/* 6. "DOWN YOUR POSTS" / TAB CONTENT */}
+                {/* SUBTAB 1: USER'S PUBLISHED POSTS (DOWN YOUR POSTS) */}
+                {aboutSubTab === 'posts' && (
+                  <div className="insta-down-posts-container">
+                    <div className="insta-down-posts-header">
+                      <div className="eyebrow" style={{ color: 'var(--primary)', marginBottom: 2 }}>Down Your Posts</div>
+                      <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>Your Published Posts</h2>
+                      <p className="lead" style={{ margin: '2px 0 0', fontSize: 12 }}>Tap the ••• icon on any post to delete or share</p>
+                    </div>
+
+                    {myPosts.length === 0 ? (
+                      <div className="profile-feed-empty card">
+                        <div style={{ fontSize: 36, marginBottom: 10 }}>📝</div>
+                        <h3>No Posts Published Yet</h3>
+                        <p className="lead">You haven't posted anything to the campus feed yet. Share updates, questions, or report campus issues.</p>
+                        <button
+                          className="primary-button"
+                          style={{ fontSize: 13, padding: '8px 18px', margin: '0 auto' }}
+                          onClick={() => setShowThreadsComposer(true)}
+                        >
+                          Create Your First Post
+                        </button>
+                      </div>
+                    ) : (
+                      myPosts.map((post) => (
+                        <div key={post.id} className="profile-post-wrapper">
+                          <MomentCard
+                            post={post}
+                            onToast={setToast}
+                            isSaved={savedPostIds.includes(post.id)}
+                            onSaveToggle={handleSaveToggle}
+                            isOwner={true}
+                            onDelete={handleDeletePost}
+                          />
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {/* SUBTAB 2: SAVED BOOKMARKS */}
+                {aboutSubTab === 'saved' && (
+                  <div className="insta-down-posts-container">
+                    <div className="insta-down-posts-header">
+                      <div className="eyebrow" style={{ color: 'var(--primary)', marginBottom: 2 }}>Bookmarks</div>
+                      <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>Saved Posts</h2>
+                      <p className="lead" style={{ margin: '2px 0 0', fontSize: 12 }}>Posts, circulars, and notices bookmarked for quick access</p>
+                    </div>
+
+                    {savedPosts.length === 0 ? (
+                      <div className="profile-feed-empty card">
+                        <div style={{ fontSize: 36, marginBottom: 10 }}>★</div>
+                        <h3>No Saved Posts</h3>
+                        <p className="lead">Tap the bookmark ribbon icon on any post in the feed to save it here for reference.</p>
+                        <button
+                          className="secondary-button"
+                          style={{ fontSize: 13, padding: '8px 18px', margin: '0 auto' }}
+                          onClick={() => setTab('feed')}
+                        >
+                          Browse Campus Feed
+                        </button>
+                      </div>
+                    ) : (
+                      savedPosts.map((post) => (
+                        <div key={post.id} className="profile-post-wrapper">
+                          <div className="post-action-banner">
+                            <button
+                              type="button"
+                              className="unsave-btn"
+                              onClick={() => handleSaveToggle(post.id)}
+                              title="Remove bookmark"
+                            >
+                              ✕ Remove from Saved
+                            </button>
+                          </div>
+                          <MomentCard
+                            post={post}
+                            onToast={setToast}
+                            isSaved={true}
+                            onSaveToggle={handleSaveToggle}
+                            isOwner={
+                              (post.authorEmail && post.authorEmail === authEmail) ||
+                              post.username === authUsername ||
+                              post.username === (authName ? authName.toLowerCase().replace(/\s+/g, '_') : '') ||
+                              post.username === 'you'
+                            }
+                            onDelete={handleDeletePost}
+                          />
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
             )}
-          </div>
+          </>
         )}
       </section>
 
@@ -2645,9 +2845,9 @@ export default function Home() {
           <span>Location</span>
         </button>
 
-        <button className={`nav-button ${tab === 'about' ? 'active' : ''}`} onClick={() => setTab('about')} aria-label="About">
-          <DarkenedAboutIcon active={tab === 'about'} size={22} />
-          <span>About</span>
+        <button className={`nav-button ${tab === 'about' ? 'active' : ''}`} onClick={() => setTab('about')} aria-label="Profile">
+          <InstagramProfileIcon active={tab === 'about'} size={24} />
+          <span>Profile</span>
         </button>
       </nav>
 

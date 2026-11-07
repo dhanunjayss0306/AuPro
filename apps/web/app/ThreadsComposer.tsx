@@ -8,7 +8,7 @@ export interface ThreadsPostData {
   category: 'normal' | 'problem' | 'announcement';
   title?: string;
   department?: string;
-  location: string;
+  location?: string;
   caption: string;
   imageUrl?: string;
   gifUrl?: string;
@@ -31,6 +31,18 @@ export const AUTHORIZED_ANNOUNCEMENT_EMAILS = [
   'examcell@andhrauniversity.edu.in',
   'library@andhrauniversity.edu.in',
 ];
+
+// Supported post categories: Normal Post, Problem report, or Announcement
+export type PostCategoryOption = 'Normal Post' | 'Problem' | 'Announcement';
+
+export function checkIsAuthorizedForAnnouncement(userEmail: string, authorizedEmails: string[] = []): boolean {
+  if (!userEmail) return false;
+  const cleanEmail = userEmail.toLowerCase().trim();
+  const allAllowed = [...AUTHORIZED_ANNOUNCEMENT_EMAILS, ...authorizedEmails.map((e) => e.toLowerCase().trim())];
+  if (allAllowed.includes(cleanEmail)) return true;
+  if (cleanEmail.startsWith('admin') || cleanEmail.startsWith('dean') || cleanEmail.startsWith('hod') || cleanEmail.startsWith('office')) return true;
+  return false;
+}
 
 interface ThreadsComposerProps {
   initialKind?: 'normal' | 'problem' | 'announcement';
@@ -60,8 +72,7 @@ export function ThreadsComposer({
 }: ThreadsComposerProps) {
   const [kind, setKind] = useState<'normal' | 'problem' | 'announcement'>(initialKind === 'announcement' ? 'problem' : initialKind);
   const [caption, setCaption] = useState('');
-  const [department, setDepartment] = useState('CSE Department');
-  const [location, setLocation] = useState('AU College of Engineering');
+  const [location, setLocation] = useState('');
   const [showLocationInput, setShowLocationInput] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedGif, setSelectedGif] = useState<string | null>(null);
@@ -71,20 +82,6 @@ export function ThreadsComposer({
   const [error, setError] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Check whether current user's email is authorized to publish an official Announcement
-  const checkIsAuthorizedForAnnouncement = (): boolean => {
-    if (!userEmail) return false;
-    const cleanEmail = userEmail.toLowerCase().trim();
-    const allAllowed = [...AUTHORIZED_ANNOUNCEMENT_EMAILS, ...authorizedEmails.map((e) => e.toLowerCase().trim())];
-    
-    // Check exact email match or official university staff prefix
-    if (allAllowed.includes(cleanEmail)) return true;
-    if (cleanEmail.startsWith('admin') || cleanEmail.startsWith('dean') || cleanEmail.startsWith('hod') || cleanEmail.startsWith('office')) return true;
-    return false;
-  };
-
-  const isAuthorized = checkIsAuthorizedForAnnouncement();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -146,7 +143,7 @@ export function ThreadsComposer({
       category: kind,
       department: undefined,
       title: kind === 'problem' ? 'Campus Problem Report' : undefined,
-      location: location.trim() || 'College of Engineering, AU Campus',
+      location: location.trim() || undefined,
       caption: caption.trim(),
       imageUrl: imagePreview || selectedGif || undefined,
       gifUrl: selectedGif || undefined,
@@ -170,39 +167,14 @@ export function ThreadsComposer({
       }}
     >
       <div className="threads-composer-card">
-        {/* Header: Cancel, 3-Option Type Selector (Normal, Problem, Announcement) */}
+        {/* Header: Cancel, Title (New thread), Spacer */}
         <header className="threads-composer-header">
           <button type="button" onClick={onClose} className="threads-cancel-btn">
             Cancel
           </button>
           
-          {/* THREE OPTIONS: Normal Post, Problem, Announcement */}
-          <div className="threads-type-pills" role="tablist" aria-label="Post category">
-            <button
-              type="button"
-              className={`threads-type-pill ${kind === 'normal' ? 'active normal' : ''}`}
-              onClick={() => { setKind('normal'); setError(''); }}
-            >
-              📝 Normal Post
-            </button>
-            <button
-              type="button"
-              className={`threads-type-pill ${kind === 'problem' ? 'active problem' : ''}`}
-              onClick={() => { setKind('problem'); setError(''); }}
-            >
-              ⚠️ Problem
-            </button>
-            <button
-              type="button"
-              className={`threads-type-pill ${kind === 'announcement' ? 'active announcement' : ''}`}
-              onClick={() => {
-                setError('Official Announcement posting is temporarily locked by university administration.');
-              }}
-              title="Official Announcements are temporarily locked by university administration"
-              style={{ opacity: 0.65 }}
-            >
-              🔒 Announcement (Blocked)
-            </button>
+          <div className="threads-composer-title" id="threads-composer-title">
+            New thread
           </div>
 
           <div style={{ width: 44 }} />
@@ -213,12 +185,12 @@ export function ThreadsComposer({
           <div className="threads-body-row">
             {/* Left Column: Avatar + Connecting Vertical Thread Line */}
             <div className="threads-left-col">
-              <div className={`threads-avatar ${kind === 'problem' ? 'avatar-problem' : kind === 'announcement' ? 'avatar-announcement' : ''}`}>
-                {isAnonymous && kind === 'problem' ? '?' : (userName[0] || 'A').toUpperCase()}
+              <div className="threads-avatar">
+                {(userName[0] || 'A').toUpperCase()}
               </div>
               <div className="threads-line" />
               <div className="threads-sub-avatar">
-                {isAnonymous ? '?' : (userName[0] || 'A').toUpperCase()}
+                {(userName[0] || 'A').toUpperCase()}
               </div>
             </div>
 
@@ -227,65 +199,65 @@ export function ThreadsComposer({
               {/* User details row */}
               <div className="threads-user-row">
                 <span className="threads-name">
-                  {isAnonymous && kind === 'problem' ? 'Anonymous Student' : userName}
+                  {userName}
                 </span>
                 <span className="threads-handle">
-                  {isAnonymous && kind === 'problem' ? '@anonymous.au' : `@${userHandle}`}
-                </span>
-                <span className={`threads-badge badge-${kind}`}>
-                  {kind === 'problem' ? 'Problem Report' : kind === 'announcement' ? 'Official Notice' : 'Normal Post'}
+                  @{userHandle}
                 </span>
               </div>
-
-              {/* Announcement Authorization Warning if email not authorized */}
-              {kind === 'announcement' && !isAuthorized && (
-                <div className="threads-permission-warning">
-                  <strong>🔒 Staff-Only Restriction</strong>
-                  <span>
-                    Official Announcements are restricted to verified university department & office email IDs ({userEmail || 'student account'}). You can submit your post as a <strong>Normal Post</strong> or report an issue under <strong>Problem</strong>.
-                  </span>
-                </div>
-              )}
-
-              {/* Specific metadata fields depending on type */}
-              {kind === 'announcement' && isAuthorized && (
-                <div className="threads-meta-row">
-                  <span className="threads-meta-label">Dept:</span>
-                  <select
-                    className="threads-select"
-                    value={department}
-                    onChange={(e) => setDepartment(e.target.value)}
-                  >
-                    <option value="Dean Academic Affairs">Dean Academic Affairs</option>
-                    <option value="CSE Department">CSE Department</option>
-                    <option value="ECE Department">ECE Department</option>
-                    <option value="Civil Engineering Dept">Civil Engineering Dept</option>
-                    <option value="Mechanical Dept">Mechanical Dept</option>
-                    <option value="Central Library">Central Library</option>
-                    <option value="Principal Office">Principal Office</option>
-                  </select>
-                </div>
-              )}
 
               {/* Location indicator / editor */}
               <div className="threads-location-row">
                 <InstagramLocationIcon size={14} />
                 {showLocationInput ? (
-                  <input
-                    type="text"
-                    className="threads-inline-input"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    placeholder="e.g. Civil Block Room 208"
-                    autoFocus
-                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: '100%' }}>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <input
+                        type="text"
+                        className="threads-inline-input"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        placeholder="Tag campus spot (e.g. Central Library, CSE Labs...)"
+                        autoFocus
+                        style={{ flex: 1 }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowLocationInput(false)}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 13 }}
+                      >
+                        ✓
+                      </button>
+                    </div>
+                    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                      {['Central Library', 'CSE Labs', 'Civil Block', 'Main Canteen', 'Grounds'].map((spot) => (
+                        <button
+                          key={spot}
+                          type="button"
+                          className="threads-location-chip"
+                          onClick={() => { setLocation(spot); setShowLocationInput(false); }}
+                          style={{
+                            fontSize: 11,
+                            padding: '2px 8px',
+                            borderRadius: 12,
+                            border: '1px solid var(--border)',
+                            background: 'var(--hover-subtle)',
+                            color: 'var(--text-main)',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {spot}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 ) : (
                   <span
                     className="threads-location-text"
                     onClick={() => setShowLocationInput(true)}
-                    title="Click to edit location"
+                    title="Click to tag a campus location"
                   >
-                    {location} ✏️
+                    {location ? `${location} ✏️` : '+ Add Campus Location'}
                   </span>
                 )}
               </div>
@@ -296,13 +268,7 @@ export function ThreadsComposer({
                 rows={3}
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
-                placeholder={
-                  kind === 'problem'
-                    ? "What's the issue? Describe what's broken or needs repair..."
-                    : kind === 'announcement'
-                    ? "What's new? Post an official department circular or exam schedule..."
-                    : "What's on your mind? Share campus moments, hackathons, or questions..."
-                }
+                placeholder="Start a thread..."
                 autoFocus
               />
 
@@ -443,18 +409,7 @@ export function ThreadsComposer({
           {/* Footer: Privacy / Anonymous toggle on left, Post button on right */}
           <footer className="threads-composer-footer">
             <div className="threads-footer-left">
-              {kind === 'problem' ? (
-                <label className="threads-anon-label">
-                  <input
-                    type="checkbox"
-                    checked={isAnonymous}
-                    onChange={(e) => setIsAnonymous(e.target.checked)}
-                  />
-                  <span>Report anonymously</span>
-                </label>
-              ) : (
-                <span className="threads-audience-text">Anyone can view & reply</span>
-              )}
+              <span className="threads-audience-text">Anyone can view & reply</span>
             </div>
 
             <button

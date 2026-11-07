@@ -281,23 +281,31 @@ export function MomentCard({
 
         {/* Right Column: User Info, Category Tag, Text, Optional Media, Actions, Activity */}
         <div className="threads-post-right">
-          {/* Header Row: Author Name, Handle, Tag, Time, Options */}
+          {/* Header Row: Author Name, Handle, Tag, Time, Geotag, Options */}
           <div className="threads-post-header">
             <div className="threads-post-author-info">
-              <span className="threads-post-author-name">{post.username}</span>
-              {post.isOfficial && (
-                <span className="insta-verified-badge" title="Verified Campus Official">
-                  ✓
-                </span>
+              <div className="threads-author-topline">
+                <span className="threads-post-author-name">{post.username}</span>
+                {post.isOfficial && (
+                  <span className="insta-verified-badge" title="Verified Campus Official">
+                    ✓
+                  </span>
+                )}
+                {post.category === 'problem' && (
+                  <span className="post-category-tag problem">⚠️ Problem</span>
+                )}
+                {post.category === 'announcement' && (
+                  <span className="post-category-tag announcement">📢 Notice</span>
+                )}
+                <span className="threads-post-dot">•</span>
+                <span className="threads-post-time">{post.timeAgo}</span>
+              </div>
+              {post.location && (
+                <div className="threads-post-location" title={`Tagged at ${post.location}`}>
+                  <InstagramLocationIcon size={11} />
+                  <span>{post.location}</span>
+                </div>
               )}
-              {post.category === 'problem' && (
-                <span className="post-category-tag problem">⚠️ Problem</span>
-              )}
-              {post.category === 'announcement' && (
-                <span className="post-category-tag announcement">📢 Notice</span>
-              )}
-              <span className="threads-post-dot">•</span>
-              <span className="threads-post-time">{post.timeAgo}</span>
             </div>
 
             <div className="threads-post-header-actions">
@@ -322,14 +330,6 @@ export function MomentCard({
               </button>
             </div>
           </div>
-
-          {/* Location pill if tagged */}
-          {post.location && (
-            <div className="threads-post-location">
-              <InstagramLocationIcon size={12} />
-              <span>{post.location}</span>
-            </div>
-          )}
 
           {/* Post Text Body */}
           <div className="threads-post-body">

@@ -170,4 +170,10 @@ test('Threads Feed & Check About post management requirements', async () => {
   assert.ok(cssContent.includes(".insta-modal-item"), 'Must style insta-modal-item');
   assert.ok(cssContent.includes(".bottom-nav.nav-hidden"), 'Must style auto-hiding bottom navigation bar');
   assert.ok(cssContent.includes(".insta-profile-screen"), 'Must style Instagram-style profile screen');
+
+  // 5. In-App Navigation and Whole Page AU Info
+  assert.ok(pageContent.includes("isNavigating"), 'Must support in-app navigation mode');
+  assert.ok(pageContent.includes("gmaps-nav-hud-top"), 'Must render in-app turn-by-turn navigation HUD');
+  assert.ok(!pageContent.includes("window.open("), 'Must NOT redirect out to external window for navigation');
+  assert.ok(pageContent.includes("au-info-fullpage"), 'Must open whole page for AU Info');
 });

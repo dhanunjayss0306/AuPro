@@ -173,6 +173,16 @@ export function DarkenedAboutIcon({ active = false, size = 24 }: { active?: bool
   );
 }
 
+// 10b. Instagram Profile Icon (Personal profile tab)
+export function InstagramProfileIcon({ active = false, size = 24 }: { active?: boolean; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth={active ? "2.5" : "2"} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
+
 // 11. Big Plus Icon for new post creation
 export function BigPlusIcon({ size = 28 }: { size?: number }) {
   return (

@@ -855,6 +855,8 @@ export default function Home() {
 
   // Head Account Master Administrator State (Only for 325506402371@andhrauniversity.edu.in)
   const [registeredUsersList, setRegisteredUsersList] = useState<Record<string, StudentProfile>>({});
+  const [studentApplications, setStudentApplications] = useState<any[]>([]);
+  const [showAdminNotifications, setShowAdminNotifications] = useState(false);
   const [platformActivities, setPlatformActivities] = useState<PlatformActivity[]>([]);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [newUserName, setNewUserName] = useState('');
@@ -871,7 +873,8 @@ export default function Home() {
       setPlatformActivities(getPlatformActivities());
     }
     try {
-      const [accRes, actRes, feedRes] = await Promise.all([
+      const [accRes, actRes, feedRes, appRes] = await Promise.all([
+        fetch('/api/applications').then((r) => (r.ok ? r.json() : null)),
         fetch('/api/accounts').then((r) => (r.ok ? r.json() : null)),
         fetch('/api/activity').then((r) => (r.ok ? r.json() : null)),
         fetch('/api/feed').then((r) => (r.ok ? r.json() : null)),
@@ -888,7 +891,19 @@ export default function Home() {
           localStorage.setItem('aupro_platform_activities', JSON.stringify(actRes.activities));
         }
       }
-      if (Array.isArray(feedRes?.posts) && feedRes.posts.length > 0) {
+      if (Array.isArray(appRes?.applications)) {
+        setStudentApplications(appRes.applications);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('aupro_applications', JSON.stringify(appRes.applications));
+        }
+      }
+      if (Array.isArray(feedRes?.posts)) {
+        const cleanPosts = feedRes.posts.filter((p: any) => !p.id.startsWith('post_init_'));
+        setFeedPosts(cleanPosts);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('aupro_feed_posts', JSON.stringify(cleanPosts));
+        }
+      } else if (Array.isArray(feedRes?.posts) && feedRes.posts.length > 0) {
         setFeedPosts(feedRes.posts);
         if (typeof window !== 'undefined') {
           localStorage.setItem('aupro_feed_posts', JSON.stringify(feedRes.posts));
@@ -909,8 +924,9 @@ export default function Home() {
       const storedPosts = localStorage.getItem('aupro_feed_posts');
       if (storedPosts) {
         const parsed = JSON.parse(storedPosts);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setFeedPosts(parsed);
+        if (Array.isArray(parsed)) {
+          const realOnly = parsed.filter((p: any) => !p.id.startsWith("post_init_"));
+          setFeedPosts(realOnly);
         }
       }
     } catch {}
@@ -3871,6 +3887,92 @@ export default function Home() {
           onClose={() => setShowThreadsComposer(false)}
           onSubmit={handleThreadsPost}
         />
+      )}
+
+      
+      {/* HEAD ADMINISTRATOR NOTIFICATIONS MODAL */}
+      {showAdminNotifications && (
+        <div className="insta-modal-backdrop" onClick={() => setShowAdminNotifications(false)}>
+          <div className="insta-modal-sheet" style={{ maxWidth: 480, maxHeight: '80vh', overflowY: 'auto', padding: 22 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 20 }}>🔔</span>
+                <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Head Administrator Notifications</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAdminNotifications(false)}
+                style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: 'var(--ink)' }}
+              >
+                ✕
+              </button>
+            </div>
+            {studentApplications.length === 0 ? (
+              <div style={{ padding: 24, textAlign: 'center', color: 'var(--muted)', fontSize: 14 }}>
+                No student applications received yet.
+              </div>
+            ) : (
+              <div className="stack" style={{ gap: 10 }}>
+                {studentApplications.map((app: any) => (
+                  <div
+                    key={app.id || app.refId}
+                    className="card"
+                    style={{
+                      background: 'var(--surface-elevated, var(--surface))',
+                      padding: 14,
+                      borderRadius: 12,
+                      border: '1px solid rgba(255,255,255,0.08)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+                      <strong style={{ fontSize: 15, color: 'var(--ink)' }}>{app.serviceTitle}</strong>
+                      <span
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          padding: '2px 8px',
+                          borderRadius: 999,
+                          background: app.status === 'approved' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(234, 179, 8, 0.2)',
+                          color: app.status === 'approved' ? '#22c55e' : '#eab308',
+                        }}
+                      >
+                        {app.status === 'approved' ? '✓ Approved' : '⏳ Pending'}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 13, color: 'var(--ink)', marginBottom: 4 }}>
+                      <strong>{app.studentName}</strong> · Roll: {app.rollNo} · {app.department}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 8 }}>
+                      Purpose: {app.purpose || 'Verification'} · Ref ID: <code>{app.refId}</code>
+                    </div>
+                    {app.status !== 'approved' && (
+                      <button
+                        type="button"
+                        className="primary-button"
+                        style={{ fontSize: 12, padding: '6px 14px', borderRadius: 8 }}
+                        onClick={async () => {
+                          try {
+                            await fetch('/api/applications', {
+                              method: 'PATCH',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ refId: app.refId, status: 'approved' }),
+                            });
+                            setStudentApplications((prev) =>
+                              prev.map((item: any) => (item.refId === app.refId ? { ...item, status: 'approved' } : item))
+                            );
+                            setToast(`Application ${app.refId} for ${app.studentName} marked as Approved.`);
+                          } catch {}
+                        }}
+                      >
+                        ✓ Approve Application
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {/* HEAD ADMINISTRATOR: ADD ANOTHER STUDENT ACCOUNT MODAL */}

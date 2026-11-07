@@ -58,10 +58,26 @@ export interface ServerFeedPost {
   durationDays?: number;
 }
 
+
+export interface ServerStudentApplication {
+  id: string;
+  refId: string;
+  studentName: string;
+  studentEmail: string;
+  rollNo: string;
+  serviceTitle: string;
+  purpose?: string;
+  department?: string;
+  year?: string;
+  submittedAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+}
+
 interface ServerDataStore {
   accounts: Record<string, ServerStudentProfile>;
   activities: ServerPlatformActivity[];
   posts: ServerFeedPost[];
+  applications?: ServerStudentApplication[];
 }
 
 const DB_FILE = path.join(os.tmpdir(), 'aupro_shared_store_v1.json');
@@ -169,56 +185,7 @@ const INITIAL_ACTIVITIES: ServerPlatformActivity[] = [
   },
 ];
 
-const INITIAL_POSTS: ServerFeedPost[] = [
-  {
-    id: 'post_init_1',
-    username: 'k_divya_sri',
-    authorEmail: '325506402375@andhrauniversity.edu.in',
-    authorHandle: 'k_divya_sri',
-    avatarText: 'K',
-    isOfficial: false,
-    category: 'problem',
-    location: 'ECE Block 2nd Floor',
-    likesCount: 5,
-    repostsCount: 1,
-    caption: 'Water purifier in ECE block 2nd floor is leaking continuously, please send campus maintenance to repair it.',
-    commentsCount: 2,
-    timeAgo: '2h ago',
-    durationDays: 30,
-  },
-  {
-    id: 'post_init_2',
-    username: 'harsha_vardhan',
-    authorEmail: '325506402391@andhrauniversity.edu.in',
-    authorHandle: 'harsha_vardhan',
-    avatarText: 'H',
-    isOfficial: false,
-    category: 'normal',
-    location: 'Dr. B.R. Ambedkar Central Library',
-    likesCount: 8,
-    repostsCount: 2,
-    caption: 'Does anyone have previous year question papers (PYQs) and handwritten notes for 4-1 Machine Learning and Cloud Computing?',
-    commentsCount: 4,
-    timeAgo: '4h ago',
-    durationDays: 30,
-  },
-  {
-    id: 'post_init_3',
-    username: 'sai_teja_au',
-    authorEmail: '325506402380@andhrauniversity.edu.in',
-    authorHandle: 'sai_teja_au',
-    avatarText: 'S',
-    isOfficial: false,
-    category: 'normal',
-    location: 'AU Golden Jubilee Ground',
-    likesCount: 12,
-    repostsCount: 3,
-    caption: 'AU College of Engineering sports trials will commence next Monday at the Golden Jubilee Ground. Register at the physical education department.',
-    commentsCount: 1,
-    timeAgo: '8h ago',
-    durationDays: 30,
-  },
-];
+const INITIAL_POSTS: ServerFeedPost[] = [];
 
 function loadStore(): ServerDataStore {
   // Global memory cache first
@@ -236,6 +203,8 @@ function loadStore(): ServerDataStore {
         // Guarantee Head Account
         if (!parsed.accounts[MAIN_ADMIN_EMAIL]) {
           parsed.accounts[MAIN_ADMIN_EMAIL] = INITIAL_HEAD_ACCOUNT;
+        parsed.posts = (parsed.posts || []).filter((p: any) => !p.id.startsWith("post_init_"));
+        parsed.applications = parsed.applications || [];
         }
         (globalThis as any).__AUPRO_GLOBAL_STORE__ = parsed;
         return parsed;
@@ -253,6 +222,7 @@ function loadStore(): ServerDataStore {
     accounts: accountsMap,
     activities: [...INITIAL_ACTIVITIES],
     posts: [...INITIAL_POSTS],
+    applications: [],
   };
 
   (globalThis as any).__AUPRO_GLOBAL_STORE__ = fresh;
@@ -504,4 +474,56 @@ export function repostFeedPost(
   );
 
   return newPost;
+}
+
+export function getAllApplications(): ServerStudentApplication[] {
+  const store = loadStore();
+  return store.applications || [];
+}
+
+export function addStudentApplication(app: Partial<ServerStudentApplication>): ServerStudentApplication {
+  const store = loadStore();
+  store.applications = Array.isArray(store.applications) ? store.applications : [];
+  const refId = app.refId || ('AU-' + Math.floor(100000 + Math.random() * 900000));
+  const newApp: ServerStudentApplication = {
+    id: app.id || ('app_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6)),
+    refId,
+    studentName: app.studentName || 'AU Student',
+    studentEmail: app.studentEmail || '',
+    rollNo: app.rollNo || 'Pending',
+    serviceTitle: app.serviceTitle || 'Certificate Application',
+    purpose: app.purpose || 'Verification',
+    department: app.department || 'AU Engineering',
+    year: app.year || '4th Year',
+    submittedAt: app.submittedAt || new Date().toISOString(),
+    status: (app.status as any) || 'pending',
+  };
+
+  store.applications.unshift(newApp);
+  store.applications = store.applications.slice(0, 100);
+  saveStoreToFile(store);
+
+  logServerActivity(
+    'Student Application Submitted',
+    newApp.studentEmail || newApp.studentName,
+    newApp.serviceTitle + ' (Ref ID: ' + newApp.refId + ') - ' + (newApp.purpose || 'Academic Need')
+  );
+
+  return newApp;
+}
+
+export function updateApplicationStatus(refId: string, status: 'pending' | 'approved' | 'rejected'): boolean {
+  const store = loadStore();
+  store.applications = Array.isArray(store.applications) ? store.applications : [];
+  const app = store.applications.find((a) => a.refId === refId || a.id === refId);
+  if (!app) return false;
+  app.status = status;
+  saveStoreToFile(store);
+
+  logServerActivity(
+    'Application ' + (status === 'approved' ? 'Approved' : 'Status Updated'),
+    MAIN_ADMIN_EMAIL,
+    app.serviceTitle + ' for ' + app.studentName + ' (' + app.refId + ') marked as ' + status
+  );
+  return true;
 }

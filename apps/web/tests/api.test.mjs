@@ -23,11 +23,14 @@ test('UI requirements: page.tsx matches user specifications', async () => {
   // 1. Underlined plus button
   assert.ok(pageContent.includes('plus-underline-bar'), 'Must contain plus-underline-bar for clear bottom nav plus underline');
 
-  // 2. Feed filter navigation: Problems, Normal Posts, Announcements
-  assert.ok(pageContent.includes('feed-category-bar'), 'Must contain feed-category-bar');
-  assert.ok(pageContent.includes('Problems'), 'Must have Problems tab');
-  assert.ok(pageContent.includes('Normal Posts'), 'Must have Normal Posts tab');
-  assert.ok(pageContent.includes('Announcements'), 'Must have Announcements tab');
+  // 2. Feed: Pure continuous unified Threads stream (Problems/Normal Posts/Announcements top bar removed per user spec)
+  assert.ok(!pageContent.includes('feed-category-bar'), 'Must NOT contain feed-category-bar in the feed');
+
+  // Instagram-style Profile in About Tab
+  assert.ok(pageContent.includes('insta-profile-screen'), 'Must render Instagram-style profile screen');
+  assert.ok(pageContent.includes('Down Your Posts'), 'Must display "Down Your Posts" in profile section');
+  assert.ok(pageContent.includes('insta-stats-row'), 'Must display 3 horizontal stats in profile');
+  assert.ok(pageContent.includes('nav-hidden'), 'Must support scroll-driven auto-hiding navigation bar');
 
   // 3. Cinematic opening intro integrated
   assert.ok(pageContent.includes('IntroCinematic'), 'Must import and use IntroCinematic');
@@ -161,4 +164,10 @@ test('Threads Feed & Check About post management requirements', async () => {
   assert.ok(pageContent.includes("handleSaveToggle"), 'Must support saving and unsaving posts');
   assert.ok(cardContent.includes("onDelete"), 'MomentCard must accept onDelete callback');
   assert.ok(cardContent.includes("onSaveToggle"), 'MomentCard must accept onSaveToggle callback');
+
+  // 4. Modal dark mode & scroll navbar
+  assert.ok(cssContent.includes(".insta-modal-sheet"), 'Must style insta-modal-sheet');
+  assert.ok(cssContent.includes(".insta-modal-item"), 'Must style insta-modal-item');
+  assert.ok(cssContent.includes(".bottom-nav.nav-hidden"), 'Must style auto-hiding bottom navigation bar');
+  assert.ok(cssContent.includes(".insta-profile-screen"), 'Must style Instagram-style profile screen');
 });

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   InstagramFeedIcon,
   InstagramLikeIcon,
@@ -43,7 +43,7 @@ import { validateTextContent, validateImageSafety } from './content_moderation';
 
 type Tab = 'applications' | 'create' | 'feed' | 'chatbot' | 'location' | 'about';
 type AuthMode = 'landing' | 'email-login' | 'signup' | 'otp';
-type FeedFilter = 'problems' | 'normal' | 'announcements';
+type FeedFilter = 'all' | 'problems' | 'normal' | 'announcements';
 
 interface CampusLandmark {
   id: string;
@@ -255,7 +255,7 @@ export default function Home() {
     return true;
   });
   const [showThreadsComposer, setShowThreadsComposer] = useState(false);
-  const [threadsInitialKind, setThreadsInitialKind] = useState<'announcement' | 'problem'>('announcement');
+  const [threadsInitialKind, setThreadsInitialKind] = useState<'normal' | 'problem' | 'announcement'>('normal');
 
   const [tab, setTab] = useState<Tab>('feed');
   const [signedIn, setSignedIn] = useState(false);
@@ -314,6 +314,41 @@ export default function Home() {
   // Topbar Profile Quick Menu
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
+  // Instagram Profile Edit Mode State
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+
+  // Scroll-driven auto-hiding / appearing bottom navigation bar
+  const [isNavVisible, setIsNavVisible] = useState(true);
+  const lastScrollYRef = useRef(0);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentY = window.scrollY || window.pageYOffset;
+          const diff = currentY - lastScrollYRef.current;
+
+          // Scroll down by > 6px past top 60px -> hide navbar
+          if (diff > 6 && currentY > 60) {
+            setIsNavVisible(false);
+          } else if (diff < -6 || currentY <= 30) {
+            // Scroll up or near top -> show navbar
+            setIsNavVisible(true);
+          }
+          lastScrollYRef.current = currentY;
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Application Dedicated Page State
   const [activeApplication, setActiveApplication] = useState<{ title: string; icon: ServiceIconKind; detail: string } | null>(null);
   const [clickedApplyId, setClickedApplyId] = useState<string | null>(null);
@@ -365,7 +400,7 @@ export default function Home() {
 
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
-  const [feedFilter, setFeedFilter] = useState<FeedFilter>('normal');
+  const [feedFilter, setFeedFilter] = useState<FeedFilter>('all');
   const [feedPosts, setFeedPosts] = useState<MomentPost[]>(initialPosts);
   const [showCreateMenu, setShowCreateMenu] = useState(false);
   const [createKind, setCreateKind] = useState<'announcement' | 'problem'>('announcement');
@@ -788,7 +823,7 @@ export default function Home() {
       } catch {}
       return updated;
     });
-    setFeedFilter(data.category === 'problem' ? 'problems' : data.category === 'announcement' ? 'announcements' : 'normal');
+    setFeedFilter('all');
     setShowThreadsComposer(false);
     setToast(data.category === 'problem' ? 'Problem reported to campus administration.' : 'Post published to AuPro feed.');
     setTab('feed');
@@ -1390,34 +1425,6 @@ export default function Home() {
         {/* TAB 1: FEED / MOMENTS */}
         {tab === 'feed' && (
           <div className="insta-feed-container">
-            {/* Small Navigation Bar with Problems, Normal Posts, and Announcements */}
-            <div className="feed-category-bar" role="tablist" aria-label="Feed filter">
-              <button
-                role="tab"
-                aria-selected={feedFilter === 'problems'}
-                className={`feed-category-btn ${feedFilter === 'problems' ? 'active' : ''}`}
-                onClick={() => setFeedFilter('problems')}
-              >
-                Problems
-              </button>
-              <button
-                role="tab"
-                aria-selected={feedFilter === 'normal'}
-                className={`feed-category-btn ${feedFilter === 'normal' ? 'active' : ''}`}
-                onClick={() => setFeedFilter('normal')}
-              >
-                Normal Posts
-              </button>
-              <button
-                role="tab"
-                aria-selected={feedFilter === 'announcements'}
-                className={`feed-category-btn ${feedFilter === 'announcements' ? 'active' : ''}`}
-                onClick={() => setFeedFilter('announcements')}
-              >
-                Announcements
-              </button>
-            </div>
-
             {filteredFeedPosts.map((post) => (
               <MomentCard
                 key={post.id}
@@ -1437,28 +1444,20 @@ export default function Home() {
 
             {filteredFeedPosts.length === 0 ? (
               <div className="card feed-empty-card">
-                <div style={{ fontSize: 32, marginBottom: 10 }}>
-                  {feedFilter === 'problems' ? '⚠️' : feedFilter === 'announcements' ? '📢' : '📝'}
-                </div>
-                <h3>
-                  {feedFilter === 'problems' ? 'No Active Problems Reported' : feedFilter === 'announcements' ? 'No Official Announcements Yet' : 'No Posts in Feed Yet'}
-                </h3>
+                <div style={{ fontSize: 32, marginBottom: 10 }}>📝</div>
+                <h3>No Posts in Feed Yet</h3>
                 <p className="lead" style={{ fontSize: 13, margin: '0 0 16px 0' }}>
-                  {feedFilter === 'problems'
-                    ? 'Have an issue with lab equipment, classrooms, or hostel facilities? Tap the + button to report it to administration.'
-                    : feedFilter === 'announcements'
-                    ? 'Department circulars and university notices published by authorized administration will appear here.'
-                    : 'Be the first to share an academic update, tech project, or question with fellow AU students.'}
+                  Be the first to share an academic update, tech project, or report a campus issue with fellow AU students.
                 </p>
                 <button
                   className="primary-button"
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 6, margin: '0 auto', fontSize: 13 }}
                   onClick={() => {
-                    setThreadsInitialKind(feedFilter === 'problems' ? 'problem' : 'announcement');
+                    setThreadsInitialKind('normal');
                     setShowThreadsComposer(true);
                   }}
                 >
-                  <span>Create {feedFilter === 'problems' ? 'Problem Report' : feedFilter === 'announcements' ? 'Announcement' : 'Post'}</span>
+                  <span>Create Post</span>
                 </button>
               </div>
             ) : (
@@ -2176,196 +2175,153 @@ export default function Home() {
           </div>
         )}
 
-        {/* TAB 6: ABOUT & STUDENT PROFILE */}
+        {/* TAB 6: ABOUT & STUDENT PROFILE (INSTAGRAM-STYLE PROFILE) */}
         {tab === 'about' && (
-          <div className="stack">
-            {/* Top Subtab switcher */}
-            <div className="about-subtab-bar" role="tablist">
+          <div className="insta-profile-screen">
+            {/* 1. TOP USERNAME BAR */}
+            <div className="insta-profile-topbar">
+              <div className="insta-topbar-username">
+                <span className="lock-icon" style={{ fontSize: 13 }}>🔒</span>
+                <span>@{authUsername || (authName ? authName.toLowerCase().replace(/\s+/g, '_') : 'au.student')}</span>
+                <span className="verified-badge" title="Official Student Identity Verified">✓</span>
+              </div>
+              <div className="insta-topbar-actions">
+                <button
+                  className="icon-button"
+                  onClick={toggleTheme}
+                  aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                  title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                >
+                  {theme === 'dark' ? <SunIcon size={18} /> : <MoonIcon size={18} />}
+                </button>
+                <button
+                  className={`icon-button ${isEditingProfile ? 'active' : ''}`}
+                  onClick={() => setIsEditingProfile(!isEditingProfile)}
+                  aria-label="Edit Profile & Settings"
+                  title="Edit Profile & Settings"
+                >
+                  ⚙️
+                </button>
+              </div>
+            </div>
+
+            {/* 2. PROFILE HERO (AVATAR + 3 STATS) */}
+            <div className="insta-profile-hero">
+              <div className="insta-avatar-wrapper">
+                <div className="insta-avatar-ring">
+                  <div className="insta-avatar-circle">
+                    {(authName.trim()[0] || authEmail.trim()[0] || 'A').toUpperCase()}
+                  </div>
+                </div>
+              </div>
+
+              <div className="insta-stats-row">
+                <button
+                  type="button"
+                  className="insta-stat-item"
+                  onClick={() => setAboutSubTab('posts')}
+                >
+                  <span className="insta-stat-number">{myPosts.length}</span>
+                  <span className="insta-stat-label">Posts</span>
+                </button>
+                <button
+                  type="button"
+                  className="insta-stat-item"
+                  onClick={() => setAboutSubTab('saved')}
+                >
+                  <span className="insta-stat-number">{savedPosts.length}</span>
+                  <span className="insta-stat-label">Saved</span>
+                </button>
+                <div className="insta-stat-item">
+                  <span className="insta-stat-number">{authYear || '4th Yr'}</span>
+                  <span className="insta-stat-label">{authDept.includes('Science') ? 'CSE' : authDept || 'Dept'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. BIO & DETAILS SECTION */}
+            <div className="insta-bio-section">
+              <h1 className="insta-bio-fullname">{authName || 'AU Student'}</h1>
+              <div className="insta-bio-college">
+                🎓 AU College of Engineering (Autonomous)
+              </div>
+              <div className="insta-bio-meta">
+                <span>🆔 Roll: <strong>{authRollNo || '325506402371'}</strong></span>
+                <span>•</span>
+                <span>✉️ {authEmail || 'student@andhrauniversity.edu.in'}</span>
+              </div>
+              <div className="insta-bio-phone">
+                📞 {authPhone || '+91 9876543210'}
+              </div>
+              <p className="insta-bio-text">
+                {authBio || 'Engineering Student @ Andhra University. Passionate about technology, projects, and campus collaboration.'}
+              </p>
+            </div>
+
+            {/* 4. ACTION BUTTONS ROW (Edit Bio, Share, Sign Out) */}
+            <div className="insta-profile-actions-row">
               <button
-                role="tab"
-                aria-selected={aboutSubTab === 'posts'}
-                className={`about-subtab-btn ${aboutSubTab === 'posts' ? 'active' : ''}`}
-                onClick={() => setAboutSubTab('posts')}
+                type="button"
+                className="insta-action-button primary"
+                onClick={() => setIsEditingProfile(!isEditingProfile)}
               >
-                <span>📝</span>
-                <span>My Posts {myPosts.length > 0 ? `(${myPosts.length})` : ''}</span>
+                <span>{isEditingProfile ? '✕ Close Editor' : '✏️ Edit Profile / Bio'}</span>
               </button>
               <button
-                role="tab"
-                aria-selected={aboutSubTab === 'saved'}
-                className={`about-subtab-btn ${aboutSubTab === 'saved' ? 'active' : ''}`}
-                onClick={() => setAboutSubTab('saved')}
+                type="button"
+                className="insta-action-button"
+                onClick={() => {
+                  if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                    navigator.clipboard.writeText(window.location.origin);
+                  }
+                  setToast('Profile link copied to clipboard!');
+                }}
               >
-                <span>★</span>
-                <span>Saved {savedPosts.length > 0 ? `(${savedPosts.length})` : ''}</span>
+                <span>🔗 Share</span>
               </button>
               <button
-                role="tab"
-                aria-selected={aboutSubTab === 'profile'}
-                className={`about-subtab-btn ${aboutSubTab === 'profile' ? 'active' : ''}`}
-                onClick={() => setAboutSubTab('profile')}
+                type="button"
+                className="insta-action-button danger"
+                onClick={handleSignOut}
               >
-                <span>👤</span>
-                <span>Profile</span>
-              </button>
-              <button
-                role="tab"
-                aria-selected={aboutSubTab === 'college'}
-                className={`about-subtab-btn ${aboutSubTab === 'college' ? 'active' : ''}`}
-                onClick={() => setAboutSubTab('college')}
-              >
-                <span>🏛️</span>
-                <span>AU Info</span>
+                <span>🚪 Sign Out</span>
               </button>
             </div>
 
-            {/* SUBTAB 1: USER'S PUBLISHED POSTS (VIEW & DELETE) */}
-            {aboutSubTab === 'posts' && (
-              <div className="stack" style={{ gap: 14 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>Your Published Posts</h2>
-                    <p className="lead" style={{ margin: '2px 0 0', fontSize: 12 }}>Manage, review, or delete posts you shared on AuPro</p>
-                  </div>
-                  <button
-                    className="primary-button"
-                    style={{ fontSize: 12, padding: '7px 14px', borderRadius: 9999 }}
-                    onClick={() => setShowThreadsComposer(true)}
-                  >
-                    + New Post
-                  </button>
+            {/* COLLAPSIBLE EDIT PROFILE / BIO & SETTINGS DRAWER */}
+            {isEditingProfile && (
+              <div className="insta-edit-drawer card">
+                <div className="insta-edit-header">
+                  <h3>Edit Profile & Bio</h3>
+                  <button className="icon-button" onClick={() => setIsEditingProfile(false)}>✕</button>
                 </div>
 
-                {myPosts.length === 0 ? (
-                  <div className="profile-feed-empty card">
-                    <div style={{ fontSize: 36, marginBottom: 10 }}>📝</div>
-                    <h3>No Posts Published Yet</h3>
-                    <p className="lead">You haven't posted anything to the campus feed yet. Share updates, questions, or report campus issues.</p>
-                    <button
-                      className="primary-button"
-                      style={{ fontSize: 13, padding: '8px 18px', margin: '0 auto' }}
-                      onClick={() => setShowThreadsComposer(true)}
-                    >
-                      Create Your First Post
-                    </button>
-                  </div>
-                ) : (
-                  myPosts.map((post) => (
-                    <div key={post.id} className="profile-post-wrapper">
-                      <MomentCard
-                        post={post}
-                        onToast={setToast}
-                        isSaved={savedPostIds.includes(post.id)}
-                        onSaveToggle={handleSaveToggle}
-                        isOwner={true}
-                        onDelete={handleDeletePost}
-                      />
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-
-            {/* SUBTAB 2: SAVED BOOKMARKS (VIEW & UNSAVE) */}
-            {aboutSubTab === 'saved' && (
-              <div className="stack" style={{ gap: 14 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="stack" style={{ gap: 12 }}>
                   <div>
-                    <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>Saved Bookmarks</h2>
-                    <p className="lead" style={{ margin: '2px 0 0', fontSize: 12 }}>Posts, circulars, and notices bookmarked for quick access</p>
-                  </div>
-                </div>
-
-                {savedPosts.length === 0 ? (
-                  <div className="profile-feed-empty card">
-                    <div style={{ fontSize: 36, marginBottom: 10 }}>★</div>
-                    <h3>No Saved Posts</h3>
-                    <p className="lead">Tap the bookmark ribbon icon on any post in the feed to save it here for reference.</p>
-                    <button
-                      className="secondary-button"
-                      style={{ fontSize: 13, padding: '8px 18px', margin: '0 auto' }}
-                      onClick={() => setTab('feed')}
-                    >
-                      Browse Campus Feed
-                    </button>
-                  </div>
-                ) : (
-                  savedPosts.map((post) => (
-                    <div key={post.id} className="profile-post-wrapper">
-                      <div className="post-action-banner">
-                        <button
-                          type="button"
-                          className="unsave-btn"
-                          onClick={() => handleSaveToggle(post.id)}
-                          title="Remove bookmark"
-                        >
-                          ✕ Remove from Saved
-                        </button>
-                      </div>
-                      <MomentCard
-                        post={post}
-                        onToast={setToast}
-                        isSaved={true}
-                        onSaveToggle={handleSaveToggle}
-                        isOwner={
-                          (post.authorEmail && post.authorEmail === authEmail) ||
-                          post.username === authUsername ||
-                          post.username === (authName ? authName.toLowerCase().replace(/\s+/g, '_') : '') ||
-                          post.username === 'you'
-                        }
-                        onDelete={handleDeletePost}
-                      />
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-
-            {aboutSubTab === 'profile' && (
-              <div className="stack">
-                {/* Profile Identity Card */}
-                <div className="profile-card">
-                  <div className="profile-header-wrap">
-                    <div className="profile-avatar-lg">
-                      {(authName.trim()[0] || authEmail.trim()[0] || 'A').toUpperCase()}
-                    </div>
-                    <div className="profile-title-group">
-                      <h2>{authName || 'AU Student'}</h2>
-                      <div className="profile-username">@{authUsername || 'au.student'}</div>
-                      <div className="profile-email-badge">
-                        <span>✉️</span>
-                        <span>{authEmail || 'student@andhrauniversity.edu.in'}</span>
-                      </div>
-                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', padding: '3px 8px', borderRadius: 6, fontSize: 11, fontWeight: 600, marginTop: 4 }}>
-                        <span>✓</span>
-                        <span>Official Student Identity Verified</span>
-                      </div>
-                    </div>
+                    <label className="field-label">Full Name</label>
+                    <input
+                      type="text"
+                      className="search"
+                      value={authName}
+                      onChange={(e) => setAuthName(e.target.value)}
+                      placeholder="e.g. P V N Dhanunjay Reddy"
+                    />
                   </div>
 
-                  <div className="profile-details-grid">
-                    <div className="profile-field-box">
-                      <div className="field-label">Roll Number</div>
-                      <div className="field-value">{authRollNo || '321101234'}</div>
-                    </div>
-                    <div className="profile-field-box">
-                      <div className="field-label">Department</div>
-                      <div className="field-value">{authDept}</div>
-                    </div>
-                    <div className="profile-field-box">
-                      <div className="field-label">Year of Study</div>
-                      <div className="field-value">{authYear}</div>
-                    </div>
-                    <div className="profile-field-box">
-                      <div className="field-label">Phone Number</div>
-                      <div className="field-value">{authPhone || '+91 9876543210'}</div>
-                    </div>
+                  <div>
+                    <label className="field-label">Phone Number (authPhone)</label>
+                    <input
+                      type="tel"
+                      className="search"
+                      value={authPhone}
+                      onChange={(e) => setAuthPhone(e.target.value)}
+                      placeholder="+91 9876543210"
+                    />
                   </div>
 
-                  {/* ABOUT YOURSELF (BIO) */}
-                  <div className="profile-bio-card">
-                    <h3>About Yourself (Bio)</h3>
-                    <p className="lead" style={{ fontSize: 12, margin: '0 0 8px 0' }}>
+                  <div className="profile-bio-card" style={{ padding: 0, border: 'none', background: 'transparent' }}>
+                    <label className="field-label">About Yourself (Bio)</label>
+                    <p className="lead" style={{ fontSize: 12, margin: '0 0 6px 0' }}>
                       Add your academic interests, branch clubs, projects, or hostel details.
                     </p>
                     <textarea
@@ -2375,18 +2331,38 @@ export default function Home() {
                       placeholder="Write a few lines about yourself..."
                       rows={3}
                     />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
                     <button
                       className="primary-button"
-                      style={{ fontSize: 13, padding: '8px 16px' }}
-                      onClick={() => setToast('Bio saved to your profile!')}
+                      style={{ fontSize: 13, padding: '8px 18px' }}
+                      onClick={() => {
+                        try {
+                          const sess = localStorage.getItem('aupro_session');
+                          if (sess) {
+                            const parsed = JSON.parse(sess);
+                            localStorage.setItem('aupro_session', JSON.stringify({ ...parsed, name: authName, phone: authPhone, bio: authBio }));
+                          }
+                        } catch {}
+                        setIsEditingProfile(false);
+                        setToast('Bio saved to your profile!');
+                      }}
                     >
                       Save Bio
                     </button>
+                    <button
+                      className="secondary-button"
+                      style={{ fontSize: 13, padding: '8px 14px' }}
+                      onClick={() => setIsEditingProfile(false)}
+                    >
+                      Cancel
+                    </button>
                   </div>
 
-                  {/* SETTINGS CARD */}
-                  <div className="settings-card">
-                    <h3>Account Preferences</h3>
+                  {/* Account Preferences / Settings */}
+                  <div className="settings-card" style={{ marginTop: 12, padding: '16px 0 0 0', borderTop: '1px solid var(--border)' }}>
+                    <h4 style={{ margin: '0 0 10px 0', fontSize: 14, color: 'var(--ink)' }}>Account Preferences</h4>
                     <div className="settings-row">
                       <div className="settings-info">
                         <strong>Dark Mode Appearance</strong>
@@ -2444,8 +2420,7 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* SIGN OUT BUTTON */}
-                  <button className="signout-button" onClick={handleSignOut}>
+                  <button className="signout-button" onClick={handleSignOut} style={{ marginTop: 8 }}>
                     <span>🚪</span>
                     <span>Sign Out of AuPro</span>
                   </button>
@@ -2453,6 +2428,134 @@ export default function Home() {
               </div>
             )}
 
+            {/* 5. INSTAGRAM PROFILE SUBTABS: Posts | Saved | AU Info */}
+            <div className="insta-profile-tabs" role="tablist" aria-label="Profile navigation">
+              <button
+                role="tab"
+                aria-selected={aboutSubTab === 'posts'}
+                className={`insta-tab-btn ${aboutSubTab === 'posts' ? 'active' : ''}`}
+                onClick={() => setAboutSubTab('posts')}
+              >
+                <span className="tab-icon">📸</span>
+                <span className="tab-label">Posts {myPosts.length > 0 ? `(${myPosts.length})` : ''}</span>
+              </button>
+
+              <button
+                role="tab"
+                aria-selected={aboutSubTab === 'saved'}
+                className={`insta-tab-btn ${aboutSubTab === 'saved' ? 'active' : ''}`}
+                onClick={() => setAboutSubTab('saved')}
+              >
+                <span className="tab-icon">🔖</span>
+                <span className="tab-label">Saved {savedPosts.length > 0 ? `(${savedPosts.length})` : ''}</span>
+              </button>
+
+              <button
+                role="tab"
+                aria-selected={aboutSubTab === 'college'}
+                className={`insta-tab-btn ${aboutSubTab === 'college' ? 'active' : ''}`}
+                onClick={() => setAboutSubTab('college')}
+              >
+                <span className="tab-icon">🏛️</span>
+                <span className="tab-label">AU Info</span>
+              </button>
+            </div>
+
+            {/* 6. "DOWN YOUR POSTS" / TAB CONTENT */}
+            {/* SUBTAB 1: USER'S PUBLISHED POSTS (DOWN YOUR POSTS) */}
+            {aboutSubTab === 'posts' && (
+              <div className="insta-down-posts-container">
+                <div className="insta-down-posts-header">
+                  <div className="eyebrow" style={{ color: 'var(--primary)', marginBottom: 2 }}>Down Your Posts</div>
+                  <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>Your Published Posts</h2>
+                  <p className="lead" style={{ margin: '2px 0 0', fontSize: 12 }}>Tap the ••• icon on any post to delete or share</p>
+                </div>
+
+                {myPosts.length === 0 ? (
+                  <div className="profile-feed-empty card">
+                    <div style={{ fontSize: 36, marginBottom: 10 }}>📝</div>
+                    <h3>No Posts Published Yet</h3>
+                    <p className="lead">You haven't posted anything to the campus feed yet. Share updates, questions, or report campus issues.</p>
+                    <button
+                      className="primary-button"
+                      style={{ fontSize: 13, padding: '8px 18px', margin: '0 auto' }}
+                      onClick={() => setShowThreadsComposer(true)}
+                    >
+                      Create Your First Post
+                    </button>
+                  </div>
+                ) : (
+                  myPosts.map((post) => (
+                    <div key={post.id} className="profile-post-wrapper">
+                      <MomentCard
+                        post={post}
+                        onToast={setToast}
+                        isSaved={savedPostIds.includes(post.id)}
+                        onSaveToggle={handleSaveToggle}
+                        isOwner={true}
+                        onDelete={handleDeletePost}
+                      />
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            {/* SUBTAB 2: SAVED BOOKMARKS */}
+            {aboutSubTab === 'saved' && (
+              <div className="insta-down-posts-container">
+                <div className="insta-down-posts-header">
+                  <div className="eyebrow" style={{ color: 'var(--primary)', marginBottom: 2 }}>Bookmarks</div>
+                  <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>Saved Posts</h2>
+                  <p className="lead" style={{ margin: '2px 0 0', fontSize: 12 }}>Posts, circulars, and notices bookmarked for quick access</p>
+                </div>
+
+                {savedPosts.length === 0 ? (
+                  <div className="profile-feed-empty card">
+                    <div style={{ fontSize: 36, marginBottom: 10 }}>★</div>
+                    <h3>No Saved Posts</h3>
+                    <p className="lead">Tap the bookmark ribbon icon on any post in the feed to save it here for reference.</p>
+                    <button
+                      className="secondary-button"
+                      style={{ fontSize: 13, padding: '8px 18px', margin: '0 auto' }}
+                      onClick={() => setTab('feed')}
+                    >
+                      Browse Campus Feed
+                    </button>
+                  </div>
+                ) : (
+                  savedPosts.map((post) => (
+                    <div key={post.id} className="profile-post-wrapper">
+                      <div className="post-action-banner">
+                        <button
+                          type="button"
+                          className="unsave-btn"
+                          onClick={() => handleSaveToggle(post.id)}
+                          title="Remove bookmark"
+                        >
+                          ✕ Remove from Saved
+                        </button>
+                      </div>
+                      <MomentCard
+                        post={post}
+                        onToast={setToast}
+                        isSaved={true}
+                        onSaveToggle={handleSaveToggle}
+                        isOwner={
+                          (post.authorEmail && post.authorEmail === authEmail) ||
+                          post.username === authUsername ||
+                          post.username === (authName ? authName.toLowerCase().replace(/\s+/g, '_') : '') ||
+                          post.username === 'you'
+                        }
+                        onDelete={handleDeletePost}
+                      />
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            {/* SUBTAB 3: AU INFO & COLLEGE */}
             {aboutSubTab === 'college' && (
               <div className="stack">
                 <div>
@@ -2505,7 +2608,7 @@ export default function Home() {
         - Location: Instagram Map Pin
         - About: Darkened icon
       */}
-      <nav className="bottom-nav" aria-label="Primary navigation">
+      <nav className={`bottom-nav ${!isNavVisible ? 'nav-hidden' : ''}`} aria-label="Primary navigation">
         <button className={`nav-button ${tab === 'applications' ? 'active' : ''}`} onClick={() => { setTab('applications'); setQuery(''); }} aria-label="Applications">
           <ApplicationsIcon active={tab === 'applications'} size={24} />
           <span>Applications</span>

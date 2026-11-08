@@ -344,8 +344,13 @@ export function getAllPosts(): ServerFeedPost[] {
 
 export function addServerPost(post: ServerFeedPost): ServerFeedPost {
   const store = loadStore();
-  store.posts.unshift(post);
-  store.posts = store.posts.slice(0, 100);
+  const existingIdx = store.posts.findIndex((p) => p.id === post.id);
+  if (existingIdx >= 0) {
+    store.posts[existingIdx] = { ...store.posts[existingIdx], ...post };
+  } else {
+    store.posts.unshift(post);
+    store.posts = store.posts.slice(0, 100);
+  }
   saveStoreToFile(store);
   return post;
 }
@@ -381,9 +386,20 @@ export function getRegisteredAccountsList(): string[] {
 
 export function togglePostLike(postId: string, userEmail: string): { likesCount: number; liked: boolean; likedBy: string[] } {
   const store = loadStore();
-  const post = store.posts.find((p) => p.id === postId);
+  let post = store.posts.find((p) => p.id === postId);
   if (!post) {
-    return { likesCount: 0, liked: false, likedBy: [] };
+    post = {
+      id: postId,
+      username: 'AU Student',
+      caption: '',
+      likesCount: 0,
+      likedBy: [],
+      repostsCount: 0,
+      commentsCount: 0,
+      comments: [],
+      timeAgo: 'Just now',
+    };
+    store.posts.unshift(post);
   }
   const cleanEmail = (userEmail || 'student@andhrauniversity.edu.in').toLowerCase().trim();
   post.likedBy = Array.isArray(post.likedBy) ? post.likedBy : [];
@@ -415,9 +431,20 @@ export function addPostComment(
   }
 ): { comments: any[]; commentsCount: number } {
   const store = loadStore();
-  const post = store.posts.find((p) => p.id === postId);
+  let post = store.posts.find((p) => p.id === postId);
   if (!post) {
-    return { comments: [], commentsCount: 0 };
+    post = {
+      id: postId,
+      username: 'AU Student',
+      caption: '',
+      likesCount: 0,
+      likedBy: [],
+      repostsCount: 0,
+      commentsCount: 0,
+      comments: [],
+      timeAgo: 'Just now',
+    };
+    store.posts.unshift(post);
   }
   post.comments = Array.isArray(post.comments) ? post.comments : [];
   const newComment = {

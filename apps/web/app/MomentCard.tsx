@@ -36,7 +36,7 @@ export interface MomentPost {
   imageCaption?: string;
   likesCount: number;
   repostsCount?: number;
-  likedBy?: string;
+  likedBy?: string[] | string;
   caption: string;
   commentsCount: number;
   comments?: MomentComment[];
@@ -55,6 +55,7 @@ export interface MomentCardProps {
   onSaveToggle?: (postId: string) => void;
   isOwner?: boolean;
   onDelete?: (postId: string) => void;
+  onPostUpdated?: (updatedPost: MomentPost) => void;
 }
 
 export function MomentCard({
@@ -68,8 +69,11 @@ export function MomentCard({
   onSaveToggle,
   isOwner = false,
   onDelete,
+  onPostUpdated,
 }: MomentCardProps) {
-  const [liked, setLiked] = useState(false);
+  const cleanUserEmail = (currentUserEmail || '').toLowerCase().trim();
+  const initialLiked = Array.isArray(post.likedBy) && cleanUserEmail ? post.likedBy.includes(cleanUserEmail) : false;
+  const [liked, setLiked] = useState(initialLiked);
   const [internalSaved, setInternalSaved] = useState(false);
   const isSaved = externalIsSaved !== undefined ? externalIsSaved : internalSaved;
 
@@ -82,6 +86,17 @@ export function MomentCard({
   const [commentError, setCommentError] = useState('');
   const [comments, setComments] = useState<MomentComment[]>(post.comments ?? []);
   const [commentsCount, setCommentsCount] = useState(post.commentsCount);
+
+  // Sync state whenever post prop changes (e.g. from server polling / refresh)
+  useEffect(() => {
+    setLikes(post.likesCount ?? 0);
+    setComments(post.comments ?? []);
+    setCommentsCount(post.commentsCount ?? (post.comments?.length ?? 0));
+    setReposts(post.repostsCount ?? 0);
+    if (Array.isArray(post.likedBy) && cleanUserEmail) {
+      setLiked(post.likedBy.includes(cleanUserEmail));
+    }
+  }, [post.id, post.likesCount, post.comments, post.commentsCount, post.repostsCount, post.likedBy, cleanUserEmail]);
   const [showHeartAnim, setShowHeartAnim] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [reportSuccess, setReportSuccess] = useState(false);
@@ -91,7 +106,6 @@ export function MomentCard({
   const [hidden, setHidden] = useState(false);
   const [localToast, setLocalToast] = useState('');
 
-  const cleanUserEmail = (currentUserEmail || '').toLowerCase().trim();
   const cleanPostEmail = (post.authorEmail || '').toLowerCase().trim();
   const isPostAuthor = Boolean(
     isOwner ||
@@ -138,8 +152,27 @@ export function MomentCard({
 
   const handleLikeToggle = async () => {
     const nextLiked = !liked;
+    const nextLikes = Math.max(0, likes + (nextLiked ? 1 : -1));
     setLiked(nextLiked);
-    setLikes((prev) => Math.max(0, prev + (nextLiked ? 1 : -1)));
+    setLikes(nextLikes);
+
+    const updatedLikedBy = Array.isArray(post.likedBy) ? [...post.likedBy] : [];
+    if (cleanUserEmail) {
+      if (nextLiked && !updatedLikedBy.includes(cleanUserEmail)) {
+        updatedLikedBy.push(cleanUserEmail);
+      } else if (!nextLiked) {
+        const idx = updatedLikedBy.indexOf(cleanUserEmail);
+        if (idx !== -1) updatedLikedBy.splice(idx, 1);
+      }
+    }
+
+    if (onPostUpdated) {
+      onPostUpdated({
+        ...post,
+        likesCount: nextLikes,
+        likedBy: updatedLikedBy,
+      });
+    }
 
     try {
       const res = await fetch('/api/feed', {
@@ -156,6 +189,13 @@ export function MomentCard({
         if (typeof data.likesCount === 'number') {
           setLikes(data.likesCount);
           setLiked(Boolean(data.liked));
+          if (onPostUpdated) {
+            onPostUpdated({
+              ...post,
+              likesCount: data.likesCount,
+              likedBy: data.likedBy || updatedLikedBy,
+            });
+          }
         }
       }
     } catch {}
@@ -306,11 +346,21 @@ export function MomentCard({
       timeAgo: 'now',
       ...(commentImage ? { imageUrl: commentImage } : {}),
     };
-    setComments((existing) => [...existing, newCommentItem]);
-    setCommentsCount((count) => count + 1);
+    const nextComments = [...comments, newCommentItem];
+    const nextCount = commentsCount + 1;
+    setComments(nextComments);
+    setCommentsCount(nextCount);
     setComment('');
     setCommentImage('');
     setCommentError('');
+
+    if (onPostUpdated) {
+      onPostUpdated({
+        ...post,
+        comments: nextComments,
+        commentsCount: nextCount,
+      });
+    }
 
     try {
       const res = await fetch('/api/feed', {
@@ -330,6 +380,13 @@ export function MomentCard({
         if (Array.isArray(data.comments)) {
           setComments(data.comments);
           setCommentsCount(data.comments.length);
+          if (onPostUpdated) {
+            onPostUpdated({
+              ...post,
+              comments: data.comments,
+              commentsCount: data.comments.length,
+            });
+          }
         }
       }
     } catch (e) {

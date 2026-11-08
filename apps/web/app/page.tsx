@@ -873,7 +873,7 @@ export default function Home() {
       setPlatformActivities(getPlatformActivities());
     }
     try {
-      const [accRes, actRes, feedRes, appRes] = await Promise.all([
+      const [appRes, accRes, actRes, feedRes] = await Promise.all([
         fetch('/api/applications').then((r) => (r.ok ? r.json() : null)),
         fetch('/api/accounts').then((r) => (r.ok ? r.json() : null)),
         fetch('/api/activity').then((r) => (r.ok ? r.json() : null)),
@@ -1407,6 +1407,19 @@ export default function Home() {
     setCreatePreview(null);
   };
 
+  const handlePostUpdated = (updatedPost: MomentPost) => {
+    setFeedPosts((posts) => {
+      const idx = posts.findIndex((p) => p.id === updatedPost.id);
+      if (idx === -1) return posts;
+      const next = [...posts];
+      next[idx] = updatedPost;
+      try {
+        localStorage.setItem('aupro_feed_posts', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
   const handleDeletePost = (postId: string) => {
     setFeedPosts((posts) => {
       const updated = posts.filter((p) => p.id !== postId);
@@ -1415,7 +1428,7 @@ export default function Home() {
       } catch {}
       return updated;
     });
-    fetch(`/api/feed?id=${encodeURIComponent(postId)}`, {
+    fetch(`/api/feed?id=${encodeURIComponent(postId)}&userEmail=${encodeURIComponent(authEmail || '')}`, {
       method: 'DELETE',
     }).catch(() => {});
     setSavedPostIds((saved) => {
@@ -2108,9 +2121,13 @@ export default function Home() {
               <MomentCard
                 key={post.id}
                 post={post}
+                currentUserEmail={authEmail}
+                currentUsername={authUsername || authName}
+                isAdmin={isHeadAccount(authEmail)}
                 onToast={setToast}
                 isSaved={savedPostIds.includes(post.id)}
                 onSaveToggle={handleSaveToggle}
+                onPostUpdated={handlePostUpdated}
                 isOwner={
                   (post.authorEmail && post.authorEmail === authEmail) ||
                   post.username === authUsername ||
@@ -3755,9 +3772,13 @@ export default function Home() {
                         <div key={post.id} className="profile-post-wrapper">
                           <MomentCard
                             post={post}
+                            currentUserEmail={authEmail}
+                            currentUsername={authUsername || authName}
+                            isAdmin={isHeadAccount(authEmail)}
                             onToast={setToast}
                             isSaved={savedPostIds.includes(post.id)}
                             onSaveToggle={handleSaveToggle}
+                            onPostUpdated={handlePostUpdated}
                             isOwner={true}
                             onDelete={handleDeletePost}
                           />
@@ -3804,9 +3825,13 @@ export default function Home() {
                           </div>
                           <MomentCard
                             post={post}
+                            currentUserEmail={authEmail}
+                            currentUsername={authUsername || authName}
+                            isAdmin={isHeadAccount(authEmail)}
                             onToast={setToast}
                             isSaved={true}
                             onSaveToggle={handleSaveToggle}
+                            onPostUpdated={handlePostUpdated}
                             isOwner={
                               (post.authorEmail && post.authorEmail === authEmail) ||
                               post.username === authUsername ||

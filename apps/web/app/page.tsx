@@ -52,6 +52,7 @@ import {
 } from './auth';
 import { auVectorDB } from './vector_search';
 import { validateTextContent, validateImageSafety } from './content_moderation';
+import { compressImageFile } from './image_compressor';
 
 type Tab = 'applications' | 'create' | 'feed' | 'chatbot' | 'location' | 'about';
 type AuthMode = 'landing' | 'email-login' | 'signup' | 'otp';
@@ -898,16 +899,23 @@ export default function Home() {
         }
       }
       if (Array.isArray(feedRes?.posts)) {
-        const cleanPosts = feedRes.posts.filter((p: any) => !p.id.startsWith('post_init_'));
-        setFeedPosts(cleanPosts);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('aupro_feed_posts', JSON.stringify(cleanPosts));
-        }
-      } else if (Array.isArray(feedRes?.posts) && feedRes.posts.length > 0) {
-        setFeedPosts(feedRes.posts);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('aupro_feed_posts', JSON.stringify(feedRes.posts));
-        }
+        const cleanServerPosts = feedRes.posts.filter((p: any) => !p.id.startsWith('post_init_'));
+        setFeedPosts((currentPosts) => {
+          const serverPostIds = new Set(cleanServerPosts.map((p: any) => p.id));
+          // Preserve any newly submitted local post created within the last 5 minutes so it is never wiped out
+          const pendingRecent = currentPosts.filter((p) => {
+            if (serverPostIds.has(p.id)) return false;
+            const numPart = Number(p.id.replace(/\D/g, '')) || 0;
+            return Date.now() - numPart < 5 * 60 * 1000;
+          });
+          const merged = [...pendingRecent, ...cleanServerPosts];
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem('aupro_feed_posts', JSON.stringify(merged));
+            } catch {}
+          }
+          return merged;
+        });
       }
     } catch (e) {
       console.error('Error synchronizing central server data:', e);
@@ -1399,9 +1407,14 @@ export default function Home() {
     }
 
     if (file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = () => setCreatePreview(reader.result as string);
-      reader.readAsDataURL(file);
+      try {
+        const compressed = await compressImageFile(file, 1280, 0.82);
+        setCreatePreview(compressed);
+      } catch {
+        const reader = new FileReader();
+        reader.onload = () => setCreatePreview(reader.result as string);
+        reader.readAsDataURL(file);
+      }
       return;
     }
     setCreatePreview(null);
@@ -1495,7 +1508,18 @@ export default function Home() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newPost),
-    }).catch(() => {});
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        if (json?.posts && Array.isArray(json.posts)) {
+          const cleanServerPosts = json.posts.filter((p: any) => !p.id.startsWith('post_init_'));
+          setFeedPosts(cleanServerPosts);
+          try {
+            localStorage.setItem('aupro_feed_posts', JSON.stringify(cleanServerPosts));
+          } catch {}
+        }
+      })
+      .catch(() => {});
     logPlatformActivity(
       data.category === 'problem' ? 'Reported Campus Problem' : data.category === 'announcement' ? 'Published Announcement' : 'Published Feed Post',
       authEmail || authUsername || 'Student',
@@ -1562,7 +1586,18 @@ export default function Home() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newPost),
-    }).catch(() => {});
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        if (json?.posts && Array.isArray(json.posts)) {
+          const cleanServerPosts = json.posts.filter((p: any) => !p.id.startsWith('post_init_'));
+          setFeedPosts(cleanServerPosts);
+          try {
+            localStorage.setItem('aupro_feed_posts', JSON.stringify(cleanServerPosts));
+          } catch {}
+        }
+      })
+      .catch(() => {});
     setFeedFilter('problems');
     setCreateTitle('');
     setCreateDepartment('');

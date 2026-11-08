@@ -233,9 +233,18 @@ export function sanitizeImageUrl(url: unknown): string {
   }
 
   // Allow safe inline image data URIs (PNG, JPEG, WebP, GIF)
-  const safeDataUriRegex = /^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+$/i;
-  if (safeDataUriRegex.test(trimmed)) {
-    return trimmed;
+  // Use non-backtracking prefix inspection to prevent ReDoS CPU lockups on large mobile photos
+  if (trimmed.startsWith('data:image/')) {
+    const headerEnd = trimmed.indexOf(';base64,');
+    if (headerEnd > 10 && headerEnd < 50) {
+      const mime = trimmed.substring(5, headerEnd).toLowerCase();
+      if (['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'].includes(mime)) {
+        const dataSample = trimmed.substring(headerEnd + 8, headerEnd + 200);
+        if (!/<script|javascript:|onerror=/i.test(dataSample)) {
+          return trimmed;
+        }
+      }
+    }
   }
 
   // Disallow any other scheme (javascript:, file:, blob:, ftp:, etc.)

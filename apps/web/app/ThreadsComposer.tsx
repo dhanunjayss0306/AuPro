@@ -3,6 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { InstagramLocationIcon } from './icons';
 import { validateTextContent, validateImageSafety, analyzePostTopic } from './content_moderation';
+import { compressImageFile } from './image_compressor';
 
 export interface ThreadsPostData {
   category: 'normal' | 'problem' | 'announcement';
@@ -95,13 +96,20 @@ export function ThreadsComposer({
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      setImagePreview(reader.result as string);
+    try {
+      const compressed = await compressImageFile(file, 1280, 0.82);
+      setImagePreview(compressed);
       setSelectedGif(null);
       setError('');
-    };
-    reader.readAsDataURL(file);
+    } catch {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result as string);
+        setSelectedGif(null);
+        setError('');
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSelectGif = (url: string) => {

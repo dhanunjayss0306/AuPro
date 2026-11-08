@@ -11,6 +11,7 @@ import {
   InstagramMoreIcon,
   InstagramLocationIcon,
 } from './icons';
+import { compressImageFile } from './image_compressor';
 
 export interface MomentComment {
   id: string;
@@ -306,7 +307,7 @@ export function MomentCard({
     }
   };
 
-  const handleCommentImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCommentImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
@@ -315,22 +316,24 @@ export function MomentCard({
       setCommentError('Choose an image file to attach.');
       return;
     }
-    if (file.size > 8 * 1024 * 1024) {
-      setCommentError('Choose an image smaller than 8 MB.');
-      return;
-    }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setCommentImage(reader.result);
-        setCommentError('');
-      } else {
-        setCommentError('This image could not be previewed.');
-      }
-    };
-    reader.onerror = () => setCommentError('This image could not be read.');
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await compressImageFile(file, 800, 0.8);
+      setCommentImage(compressed);
+      setCommentError('');
+    } catch {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setCommentImage(reader.result);
+          setCommentError('');
+        } else {
+          setCommentError('This image could not be previewed.');
+        }
+      };
+      reader.onerror = () => setCommentError('This image could not be read.');
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleCommentSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

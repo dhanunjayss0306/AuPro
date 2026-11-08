@@ -35,7 +35,7 @@ const nextConfig = {
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: blob: https:",
+              "img-src 'self' data: blob: https: https://images.unsplash.com",
               "frame-src 'self' https://www.google.com https://maps.google.com https://accounts.google.com",
               "connect-src 'self' https://api.resend.com https://api.brevo.com https://*.supabase.co",
             ].join('; '),
@@ -51,7 +51,7 @@ const nextConfig = {
           },
           {
             key: 'Access-Control-Allow-Methods',
-            value: 'GET, POST, OPTIONS',
+            value: 'GET, POST, PATCH, DELETE, OPTIONS',
           },
           {
             key: 'Access-Control-Allow-Headers',

@@ -232,8 +232,26 @@ function loadStore(): ServerDataStore {
 
 function saveStoreToFile(store: ServerDataStore) {
   try {
-    fs.writeFileSync(DB_FILE, JSON.stringify(store, null, 2), 'utf8');
-  } catch {}
+    // Keep global in-memory cache in sync
+    (globalThis as any).__AUPRO_GLOBAL_STORE__ = store;
+
+    // Atomic write pattern: write to temporary file first then rename over target
+    // Prevents corrupted/half-written JSON files during concurrent requests or abrupt shutdowns
+    const tmpFile = `${DB_FILE}.${Date.now()}.${Math.random().toString(36).substring(2, 7)}.tmp`;
+    fs.writeFileSync(tmpFile, JSON.stringify(store, null, 2), 'utf8');
+
+    try {
+      fs.renameSync(tmpFile, DB_FILE);
+    } catch {
+      // Fallback on Windows if destination file is temporarily locked
+      try {
+        fs.copyFileSync(tmpFile, DB_FILE);
+        fs.unlinkSync(tmpFile);
+      } catch {}
+    }
+  } catch (err) {
+    console.error('Failed to persist AuPro store:', err);
+  }
 }
 
 export function getAllAccounts(): Record<string, ServerStudentProfile> {

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
 import { registerAccount, logServerActivity } from '../account-registry';
+import { signSessionToken, isHeadAdmin } from '../security';
 
 const COLLEGE_DOMAIN = '@andhrauniversity.edu.in';
 const AUTH_SECRET = process.env.AUTH_SECRET || 'aupro-andhra-university-otp-signing-secret-2026';
@@ -130,14 +131,30 @@ export async function POST(req: Request) {
       `Student ${profileData.name || cleanEmail} verified identity via 6-digit OTP`
     );
 
-    // Verified! Generate proof of verification timestamp
-    return NextResponse.json({
+    // Verified! Generate proof of verification timestamp & signed session token
+    const role = isHeadAdmin(cleanEmail) ? 'head_admin' : 'student';
+    const sessionToken = signSessionToken(cleanEmail, role);
+
+    const response = NextResponse.json({
       success: true,
       verified: true,
       email: cleanEmail,
+      role,
+      sessionToken,
       verifiedAt: new Date().toISOString(),
       message: 'Student email verified successfully. Account activated.',
     });
+
+    // Set secure HTTP-only session cookie
+    response.cookies.set('aupro_session', sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+    });
+
+    return response;
   } catch (err: any) {
     console.error('verify-otp error:', err);
     return NextResponse.json(

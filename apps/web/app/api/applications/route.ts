@@ -4,6 +4,13 @@ import {
   addStudentApplication,
   updateApplicationStatus,
 } from '../auth/account-registry';
+import {
+  checkRateLimit,
+  getClientIp,
+  sanitizeText,
+  sanitizeEmail,
+  isRequestAuthorizedAsAdmin,
+} from '../auth/security';
 
 const DEFAULT_SERVICES = [
   { id: 'bonafide', name: 'Bonafide certificate', status: 'available' },
@@ -18,8 +25,17 @@ const DEFAULT_SERVICES = [
  * GET /api/applications
  * Returns all submitted student applications and the service catalog.
  */
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const ip = getClientIp(req);
+    const limit = checkRateLimit(`get_apps:${ip}`, 60, 60 * 1000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded.' },
+        { status: 429 }
+      );
+    }
+
     const list = getAllApplications();
     return NextResponse.json({
       success: true,
@@ -42,6 +58,15 @@ export async function GET() {
  */
 export async function POST(req: Request) {
   try {
+    const ip = getClientIp(req);
+    const limit = checkRateLimit(`post_apps:${ip}`, 15, 60 * 1000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many application submissions. Please wait a minute.' },
+        { status: 429, headers: { 'Retry-After': String(limit.resetInSeconds) } }
+      );
+    }
+
     const body = await req.json();
     const {
       studentName,
@@ -54,22 +79,25 @@ export async function POST(req: Request) {
       refId,
     } = body;
 
-    if (!serviceTitle) {
+    const cleanService = sanitizeText(serviceTitle, 100);
+    if (!cleanService) {
       return NextResponse.json(
         { error: 'Application service title is required.' },
         { status: 400 }
       );
     }
 
+    const cleanEmail = sanitizeEmail(studentEmail);
+
     const application = addStudentApplication({
-      refId,
-      studentName: studentName || 'AU Student',
-      studentEmail: studentEmail || '',
-      rollNo: rollNo || 'Pending',
-      serviceTitle,
-      purpose: purpose || 'Verification',
-      department: department || 'AU Engineering',
-      year: year || '4th Year',
+      refId: sanitizeText(refId, 50) || undefined,
+      studentName: sanitizeText(studentName, 100) || 'AU Student',
+      studentEmail: cleanEmail || '',
+      rollNo: sanitizeText(rollNo, 50) || 'Pending',
+      serviceTitle: cleanService,
+      purpose: sanitizeText(purpose, 500) || 'Verification',
+      department: sanitizeText(department, 100) || 'AU Engineering',
+      year: sanitizeText(year, 50) || '4th Year',
       status: 'pending',
     });
 
@@ -89,11 +117,20 @@ export async function POST(req: Request) {
 /**
  * PATCH /api/applications
  * Updates an application's status (e.g. approved, rejected) by the Head Administrator.
+ * Strictly checks that the requester has Head Administrator privileges.
  */
 export async function PATCH(req: Request) {
   try {
     const body = await req.json();
-    const { refId, status } = body;
+    const { refId, status, adminEmail } = body;
+
+    const isAuthorized = isRequestAuthorizedAsAdmin(req, adminEmail);
+    if (!isAuthorized) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Only the Head Administrator may approve or reject student applications.' },
+        { status: 403 }
+      );
+    }
 
     if (!refId || !status) {
       return NextResponse.json(
@@ -102,7 +139,15 @@ export async function PATCH(req: Request) {
       );
     }
 
-    const updated = updateApplicationStatus(refId, status);
+    const validStatus = ['pending', 'approved', 'rejected'].includes(status) ? status : null;
+    if (!validStatus) {
+      return NextResponse.json(
+        { error: 'Invalid application status. Allowed: pending, approved, rejected.' },
+        { status: 400 }
+      );
+    }
+
+    const updated = updateApplicationStatus(refId, validStatus);
     if (!updated) {
       return NextResponse.json(
         { error: 'Application not found with the given Reference ID.' },

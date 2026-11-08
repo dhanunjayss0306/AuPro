@@ -9,13 +9,31 @@ import {
   repostFeedPost,
   ServerFeedPost,
 } from '../auth/account-registry';
+import {
+  checkRateLimit,
+  getClientIp,
+  sanitizeText,
+  sanitizeImageUrl,
+  sanitizeEmail,
+  isHeadAdmin,
+  isRequestAuthorizedAsAdmin,
+} from '../auth/security';
 
 /**
  * GET /api/feed
  * Returns all shared campus feed posts across all students and devices.
  */
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const ip = getClientIp(req);
+    const limit = checkRateLimit(`get_feed:${ip}`, 120, 60 * 1000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Please wait a moment.' },
+        { status: 429, headers: { 'Retry-After': String(limit.resetInSeconds) } }
+      );
+    }
+
     const posts = getAllPosts();
     return NextResponse.json({
       success: true,
@@ -33,9 +51,19 @@ export async function GET() {
 /**
  * POST /api/feed
  * Adds a new student post to the shared campus feed.
+ * Protected against XSS, image scheme injection, and unauthorized announcements.
  */
 export async function POST(req: Request) {
   try {
+    const ip = getClientIp(req);
+    const limit = checkRateLimit(`post_feed:${ip}`, 20, 60 * 1000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: 'Posting too rapidly. Please wait a minute before publishing again.' },
+        { status: 429, headers: { 'Retry-After': String(limit.resetInSeconds) } }
+      );
+    }
+
     const body = await req.json();
     const {
       id,
@@ -57,30 +85,42 @@ export async function POST(req: Request) {
       durationDays,
     } = body;
 
-    if (!caption && !imageUrl) {
+    const cleanCaption = sanitizeText(caption, 2000);
+    const cleanImageUrl = sanitizeImageUrl(imageUrl);
+
+    if (!cleanCaption && !cleanImageUrl) {
       return NextResponse.json(
-        { error: 'Post must have a caption or image.' },
+        { error: 'Post must have a valid caption or image.' },
         { status: 400 }
       );
     }
 
+    const cleanAuthorEmail = sanitizeEmail(authorEmail);
+
+    // Security Gate: Only the verified Head Administrator can post Official Announcements
+    const canPostAnnouncement = isHeadAdmin(cleanAuthorEmail) || isRequestAuthorizedAsAdmin(req, cleanAuthorEmail);
+    const effectiveCategory = category === 'announcement'
+      ? (canPostAnnouncement ? 'announcement' : 'normal')
+      : (category || 'normal');
+    const effectiveIsOfficial = Boolean(isOfficial && canPostAnnouncement);
+
     const postPayload: ServerFeedPost = {
       id: id || 'post_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-      username: username || 'AU Student',
-      authorEmail: authorEmail || '',
-      authorHandle: authorHandle || username || 'student',
-      avatarText: avatarText || (username ? username.charAt(0).toUpperCase() : 'A'),
-      isOfficial: Boolean(isOfficial),
-      category: category || 'normal',
-      location: location || '',
-      imageUrl: imageUrl || '',
-      imageCaption: imageCaption || '',
-      likesCount: typeof likesCount === 'number' ? likesCount : 0,
-      likedBy: authorEmail ? [] : [],
-      repostsCount: typeof repostsCount === 'number' ? repostsCount : 0,
-      caption: caption || '',
-      commentsCount: typeof commentsCount === 'number' ? commentsCount : 0,
-      comments: Array.isArray(comments) ? comments : [],
+      username: sanitizeText(username, 100) || 'AU Student',
+      authorEmail: cleanAuthorEmail,
+      authorHandle: sanitizeText(authorHandle || username, 60) || 'student',
+      avatarText: sanitizeText(avatarText, 10) || (username ? username.charAt(0).toUpperCase() : 'A'),
+      isOfficial: effectiveIsOfficial,
+      category: effectiveCategory,
+      location: sanitizeText(location, 120),
+      imageUrl: cleanImageUrl,
+      imageCaption: sanitizeText(imageCaption, 200),
+      likesCount: typeof likesCount === 'number' ? Math.max(0, likesCount) : 0,
+      likedBy: [],
+      repostsCount: typeof repostsCount === 'number' ? Math.max(0, repostsCount) : 0,
+      caption: cleanCaption,
+      commentsCount: typeof commentsCount === 'number' ? Math.max(0, commentsCount) : 0,
+      comments: Array.isArray(comments) ? comments.slice(0, 50) : [],
       timeAgo: timeAgo || 'Just now',
       durationDays: typeof durationDays === 'number' ? durationDays : 30,
     };
@@ -88,16 +128,16 @@ export async function POST(req: Request) {
     const saved = addServerPost(postPayload);
 
     // Log the post activity in the real-time activity stream
-    const activityAction = category === 'problem'
+    const activityAction = effectiveCategory === 'problem'
       ? 'Campus Problem Reported'
-      : category === 'announcement'
+      : effectiveCategory === 'announcement'
       ? 'Official Announcement Published'
       : 'Feed Post Published';
 
     logServerActivity(
       activityAction,
-      authorEmail || username || 'AU Student',
-      caption ? caption.substring(0, 90) : (location || 'Campus post')
+      cleanAuthorEmail || username || 'AU Student',
+      cleanCaption ? cleanCaption.substring(0, 90) : (location || 'Campus post')
     );
 
     return NextResponse.json({
@@ -119,6 +159,15 @@ export async function POST(req: Request) {
  */
 export async function PATCH(req: Request) {
   try {
+    const ip = getClientIp(req);
+    const limit = checkRateLimit(`patch_feed:${ip}`, 60, 60 * 1000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: 'Interaction rate limit reached. Please wait a moment.' },
+        { status: 429, headers: { 'Retry-After': String(limit.resetInSeconds) } }
+      );
+    }
+
     const body = await req.json();
     const { action, postId, userEmail, comment, user } = body;
 
@@ -131,7 +180,8 @@ export async function PATCH(req: Request) {
 
     // 1. Real Likes Toggle (Persisted per student email, no automated numbers)
     if (action === 'like') {
-      const result = togglePostLike(postId, userEmail);
+      const cleanEmail = sanitizeEmail(userEmail);
+      const result = togglePostLike(postId, cleanEmail);
       return NextResponse.json({
         success: true,
         action: 'like',
@@ -150,7 +200,16 @@ export async function PATCH(req: Request) {
           { status: 400 }
         );
       }
-      const result = addPostComment(postId, comment);
+      const cleanComment = {
+        id: comment.id || 'cmt_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+        username: sanitizeText(comment.username || comment.author, 100) || 'AU Student',
+        authorEmail: sanitizeEmail(comment.authorEmail),
+        avatarText: sanitizeText(comment.avatarText, 10) || ((comment.username || comment.author || 'A').charAt(0).toUpperCase()),
+        text: sanitizeText(comment.text, 500),
+        imageUrl: sanitizeImageUrl(comment.imageUrl),
+        timeAgo: sanitizeText(comment.timeAgo, 30) || 'Just now',
+      };
+      const result = addPostComment(postId, cleanComment);
       return NextResponse.json({
         success: true,
         action: 'comment',
@@ -191,19 +250,37 @@ export async function PATCH(req: Request) {
 }
 
 /**
- * DELETE /api/feed?id=...
+ * DELETE /api/feed?id=...&userEmail=...
  * Removes a post by ID from the central feed.
+ * Strictly checks that the requester is the original author OR the Head Administrator.
  */
 export async function DELETE(req: Request) {
   try {
     const url = new URL(req.url);
     const postId = url.searchParams.get('id');
+    const userEmail = sanitizeEmail(url.searchParams.get('userEmail') || '');
 
     if (!postId) {
       return NextResponse.json(
         { error: 'Post ID query parameter is required.' },
         { status: 400 }
       );
+    }
+
+    // Find the post to verify author ownership
+    const currentPosts = getAllPosts();
+    const targetPost = currentPosts.find((p) => p.id === postId);
+
+    if (targetPost) {
+      const isAuthor = Boolean(userEmail && targetPost.authorEmail && targetPost.authorEmail.toLowerCase() === userEmail);
+      const isAdmin = isHeadAdmin(userEmail) || isRequestAuthorizedAsAdmin(req, userEmail);
+
+      if (!isAuthor && !isAdmin) {
+        return NextResponse.json(
+          { error: 'Unauthorized: Only the author of this post or the Head Administrator can delete it.' },
+          { status: 403 }
+        );
+      }
     }
 
     deleteServerPost(postId);

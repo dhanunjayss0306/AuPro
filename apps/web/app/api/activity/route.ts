@@ -4,13 +4,28 @@ import {
   logServerActivity,
   clearAllActivities,
 } from '../auth/account-registry';
+import {
+  checkRateLimit,
+  getClientIp,
+  sanitizeText,
+  isRequestAuthorizedAsAdmin,
+} from '../auth/security';
 
 /**
  * GET /api/activity
  * Returns the real-time activity stream of campus events.
  */
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const ip = getClientIp(req);
+    const limit = checkRateLimit(`get_activity:${ip}`, 60, 60 * 1000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Please wait a moment.' },
+        { status: 429 }
+      );
+    }
+
     const activities = getAllActivities();
     return NextResponse.json({
       success: true,
@@ -31,6 +46,15 @@ export async function GET() {
  */
 export async function POST(req: Request) {
   try {
+    const ip = getClientIp(req);
+    const limit = checkRateLimit(`post_activity:${ip}`, 30, 60 * 1000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many activity reports.' },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const { action, actor, details } = body;
 
@@ -42,9 +66,9 @@ export async function POST(req: Request) {
     }
 
     const activity = logServerActivity(
-      String(action),
-      String(actor || 'AU User'),
-      details ? String(details) : undefined
+      sanitizeText(action, 80),
+      sanitizeText(actor || 'AU User', 100),
+      details ? sanitizeText(details, 300) : undefined
     );
 
     return NextResponse.json({
@@ -62,9 +86,21 @@ export async function POST(req: Request) {
 /**
  * DELETE /api/activity
  * Clears the activity log.
+ * Strictly restricted to the Head Administrator.
  */
-export async function DELETE() {
+export async function DELETE(req: Request) {
   try {
+    const url = new URL(req.url);
+    const adminEmail = url.searchParams.get('adminEmail') || '';
+    const isAuthorized = isRequestAuthorizedAsAdmin(req, adminEmail);
+
+    if (!isAuthorized) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Only the Head Administrator can clear activity logs.' },
+        { status: 403 }
+      );
+    }
+
     clearAllActivities();
     return NextResponse.json({
       success: true,

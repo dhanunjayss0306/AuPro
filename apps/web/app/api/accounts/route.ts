@@ -7,13 +7,29 @@ import {
   logServerActivity,
   MAIN_ADMIN_EMAIL,
 } from '../auth/account-registry';
+import {
+  checkRateLimit,
+  getClientIp,
+  sanitizeEmail,
+  sanitizeText,
+  isRequestAuthorizedAsAdmin,
+} from '../auth/security';
 
 /**
  * GET /api/accounts
  * Returns all verified registered accounts on the university portal.
  */
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const ip = getClientIp(req);
+    const limit = checkRateLimit(`get_accounts:${ip}`, 60, 60 * 1000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Please wait a moment.' },
+        { status: 429, headers: { 'Retry-After': String(limit.resetInSeconds) } }
+      );
+    }
+
     const accounts = getAllAccounts();
     return NextResponse.json({
       success: true,
@@ -34,24 +50,33 @@ export async function GET() {
  */
 export async function POST(req: Request) {
   try {
+    const ip = getClientIp(req);
+    const limit = checkRateLimit(`post_accounts:${ip}`, 30, 60 * 1000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many account modification requests. Please wait a minute.' },
+        { status: 429, headers: { 'Retry-After': String(limit.resetInSeconds) } }
+      );
+    }
+
     const body = await req.json();
     const { email, name, rollNo, department, year, phone, bio } = body;
 
-    if (!email) {
+    const cleanEmail = sanitizeEmail(email);
+    if (!cleanEmail) {
       return NextResponse.json(
-        { error: 'Student email is required.' },
+        { error: 'Valid student email is required.' },
         { status: 400 }
       );
     }
 
-    const cleanEmail = String(email).toLowerCase().trim();
     const success = registerAccount(cleanEmail, {
-      name,
-      rollNo,
-      department,
-      year,
-      phone,
-      bio,
+      name: sanitizeText(name, 120),
+      rollNo: sanitizeText(rollNo, 50),
+      department: sanitizeText(department, 100),
+      year: sanitizeText(year, 50),
+      phone: sanitizeText(phone, 30),
+      bio: sanitizeText(bio, 500),
     });
 
     if (success) {
@@ -82,12 +107,32 @@ export async function POST(req: Request) {
 /**
  * DELETE /api/accounts?email=... OR ?purgeAll=true
  * Deletes a student account or resets all accounts except the Head Master account.
+ * Strictly protected: Requires Head Administrator authorization.
  */
 export async function DELETE(req: Request) {
   try {
+    const ip = getClientIp(req);
+    const limit = checkRateLimit(`del_accounts:${ip}`, 20, 60 * 1000);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many administrative requests. Please wait a minute.' },
+        { status: 429, headers: { 'Retry-After': String(limit.resetInSeconds) } }
+      );
+    }
+
     const url = new URL(req.url);
     const purgeAll = url.searchParams.get('purgeAll') === 'true';
     const email = url.searchParams.get('email');
+    const adminEmail = url.searchParams.get('adminEmail') || '';
+
+    // Enforce Head Administrator authorization
+    const isAuthorized = isRequestAuthorizedAsAdmin(req, adminEmail);
+    if (!isAuthorized) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Only the Head Administrator may delete or purge student accounts.' },
+        { status: 403 }
+      );
+    }
 
     if (purgeAll) {
       purgeAllAccountsExceptHead();
@@ -110,7 +155,7 @@ export async function DELETE(req: Request) {
       );
     }
 
-    const cleanEmail = email.toLowerCase().trim();
+    const cleanEmail = sanitizeEmail(email);
     if (cleanEmail === MAIN_ADMIN_EMAIL || cleanEmail.startsWith('325506402371')) {
       return NextResponse.json(
         { error: 'Cannot delete the Head Master Account.' },

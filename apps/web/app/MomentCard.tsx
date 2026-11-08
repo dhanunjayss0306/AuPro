@@ -183,6 +183,21 @@ export function MomentCard({
           action: 'like',
           postId: post.id,
           userEmail: cleanUserEmail || 'student@andhrauniversity.edu.in',
+          postDetails: {
+            caption: post.caption,
+            username: post.username,
+            imageUrl: post.imageUrl,
+            imageCaption: post.imageCaption,
+            avatarText: post.avatarText,
+            authorEmail: post.authorEmail,
+            authorHandle: post.authorHandle,
+            category: post.category,
+            location: post.location,
+            isOfficial: post.isOfficial,
+            timeAgo: post.timeAgo,
+            likesCount: nextLikes,
+            likedBy: updatedLikedBy,
+          },
         }),
       });
       if (res.ok) {
@@ -376,6 +391,19 @@ export function MomentCard({
             ...newCommentItem,
             authorEmail: cleanUserEmail,
           },
+          postDetails: {
+            caption: post.caption,
+            username: post.username,
+            imageUrl: post.imageUrl,
+            imageCaption: post.imageCaption,
+            avatarText: post.avatarText,
+            authorEmail: post.authorEmail,
+            authorHandle: post.authorHandle,
+            category: post.category,
+            location: post.location,
+            isOfficial: post.isOfficial,
+            timeAgo: post.timeAgo,
+          },
         }),
       });
       if (res.ok) {
@@ -479,9 +507,11 @@ export function MomentCard({
           </div>
 
           {/* Post Text Body */}
-          <div className="threads-post-body">
-            <p className="threads-post-text">{post.caption}</p>
-          </div>
+          {(Boolean(post.caption?.trim()) || Boolean(post.imageCaption?.trim())) && (
+            <div className="threads-post-body">
+              <p className="threads-post-text">{post.caption || post.imageCaption}</p>
+            </div>
+          )}
 
           {/* Optional Media Container:
               ONLY rendered if an image or document is present!

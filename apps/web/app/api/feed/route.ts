@@ -169,7 +169,7 @@ export async function PATCH(req: Request) {
     }
 
     const body = await req.json();
-    const { action, postId, userEmail, comment, user } = body;
+    const { action, postId, userEmail, comment, user, postDetails } = body;
 
     if (!postId) {
       return NextResponse.json(
@@ -178,10 +178,25 @@ export async function PATCH(req: Request) {
       );
     }
 
+    const cleanPostDetails = postDetails ? {
+      caption: sanitizeText(postDetails.caption, 2000),
+      username: sanitizeText(postDetails.username, 100),
+      imageUrl: sanitizeImageUrl(postDetails.imageUrl),
+      imageCaption: sanitizeText(postDetails.imageCaption, 200),
+      avatarText: sanitizeText(postDetails.avatarText, 10),
+      authorEmail: sanitizeEmail(postDetails.authorEmail),
+      authorHandle: sanitizeText(postDetails.authorHandle, 60),
+      category: postDetails.category,
+      location: sanitizeText(postDetails.location, 120),
+      isOfficial: Boolean(postDetails.isOfficial),
+      timeAgo: sanitizeText(postDetails.timeAgo, 30),
+      durationDays: typeof postDetails.durationDays === 'number' ? postDetails.durationDays : 30,
+    } : undefined;
+
     // 1. Real Likes Toggle (Persisted per student email, no automated numbers)
     if (action === 'like') {
       const cleanEmail = sanitizeEmail(userEmail);
-      const result = togglePostLike(postId, cleanEmail);
+      const result = togglePostLike(postId, cleanEmail, cleanPostDetails);
       return NextResponse.json({
         success: true,
         action: 'like',
@@ -209,7 +224,7 @@ export async function PATCH(req: Request) {
         imageUrl: sanitizeImageUrl(comment.imageUrl),
         timeAgo: sanitizeText(comment.timeAgo, 30) || 'Just now',
       };
-      const result = addPostComment(postId, cleanComment);
+      const result = addPostComment(postId, cleanComment, cleanPostDetails);
       return NextResponse.json({
         success: true,
         action: 'comment',

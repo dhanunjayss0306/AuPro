@@ -899,16 +899,39 @@ export default function Home() {
         }
       }
       if (Array.isArray(feedRes?.posts)) {
-        const cleanServerPosts = feedRes.posts.filter((p: any) => !p.id.startsWith('post_init_'));
+        const cleanServerPosts = feedRes.posts.filter(
+          (p: any) => p && !p.id.startsWith('post_init_') && (Boolean(p.caption?.trim()) || Boolean(p.imageUrl))
+        );
         setFeedPosts((currentPosts) => {
-          const serverPostIds = new Set(cleanServerPosts.map((p: any) => p.id));
+          const serverPostMap = new Map(cleanServerPosts.map((p: any) => [p.id, p]));
+
+          // Reconcile: merge server posts with any richer local data
+          const mergedServer = cleanServerPosts.map((sp: any) => {
+            const localMatch = currentPosts.find((lp) => lp.id === sp.id);
+            if (localMatch) {
+              return {
+                ...sp,
+                caption: sp.caption?.trim() ? sp.caption : localMatch.caption,
+                imageUrl: sp.imageUrl || localMatch.imageUrl,
+                username: (sp.username && sp.username !== 'AU Student') ? sp.username : (localMatch.username || sp.username),
+                authorEmail: sp.authorEmail || localMatch.authorEmail,
+                avatarText: sp.avatarText || localMatch.avatarText,
+              };
+            }
+            return sp;
+          });
+
           // Preserve any newly submitted local post created within the last 5 minutes so it is never wiped out
           const pendingRecent = currentPosts.filter((p) => {
-            if (serverPostIds.has(p.id)) return false;
+            if (!p || (!p.caption?.trim() && !p.imageUrl)) return false;
+            if (serverPostMap.has(p.id)) return false;
             const numPart = Number(p.id.replace(/\D/g, '')) || 0;
             return Date.now() - numPart < 5 * 60 * 1000;
           });
-          const merged = [...pendingRecent, ...cleanServerPosts];
+
+          const merged = [...pendingRecent, ...mergedServer].filter(
+            (p) => p && (Boolean(p.caption?.trim()) || Boolean(p.imageUrl))
+          );
           if (typeof window !== 'undefined') {
             try {
               localStorage.setItem('aupro_feed_posts', JSON.stringify(merged));
@@ -933,7 +956,9 @@ export default function Home() {
       if (storedPosts) {
         const parsed = JSON.parse(storedPosts);
         if (Array.isArray(parsed)) {
-          const realOnly = parsed.filter((p: any) => !p.id.startsWith("post_init_"));
+          const realOnly = parsed.filter(
+            (p: any) => p && !p.id.startsWith("post_init_") && (Boolean(p.caption?.trim()) || Boolean(p.imageUrl))
+          );
           setFeedPosts(realOnly);
         }
       }
@@ -1334,6 +1359,7 @@ export default function Home() {
   }, [toast]);
 
   const filteredFeedPosts = feedPosts.filter((post) => {
+    if (!post || (!post.caption?.trim() && !post.imageUrl)) return false;
     if (feedFilter === 'problems') return post.category === 'problem';
     if (feedFilter === 'announcements') return post.category === 'announcement';
     if (feedFilter === 'normal') return post.category === 'normal' || !post.category;
@@ -1512,11 +1538,21 @@ export default function Home() {
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
         if (json?.posts && Array.isArray(json.posts)) {
-          const cleanServerPosts = json.posts.filter((p: any) => !p.id.startsWith('post_init_'));
-          setFeedPosts(cleanServerPosts);
-          try {
-            localStorage.setItem('aupro_feed_posts', JSON.stringify(cleanServerPosts));
-          } catch {}
+          const cleanServerPosts = json.posts.filter((p: any) => p && !p.id.startsWith('post_init_') && (Boolean(p.caption?.trim()) || Boolean(p.imageUrl)));
+          setFeedPosts((currentPosts) => {
+            const serverPostIds = new Set(cleanServerPosts.map((p: any) => p.id));
+            const pendingRecent = currentPosts.filter((p) => {
+              if (!p || (!p.caption?.trim() && !p.imageUrl)) return false;
+              if (serverPostIds.has(p.id)) return false;
+              const numPart = Number(p.id.replace(/\D/g, '')) || 0;
+              return Date.now() - numPart < 5 * 60 * 1000;
+            });
+            const merged = [...pendingRecent, ...cleanServerPosts];
+            try {
+              localStorage.setItem('aupro_feed_posts', JSON.stringify(merged));
+            } catch {}
+            return merged;
+          });
         }
       })
       .catch(() => {});
@@ -1590,11 +1626,21 @@ export default function Home() {
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
         if (json?.posts && Array.isArray(json.posts)) {
-          const cleanServerPosts = json.posts.filter((p: any) => !p.id.startsWith('post_init_'));
-          setFeedPosts(cleanServerPosts);
-          try {
-            localStorage.setItem('aupro_feed_posts', JSON.stringify(cleanServerPosts));
-          } catch {}
+          const cleanServerPosts = json.posts.filter((p: any) => p && !p.id.startsWith('post_init_') && (Boolean(p.caption?.trim()) || Boolean(p.imageUrl)));
+          setFeedPosts((currentPosts) => {
+            const serverPostIds = new Set(cleanServerPosts.map((p: any) => p.id));
+            const pendingRecent = currentPosts.filter((p) => {
+              if (!p || (!p.caption?.trim() && !p.imageUrl)) return false;
+              if (serverPostIds.has(p.id)) return false;
+              const numPart = Number(p.id.replace(/\D/g, '')) || 0;
+              return Date.now() - numPart < 5 * 60 * 1000;
+            });
+            const merged = [...pendingRecent, ...cleanServerPosts];
+            try {
+              localStorage.setItem('aupro_feed_posts', JSON.stringify(merged));
+            } catch {}
+            return merged;
+          });
         }
       })
       .catch(() => {});

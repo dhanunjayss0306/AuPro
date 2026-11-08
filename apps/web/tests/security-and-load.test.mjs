@@ -20,6 +20,12 @@ import {
   sanitizeEmail,
   isHeadAdmin,
 } from '../app/api/auth/security.ts';
+import {
+  togglePostLike,
+  addPostComment,
+  getAllPosts,
+  addServerPost,
+} from '../app/api/auth/account-registry.ts';
 
 test('1. Security: Cryptographic session token verification and tamper-resistance', () => {
   const email = '325506402371@andhrauniversity.edu.in';
@@ -129,4 +135,45 @@ test('5. High Concurrency Simulation: 100 simultaneous async write operations', 
 
   const results = await Promise.all(tasks);
   assert.equal(results.length, 100, 'All 100 concurrent operations must resolve without collision');
+});
+
+test('6. Ghost Post Immunity: Interactions never create blank posts and invalid posts are purged', () => {
+  const ghostPostId = 'test_ghost_' + Date.now();
+  const testEmail = '325506402371@andhrauniversity.edu.in';
+
+  // Attempting to like a non-existent post without post details must NOT create a blank post
+  const likeResult = togglePostLike(ghostPostId, testEmail);
+  assert.equal(likeResult.likesCount, 0, 'Like on unknown post without details must not increment');
+
+  const allPostsAfterLike = getAllPosts();
+  const foundGhost = allPostsAfterLike.find((p) => p.id === ghostPostId);
+  assert.equal(foundGhost, undefined, 'Unknown post must NEVER be added to feed as a blank ghost post');
+
+  // Liking with rich postDetails reconstructs the real post with its caption preserved
+  const realPostId = 'test_real_' + Date.now();
+  const validDetails = {
+    caption: 'Campus WiFi router installed at South Block',
+    username: 'AU Network Team',
+    category: 'announcement',
+  };
+  const likeWithDetails = togglePostLike(realPostId, testEmail, validDetails);
+  assert.equal(likeWithDetails.liked, true);
+  assert.equal(likeWithDetails.likesCount, 1);
+
+  const allPostsAfterDetails = getAllPosts();
+  const foundReal = allPostsAfterDetails.find((p) => p.id === realPostId);
+  assert.ok(foundReal, 'Post with valid details must be saved');
+  assert.equal(foundReal.caption, 'Campus WiFi router installed at South Block');
+  assert.equal(foundReal.username, 'AU Network Team');
+
+  // Attempting to add an invalid post without caption and image must be dropped
+  const blankPost = {
+    id: 'test_blank_' + Date.now(),
+    username: 'Ghost',
+    caption: '   ',
+    timeAgo: 'Just now',
+  };
+  addServerPost(blankPost);
+  const postsAfterBlank = getAllPosts();
+  assert.equal(postsAfterBlank.some((p) => p.id === blankPost.id), false, 'addServerPost must reject empty posts');
 });

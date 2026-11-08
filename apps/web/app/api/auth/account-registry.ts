@@ -203,9 +203,12 @@ function loadStore(): ServerDataStore {
         // Guarantee Head Account
         if (!parsed.accounts[MAIN_ADMIN_EMAIL]) {
           parsed.accounts[MAIN_ADMIN_EMAIL] = INITIAL_HEAD_ACCOUNT;
-        parsed.posts = (parsed.posts || []).filter((p: any) => !p.id.startsWith("post_init_"));
-        parsed.applications = parsed.applications || [];
         }
+        // Purge legacy demo posts and any ghost posts without caption or image
+        parsed.posts = (parsed.posts || []).filter(
+          (p: any) => p && !p.id?.startsWith('post_init_') && (Boolean(p.caption?.trim()) || Boolean(p.imageUrl))
+        );
+        parsed.applications = parsed.applications || [];
         (globalThis as any).__AUPRO_GLOBAL_STORE__ = parsed;
         return parsed;
       }
@@ -339,11 +342,18 @@ export function clearAllActivities(): void {
 
 export function getAllPosts(): ServerFeedPost[] {
   const store = loadStore();
-  return store.posts;
+  // Filter out any ghost/blank posts or legacy mock posts
+  return (store.posts || []).filter(
+    (p) => p && !p.id?.startsWith('post_init_') && (Boolean(p.caption?.trim()) || Boolean(p.imageUrl))
+  );
 }
 
 export function addServerPost(post: ServerFeedPost): ServerFeedPost {
   const store = loadStore();
+  // Reject ghost posts that have neither caption nor image
+  if (!post || (!post.caption?.trim() && !post.imageUrl)) {
+    return post;
+  }
   const existingIdx = store.posts.findIndex((p) => p.id === post.id);
   if (existingIdx >= 0) {
     store.posts[existingIdx] = { ...store.posts[existingIdx], ...post };
@@ -384,23 +394,59 @@ export function getRegisteredAccountsList(): string[] {
 }
 
 
-export function togglePostLike(postId: string, userEmail: string): { likesCount: number; liked: boolean; likedBy: string[] } {
+export function togglePostLike(
+  postId: string,
+  userEmail: string,
+  postDetails?: Partial<ServerFeedPost>
+): { likesCount: number; liked: boolean; likedBy: string[] } {
   const store = loadStore();
   let post = store.posts.find((p) => p.id === postId);
   if (!post) {
+    const hasContent = Boolean(postDetails?.caption?.trim()) || Boolean(postDetails?.imageUrl);
+    if (!hasContent) {
+      // Do not create an empty ghost post
+      return { likesCount: 0, liked: false, likedBy: [] };
+    }
     post = {
       id: postId,
-      username: 'AU Student',
-      caption: '',
-      likesCount: 0,
-      likedBy: [],
-      repostsCount: 0,
-      commentsCount: 0,
-      comments: [],
-      timeAgo: 'Just now',
+      username: postDetails?.username || 'AU Student',
+      authorEmail: postDetails?.authorEmail,
+      authorHandle: postDetails?.authorHandle || 'student',
+      avatarText: postDetails?.avatarText || (postDetails?.username ? postDetails.username.charAt(0).toUpperCase() : 'A'),
+      isOfficial: Boolean(postDetails?.isOfficial),
+      category: postDetails?.category || 'normal',
+      location: postDetails?.location,
+      imageUrl: postDetails?.imageUrl,
+      imageCaption: postDetails?.imageCaption,
+      caption: postDetails?.caption || '',
+      likesCount: typeof postDetails?.likesCount === 'number' ? postDetails.likesCount : 0,
+      likedBy: Array.isArray(postDetails?.likedBy) ? postDetails.likedBy : [],
+      repostsCount: typeof postDetails?.repostsCount === 'number' ? postDetails.repostsCount : 0,
+      commentsCount: typeof postDetails?.commentsCount === 'number' ? postDetails.commentsCount : 0,
+      comments: Array.isArray(postDetails?.comments) ? postDetails.comments : [],
+      timeAgo: postDetails?.timeAgo || 'Just now',
+      durationDays: postDetails?.durationDays || 30,
     };
     store.posts.unshift(post);
+  } else if (postDetails) {
+    // Enrich existing post if it was previously incomplete
+    if (!post.caption?.trim() && postDetails.caption?.trim()) {
+      post.caption = postDetails.caption;
+    }
+    if (!post.imageUrl && postDetails.imageUrl) {
+      post.imageUrl = postDetails.imageUrl;
+    }
+    if ((!post.username || post.username === 'AU Student') && postDetails.username && postDetails.username !== 'AU Student') {
+      post.username = postDetails.username;
+    }
+    if (!post.avatarText && postDetails.avatarText) {
+      post.avatarText = postDetails.avatarText;
+    }
+    if (!post.authorEmail && postDetails.authorEmail) {
+      post.authorEmail = postDetails.authorEmail;
+    }
   }
+
   const cleanEmail = (userEmail || 'student@andhrauniversity.edu.in').toLowerCase().trim();
   post.likedBy = Array.isArray(post.likedBy) ? post.likedBy : [];
   const idx = post.likedBy.indexOf(cleanEmail);
@@ -428,24 +474,57 @@ export function addPostComment(
     text: string;
     timeAgo?: string;
     imageUrl?: string;
-  }
+  },
+  postDetails?: Partial<ServerFeedPost>
 ): { comments: any[]; commentsCount: number } {
   const store = loadStore();
   let post = store.posts.find((p) => p.id === postId);
   if (!post) {
+    const hasContent = Boolean(postDetails?.caption?.trim()) || Boolean(postDetails?.imageUrl);
+    if (!hasContent) {
+      // Do not create a ghost post in central store
+      return { comments: [comment], commentsCount: 1 };
+    }
     post = {
       id: postId,
-      username: 'AU Student',
-      caption: '',
-      likesCount: 0,
-      likedBy: [],
-      repostsCount: 0,
+      username: postDetails?.username || 'AU Student',
+      authorEmail: postDetails?.authorEmail,
+      authorHandle: postDetails?.authorHandle || 'student',
+      avatarText: postDetails?.avatarText || (postDetails?.username ? postDetails.username.charAt(0).toUpperCase() : 'A'),
+      isOfficial: Boolean(postDetails?.isOfficial),
+      category: postDetails?.category || 'normal',
+      location: postDetails?.location,
+      imageUrl: postDetails?.imageUrl,
+      imageCaption: postDetails?.imageCaption,
+      caption: postDetails?.caption || '',
+      likesCount: typeof postDetails?.likesCount === 'number' ? postDetails.likesCount : 0,
+      likedBy: Array.isArray(postDetails?.likedBy) ? postDetails.likedBy : [],
+      repostsCount: typeof postDetails?.repostsCount === 'number' ? postDetails.repostsCount : 0,
       commentsCount: 0,
       comments: [],
-      timeAgo: 'Just now',
+      timeAgo: postDetails?.timeAgo || 'Just now',
+      durationDays: postDetails?.durationDays || 30,
     };
     store.posts.unshift(post);
+  } else if (postDetails) {
+    // Enrich existing post if incomplete
+    if (!post.caption?.trim() && postDetails.caption?.trim()) {
+      post.caption = postDetails.caption;
+    }
+    if (!post.imageUrl && postDetails.imageUrl) {
+      post.imageUrl = postDetails.imageUrl;
+    }
+    if ((!post.username || post.username === 'AU Student') && postDetails.username && postDetails.username !== 'AU Student') {
+      post.username = postDetails.username;
+    }
+    if (!post.avatarText && postDetails.avatarText) {
+      post.avatarText = postDetails.avatarText;
+    }
+    if (!post.authorEmail && postDetails.authorEmail) {
+      post.authorEmail = postDetails.authorEmail;
+    }
   }
+
   post.comments = Array.isArray(post.comments) ? post.comments : [];
   const newComment = {
     id: comment.id || 'cmt_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),

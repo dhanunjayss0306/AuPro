@@ -698,11 +698,12 @@ export default function Home() {
   const [debouncedMapSearch, setDebouncedMapSearch] = useState('');
 
   // Request deduplication manager: prevents duplicate network calls during rapid tab switching
-  const dedupFetch = (key: string, fetcher: () => Promise<any>): Promise<any> => {
+  const dedupFetch = (key: string, fetcher?: () => Promise<any>): Promise<any> => {
     if (inFlightFetches.current.has(key)) {
       return inFlightFetches.current.get(key)!;
     }
-    const promise = fetcher().finally(() => {
+    const execFetcher = fetcher || (() => fetch(key).then((r) => r.json()));
+    const promise = execFetcher().finally(() => {
       inFlightFetches.current.delete(key);
     });
     inFlightFetches.current.set(key, promise);
@@ -730,6 +731,12 @@ export default function Home() {
   const [selectedLandmark, setSelectedLandmark] = useState<CampusLandmark | null>(campusLandmarks[0]);
   const [mapLayer, setMapLayer] = useState<'m' | 'k'>('m');
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
+  const [isMapControlsHidden, setIsMapControlsHidden] = useState(false);
+
+  useEffect(() => {
+    setIsMapControlsHidden(false);
+    setIsNavVisible(true);
+  }, [tab]);
   const [mapSearchInput, setMapSearchInput] = useState('');
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
   const [mapFilterChip, setMapFilterChip] = useState<'all' | 'history' | 'built-1950' | 'visakhapatnam' | 'vaddadi' | 'library' | 'departments' | 'hostels'>('all');
@@ -2344,7 +2351,7 @@ export default function Home() {
   return (
     <main className="shell">
       {/* Top Bar: Clean and uncluttered, NO "Search campus posts" */}
-      <header className="topbar">
+      <header className={`topbar ${!isNavVisible && (tab === 'feed' || (tab === 'location' && isMapControlsHidden)) ? 'topbar-hidden' : ''}`}>
         <div className="brand" onClick={() => setTab('feed')} style={{ cursor: 'pointer' }}>
           <span>AuPro</span>
           <span className="brand-badge">AU Eng</span>
@@ -2429,7 +2436,7 @@ export default function Home() {
       )}
 
       {/* Main Content Area */}
-      <section className={`content ${tab === 'location' ? 'content-map' : ''}`}>
+      <section className={`content ${tab === 'location' ? 'content-map' : ''} ${tab === 'chatbot' ? 'content-chatbot' : ''} ${tab === 'location' && isMapControlsHidden ? 'map-controls-hidden' : ''}`}>
         {topNotice && (
           <div className="top-notice" role="status">
             <span>{topNotice}</span>
@@ -3064,8 +3071,8 @@ export default function Home() {
 
         {/* TAB 4: CHATBOT / AI ASSISTANT (Sharp, to-the-point) */}
         {tab === 'chatbot' && (
-          <div className="stack" style={{ maxWidth: 640, margin: '0 auto' }}>
-            <div>
+          <div className="chatbot-wrapper">
+            <div className="chatbot-header">
               <div className="eyebrow">AU Assistant</div>
               <h1>Ask AuPro</h1>
               <p className="lead">Direct, verified answers for College of Engineering administration, exams, fees, and services.</p>
@@ -3170,6 +3177,38 @@ export default function Home() {
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
+
+            {/* Gesture Detection Overlay: When controls are visible, touching the map automatically hides navigation bars and controls */}
+            {!isMapControlsHidden && (
+              <div
+                className="gmaps-touch-catcher"
+                onTouchStart={() => {
+                  setIsMapControlsHidden(true);
+                  setIsNavVisible(false);
+                }}
+                onPointerDown={() => {
+                  setIsMapControlsHidden(true);
+                  setIsNavVisible(false);
+                }}
+                aria-hidden="true"
+              />
+            )}
+
+            {/* Floating Restore Controls Button */}
+            {isMapControlsHidden && (
+              <button
+                type="button"
+                className="gmaps-show-controls-pill"
+                onClick={() => {
+                  setIsMapControlsHidden(false);
+                  setIsNavVisible(true);
+                }}
+                aria-label="Show menu and map controls"
+              >
+                <Glyph n="menu" />
+                <span>Show Controls</span>
+              </button>
+            )}
 
             {/* IN-APP TURN-BY-TURN NAVIGATION HUD */}
             {isNavigating ? (
@@ -3280,7 +3319,7 @@ export default function Home() {
             ) : null}
 
             {/* Floating Top Bar: Search Bar or Directions Header */}
-            <div className="gmaps-top-overlay">
+            <div className={`gmaps-top-overlay ${isMapControlsHidden ? 'controls-hidden' : ''}`}>
               {isGpsTracking && userCoords && (
                 <div
                   className="gmaps-gps-badge"
@@ -3372,7 +3411,7 @@ export default function Home() {
                   </div>
 
                   {/* Google Maps Category Filter Chips */}
-                  <div className="gmaps-chips-scroll">
+                  <div className={`gmaps-chips-scroll ${isMapControlsHidden ? 'controls-hidden' : ''}`}>
                     {[
                       { id: 'all', label: 'All' },
                       { id: 'history', label: 'History' },
@@ -3609,7 +3648,7 @@ export default function Home() {
 
             {/* Layer 4: Bottom Sheet (peek / expanded) */}
             {!showDirections && (
-              <div className={`gmaps-bottom-sheet ${isSheetExpanded ? 'expanded' : 'peek'}`}>
+              <div className={`gmaps-bottom-sheet ${isSheetExpanded ? 'expanded' : 'peek'} ${isMapControlsHidden ? 'controls-hidden' : ''}`}>
                 {/* Drag Handle & Place Count Header */}
                 <button
                   type="button"
@@ -4497,7 +4536,7 @@ export default function Home() {
         - Location: Instagram Map Pin
         - About: Darkened icon
       */}
-      <nav className={`bottom-nav ${!isNavVisible ? 'nav-hidden' : ''}`} aria-label="Primary navigation">
+      <nav className={`bottom-nav ${!isNavVisible || (tab === 'location' && isMapControlsHidden) ? 'nav-hidden' : ''}`} aria-label="Primary navigation">
         <button className={`nav-button ${tab === 'applications' ? 'active' : ''}`} onClick={() => { setTab('applications'); setQuery(''); }} aria-label="Applications">
           <ApplicationsIcon active={tab === 'applications'} size={24} />
           <span>Applications</span>
@@ -4514,7 +4553,7 @@ export default function Home() {
           title="Add new post"
         >
           <div className="big-plus-bubble">
-            <BigPlusIcon size={24} />
+            <BigPlusIcon size={20} />
           </div>
           <div className="plus-underline-bar" />
         </button>

@@ -247,7 +247,7 @@ input, textarea, select { font-size: 16px; min-height: 48px; padding-inline: 14p
 .bottom-nav { padding-bottom: env(safe-area-inset-bottom, 0px); }
 .bottom-nav button { min-height: 56px; min-width: 56px; font-size: 12px; user-select: none; }
 .bottom-nav button .glyph, .bottom-nav button svg { width: 24px; height: 24px; }
-.big-plus-bubble { width: 56px; height: 56px; }
+.big-plus-bubble { width: 42px; height: 42px; }
 
 /* Chip rows glide and snap instead of dragging precisely */
 .chatbot-chips, .gmaps-chips, .gmaps-chip-row { scroll-snap-type: x proximity; overflow-x: auto; -webkit-overflow-scrolling: touch; scroll-padding-inline: 16px; padding-bottom: 4px; scrollbar-width: none; }
@@ -259,7 +259,7 @@ input, textarea, select { font-size: 16px; min-height: 48px; padding-inline: 14p
 button, .primary-button, .secondary-button, .chatbot-chip, .gmaps-chip { user-select: none; -webkit-user-select: none; }
 
 /* Touch-target fixes found by the audit */
-.profile-avatar { width: 44px; height: 44px; min-width: 44px; }
+.profile-avatar { width: 38px; height: 38px; min-width: 38px; }
 .about-link { display: inline-flex; align-items: center; min-height: 44px; padding-block: 12px; }
 .gmaps-directions-btn, .gmaps-action-pill, .gmaps-bottom-sheet button { min-height: 44px; }
 .gmaps-action-pill { padding-inline: 14px; }

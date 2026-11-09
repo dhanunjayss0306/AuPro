@@ -86,7 +86,7 @@ function getEmailHtml(name: string, otp: string, rollNo: string): string {
                 <div style="font-size: 12px; color: #dc2626; margin-top: 8px; font-weight: 500;">Expires in 10 minutes</div>
               </div>
 
-              <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 4px; padding: 12px 14px; margin-bottom: 24px;">
+              <div style="background-color: #eff6ff; border: 1px solid #dedfda; border-radius: 4px; padding: 12px 14px; margin-bottom: 24px;">
                 <p style="margin: 0; color: #1e40af; font-size: 12px; line-height: 1.5;">
                   <strong>Identity Security:</strong> This one-time verification ensures that your student roll number cannot be used by anyone else on campus. Never share this code.
                 </p>

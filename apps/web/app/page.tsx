@@ -26,10 +26,12 @@ import {
   TransitBusIcon,
   SunIcon,
   MoonIcon,
-} from './icons';
-import { MomentCard, MomentPost } from './MomentCard';
-import { IntroCinematic } from './IntroCinematic';
-import { ThreadsComposer, ThreadsPostData } from './ThreadsComposer';
+} from './components/icons';
+import { MomentCard, MomentPost } from './components/MomentCard';
+import { Glyph } from './components/Glyph';
+import { CampusPhoto } from './components/CampusPhoto';
+import { IntroCinematic } from './components/IntroCinematic';
+import { ThreadsComposer, ThreadsPostData } from './components/ThreadsComposer';
 import {
   getGoogleOAuthUrl,
   isValidCollegeEmail,
@@ -49,10 +51,10 @@ import {
   clearPlatformActivities,
   PlatformActivity,
   StudentProfile,
-} from './auth';
-import { auVectorDB } from './vector_search';
-import { validateTextContent, validateImageSafety } from './content_moderation';
-import { compressImageFile } from './image_compressor';
+} from './lib/auth';
+import { auVectorDB } from './lib/vector_search';
+import { validateTextContent, validateImageSafety } from './lib/content_moderation';
+import { compressImageFile } from './lib/image_compressor';
 
 type Tab = 'applications' | 'create' | 'feed' | 'chatbot' | 'location' | 'about';
 type AuthMode = 'landing' | 'email-login' | 'signup' | 'otp';
@@ -506,7 +508,7 @@ export default function Home() {
       document.documentElement.setAttribute('data-theme', nextTheme);
       document.documentElement.classList.toggle('dark', nextTheme === 'dark');
     } catch {}
-    setToast(nextTheme === 'dark' ? '🌙 Dark mode enabled' : '☀️ Light mode enabled');
+    setToast(nextTheme === 'dark' ? 'Dark mode enabled' : 'Light mode enabled');
   };
 
   // Topbar Profile Quick Menu
@@ -602,7 +604,7 @@ export default function Home() {
         {
           instruction: `Arrive at ${endName}`,
           distance: '150 m',
-          turnIcon: '🏁',
+          turnIcon: 'flag',
           subText: 'Destination reached on campus',
         },
       ];
@@ -631,7 +633,7 @@ export default function Home() {
         {
           instruction: `Arrive at ${endName}`,
           distance: '100 m',
-          turnIcon: '🏁',
+          turnIcon: 'flag',
           subText: 'Destination reached',
         },
       ];
@@ -660,7 +662,7 @@ export default function Home() {
         {
           instruction: `Arrive at ${endName}`,
           distance: '50 m',
-          turnIcon: '🏁',
+          turnIcon: 'flag',
           subText: 'Destination reached',
         },
       ];
@@ -689,7 +691,7 @@ export default function Home() {
         {
           instruction: `Arrive at ${endName}`,
           distance: '50 m',
-          turnIcon: '🏁',
+          turnIcon: 'flag',
           subText: 'Destination reached',
         },
       ];
@@ -718,7 +720,7 @@ export default function Home() {
         {
           instruction: `Arrive at ${endName}`,
           distance: '120 m',
-          turnIcon: '🏁',
+          turnIcon: 'flag',
           subText: 'Destination reached',
         },
       ];
@@ -741,7 +743,7 @@ export default function Home() {
         {
           instruction: `Arrive at ${endName}`,
           distance: '250 m',
-          turnIcon: '🏁',
+          turnIcon: 'flag',
           subText: 'Destination reached',
         },
       ];
@@ -764,7 +766,7 @@ export default function Home() {
         {
           instruction: `Arrive at ${endName}`,
           distance: '60 m',
-          turnIcon: '🏁',
+          turnIcon: 'flag',
           subText: 'Destination reached',
         },
       ];
@@ -793,7 +795,7 @@ export default function Home() {
       {
         instruction: `Arrived at ${endName}`,
         distance: '40 m',
-        turnIcon: '📍',
+        turnIcon: 'pin',
         subText: 'Your destination is on the right',
       },
     ];
@@ -1212,7 +1214,7 @@ export default function Home() {
       return;
     }
     setIsLocating(true);
-    setToast('🛰️ Acquiring live GPS position...');
+    setToast('Acquiring live GPS position...');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude, accuracy } = pos.coords;
@@ -1231,7 +1233,7 @@ export default function Home() {
           setIsLocationFar(true);
           setDirectionsStart('Your location');
           setMapLocationQuery(`${latitude},${longitude}`);
-          setToast(`📍 You are ${distKm}km from AU. Select a campus hub or route directly.`);
+          setToast(`You are ${distKm}km from AU. Select a campus hub or route directly.`);
           if (transportMode === 'w') {
             setTransportMode('d');
           }
@@ -1239,7 +1241,7 @@ export default function Home() {
           setIsLocationFar(false);
           setMapLocationQuery(`${latitude},${longitude}`);
           setDirectionsStart('Your location');
-          setToast(`📍 GPS Locked: ${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E (±${Math.round(accuracy)}m)`);
+          setToast(`GPS Locked: ${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E (±${Math.round(accuracy)}m)`);
         }
       },
       (err) => {
@@ -1342,7 +1344,7 @@ export default function Home() {
 
   const handlePurgeAllAccounts = () => {
     const confirmed = typeof window !== 'undefined' ? window.confirm(
-      '⚠️ DANGER: Are you sure you want to remove ALL registered accounts except your Head Administrator account? All other student accounts will be deleted immediately.'
+      'DANGER: Are you sure you want to remove ALL registered accounts except your Head Administrator account? All other student accounts will be deleted immediately.'
     ) : false;
     if (!confirmed) return;
 
@@ -1664,6 +1666,7 @@ export default function Home() {
     return (
       <main className="shell">
         <section className="content" style={{ paddingTop: '12vh' }}>
+          <CampusPhoto slot="login" />
           <div className="card auth-card">
             <div className="eyebrow" style={{ color: 'var(--secondary)', letterSpacing: '0.08em', textTransform: 'uppercase', fontSize: 12, fontWeight: 600, lineHeight: 1.4, marginBottom: 4 }}>ANDHRA UNIVERSITY</div>
             <h1 style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.25, marginBottom: 8, color: 'var(--ink)' }}>Welcome to AuPro</h1>
@@ -1947,7 +1950,7 @@ export default function Home() {
               }} className="stack" style={{ gap: 14 }}>
                 <div style={{ textAlign: 'center', padding: '6px 0' }}>
                   <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: 22, background: 'var(--teal)', color: 'var(--secondary)', fontSize: 20, marginBottom: 8 }}>
-                    🛡️
+                    <Glyph n="shield" />
                   </div>
                   <h3 style={{ margin: '0 0 4px 0', fontSize: 17, fontWeight: 700, color: 'var(--ink)' }}>Verify College Identity</h3>
                   <p className="lead" style={{ fontSize: 13, margin: 0, color: 'var(--muted)' }}>
@@ -1970,7 +1973,7 @@ export default function Home() {
                     margin: '6px 0 10px 0',
                     lineHeight: 1.5,
                   }}>
-                    <div style={{ color: '#10b981', fontWeight: 700, marginBottom: 2 }}>✓ Dispatched via Resend</div>
+                    <div style={{ color: '#10b981', fontWeight: 700, marginBottom: 2 }}><Glyph n="check" /> Dispatched via Resend</div>
                     <span style={{ color: 'var(--muted)' }}>Check your university inbox (and spam folder) for the 6-digit code.</span>
                   </div>
                 )}
@@ -1987,7 +1990,7 @@ export default function Home() {
                     margin: '6px 0 10px 0',
                     textAlign: 'left',
                   }}>
-                    <strong style={{ color: '#ef4444', display: 'block', marginBottom: 2 }}>⚠️ Email Dispatch Diagnostic:</strong>
+                    <strong style={{ color: '#ef4444', display: 'block', marginBottom: 2 }}><Glyph n="warn" /> Email Dispatch Diagnostic:</strong>
                     <span>{authOtpProviderError}</span>
                   </div>
                 )}
@@ -2040,7 +2043,7 @@ export default function Home() {
                     cursor: authOtp.trim().length === 6 ? 'pointer' : 'not-allowed',
                   }}
                 >
-                  {isOtpLoading ? 'Verifying...' : '✓ Verify Code & Activate Account'}
+                  {isOtpLoading ? 'Verifying...' : 'Verify Code & Activate Account'}
                 </button>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4, fontSize: 12 }}>
@@ -2154,7 +2157,7 @@ export default function Home() {
                 className="profile-dropdown-btn"
                 onClick={toggleTheme}
               >
-                <span>{theme === 'dark' ? '☀️' : '🌙'}</span>
+                <span><Glyph n={theme === 'dark' ? 'sun' : 'moon'} /></span>
                 <span>{theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}</span>
               </button>
               <button
@@ -2165,7 +2168,7 @@ export default function Home() {
                   setShowProfileMenu(false);
                 }}
               >
-                <span>👤</span> View Full Profile &amp; Bio
+                <span><Glyph n="user" /></span> View Full Profile &amp; Bio
               </button>
               <button
                 className="profile-dropdown-btn"
@@ -2175,10 +2178,10 @@ export default function Home() {
                   setShowProfileMenu(false);
                 }}
               >
-                <span>⚙️</span> Account Preferences &amp; Settings
+                <span><Glyph n="gear" /></span> Account Preferences &amp; Settings
               </button>
               <button className="profile-dropdown-signout" onClick={handleSignOut}>
-                <span>🚪</span> Sign Out of AuPro
+                <span><Glyph n="logout" /></span> Sign Out of AuPro
               </button>
             </div>
           </div>
@@ -2221,7 +2224,7 @@ export default function Home() {
 
             {filteredFeedPosts.length === 0 ? (
               <div className="card feed-empty-card">
-                <div style={{ fontSize: 32, marginBottom: 10 }}>📝</div>
+                <svg className="empty-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>
                 <h3>No Posts in Feed Yet</h3>
                 <p className="lead" style={{ fontSize: 13, margin: '0 0 16px 0' }}>
                   Be the first to share an academic update, tech project, or report a campus issue with fellow AU students.
@@ -2404,7 +2407,7 @@ export default function Home() {
                           }, 220);
                         }}
                       >
-                        Apply now ➔
+                        Apply now <Glyph n="arrow" />
                       </button>
                     </article>
                   ))}
@@ -2432,7 +2435,7 @@ export default function Home() {
             <form className="card create-form" onSubmit={handleCreatePost}>
               {createKind === 'announcement' ? (
                 <div style={{ background: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(220, 38, 38, 0.3)', borderRadius: 12, padding: 14, color: 'var(--error)', fontSize: 13, lineHeight: 1.5, marginBottom: 8 }}>
-                  <strong>🔒 Announcements Temporarily Blocked</strong>
+                  <strong><Glyph n="lock" /> Announcements Temporarily Blocked</strong>
                   <p style={{ margin: '4px 0 0 0', fontSize: 12 }}>
                     Official announcement publishing is currently locked by university administration. Please report your campus concern as a <strong>Problem</strong>.
                   </p>
@@ -2647,7 +2650,7 @@ export default function Home() {
                 {/* Green Navigation HUD Banner at the BOTTOM */}
                 <div className="gmaps-nav-hud-top">
                   <div className="gmaps-nav-turn-icon">
-                    {campusNavSteps[navStepIndex]?.turnIcon || '⬆'}
+                    <Glyph n={campusNavSteps[navStepIndex]?.turnIcon || 'up'} size="1.4em" />
                   </div>
                   <div className="gmaps-nav-instructions">
                     <div className="gmaps-nav-primary-instruction">
@@ -2664,7 +2667,7 @@ export default function Home() {
                   <div className="gmaps-nav-steps-modal">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                       <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--ink)' }}>Turn-by-Turn Route Guidance</h4>
-                      <button className="icon-button" onClick={() => setShowNavStepsSheet(false)}>✕</button>
+                      <button className="icon-button" onClick={() => setShowNavStepsSheet(false)}><Glyph n="x" /></button>
                     </div>
                     <div className="stack" style={{ gap: 8 }}>
                       {campusNavSteps.map((step, idx) => (
@@ -2682,7 +2685,7 @@ export default function Home() {
                             cursor: 'pointer',
                           }}
                         >
-                          <span style={{ fontSize: 20 }}>{step.turnIcon}</span>
+                          <span style={{ fontSize: 20 }}><Glyph n={step.turnIcon} /></span>
                           <div style={{ flex: 1 }}>
                             <strong style={{ fontSize: 13, display: 'block', color: 'var(--ink)' }}>{step.instruction}</strong>
                             <span style={{ fontSize: 11.5, color: 'var(--muted)' }}>{step.subText} • {step.distance}</span>
@@ -2705,7 +2708,7 @@ export default function Home() {
                       className="gmaps-nav-steps-btn"
                       onClick={() => setShowNavStepsSheet(!showNavStepsSheet)}
                     >
-                      Steps ☰
+                      Steps <Glyph n="menu" />
                     </button>
                     <button
                       type="button"
@@ -2717,7 +2720,7 @@ export default function Home() {
                         setToast('In-app navigation ended.');
                       }}
                     >
-                      ✕ Exit
+                      <Glyph n="x" /> Exit
                     </button>
                   </div>
                 </div>
@@ -2768,7 +2771,7 @@ export default function Home() {
                         }}
                         aria-label="Clear search"
                       >
-                        ✕
+                        <Glyph n="x" />
                       </button>
                     )}
                     <div className="gmaps-search-divider" />
@@ -2870,7 +2873,7 @@ export default function Home() {
                         className={`gmaps-transit-btn ${transportMode === 'm' ? 'active' : ''}`}
                         onClick={() => setTransportMode('m')}
                       >
-                        <span>🏍️</span>
+                        <span><Glyph n="bike" /></span>
                         <span>Bike</span>
                       </button>
                       <button
@@ -2951,8 +2954,8 @@ export default function Home() {
                       >
                         {preset === 'Your location'
                           ? userCoords
-                            ? '📍 Your location (Live GPS)'
-                            : '📍 Your location'
+                            ? 'Your location (Live GPS)'
+                            : 'Your location'
                           : preset}
                       </button>
                     ))}
@@ -2962,7 +2965,7 @@ export default function Home() {
                   {isLocationFar && userDistanceToAu && (
                     <div className="gmaps-far-location-prompt">
                       <div className="gmaps-far-header">
-                        <span style={{ fontSize: 16 }}>📍</span>
+                        <span style={{ fontSize: 16 }}><Glyph n="pin" /></span>
                         <div>
                           <strong>You are {userDistanceToAu} km from Andhra University</strong>
                           <p>Choose a nearby campus entry hub below, or route directly from anywhere with Google Maps.</p>
@@ -2980,7 +2983,7 @@ export default function Home() {
                               setToast(`Starting route from nearest campus hub: ${nearestHub.shortName}`);
                             }}
                           >
-                            ⭐ Start from {nearestHub.shortName} (~{nearestHub.distanceKm} km to AU)
+                            <Glyph n="star" /> Start from {nearestHub.shortName} (~{nearestHub.distanceKm} km to AU)
                           </button>
                         )}
 
@@ -2993,7 +2996,7 @@ export default function Home() {
                             setToast(`Routing directly from your current location (${userDistanceToAu} km away)`);
                           }}
                         >
-                          🚗 Route from current location ({userDistanceToAu} km)
+                          <Glyph n="car" /> Route from current location ({userDistanceToAu} km)
                         </button>
                       </div>
 
@@ -3048,7 +3051,7 @@ export default function Home() {
                 title={isMapFullscreen ? 'Exit Fullscreen' : 'Open in Fullscreen'}
                 onClick={() => setIsMapFullscreen((prev) => !prev)}
               >
-                {isMapFullscreen ? '✕' : '⛶'}
+                {isMapFullscreen ? <Glyph n="x" /> : <Glyph n="expand" />}
               </button>
             </div>
 
@@ -3100,7 +3103,7 @@ export default function Home() {
                               {loc.name}
                             </div>
                             <span style={{ fontSize: 16 }}>
-                              {loc.category === 'Department' ? '🏢' : loc.category === 'Library' ? '📚' : loc.category === 'Hostel' ? '🛏️' : '🏛️'}
+                              <Glyph n={loc.category === 'Department' ? 'building' : loc.category === 'Library' ? 'book' : loc.category === 'Hostel' ? 'bed' : 'landmark'} />
                             </span>
                           </div>
 
@@ -3137,7 +3140,7 @@ export default function Home() {
                                 }
                               }}
                             >
-                              <span>📋</span>
+                              <span><Glyph n="clipboard" /></span>
                               <span>Copy</span>
                             </button>
                           </div>
@@ -3169,7 +3172,7 @@ export default function Home() {
                   }}
                 >
                   <span>Start Navigation</span>
-                  <span style={{ fontSize: 16 }}>➔</span>
+                  <span style={{ fontSize: 16 }}><Glyph n="arrow" /></span>
                 </button>
               </div>
             )}
@@ -3207,6 +3210,7 @@ export default function Home() {
                   </a>
                 </div>
 
+                <CampusPhoto slot="info" />
                 <div className="card au-info-hero-card">
                   <div className="eyebrow">ESTABLISHED 1926 • AUTONOMOUS SINCE 1946</div>
                   <h1 style={{ margin: '6px 0 10px', fontSize: 22 }}>Andhra University College of Engineering (AUCoE)</h1>
@@ -3290,7 +3294,7 @@ export default function Home() {
                 <div className="card head-admin-hero-card">
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <div className="head-admin-hero-avatar">👑</div>
+                      <div className="head-admin-hero-avatar"><Glyph n="crown" /></div>
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>Head Administrator</h1>
@@ -3306,7 +3310,7 @@ export default function Home() {
                         style={{ fontSize: 12, padding: '7px 14px' }}
                         onClick={() => setShowAddUserModal(true)}
                       >
-                        ➕ Add Another One
+                        <Glyph n="plus" /> Add Another One
                       </button>
                       <button
                         type="button"
@@ -3315,7 +3319,7 @@ export default function Home() {
                         onClick={handlePurgeAllAccounts}
                         title="Delete all accounts except the Head Account"
                       >
-                        🧹 Purge Other Accounts
+                        <Glyph n="broom" /> Purge Other Accounts
                       </button>
                     </div>
                   </div>
@@ -3353,7 +3357,7 @@ export default function Home() {
                       style={{ fontSize: 12, padding: '5px 12px' }}
                       onClick={refreshAdminData}
                     >
-                      🔄 Refresh
+                      <Glyph n="refresh" /> Refresh
                     </button>
                   </div>
 
@@ -3364,7 +3368,7 @@ export default function Home() {
                         <div key={user.email} className={`head-user-card ${isThisHead ? 'is-head-account' : ''}`}>
                           <div className="head-user-left">
                             <div className="head-user-avatar">
-                              {isThisHead ? '👑' : (user.name[0] || 'U').toUpperCase()}
+                              {isThisHead ? <Glyph n="crown" /> : (user.name[0] || 'U').toUpperCase()}
                             </div>
                             <div className="head-user-info">
                               <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
@@ -3387,7 +3391,7 @@ export default function Home() {
                                 className="danger-button-outline"
                                 onClick={() => handleDeleteUserAccount(user.email, user.name)}
                               >
-                                🗑️ Remove
+                                <Glyph n="trash" /> Remove
                               </button>
                             )}
                           </div>
@@ -3457,9 +3461,9 @@ export default function Home() {
                 {/* 1. TOP USERNAME BAR */}
                 <div className="insta-profile-topbar">
                   <div className="insta-topbar-username">
-                    <span className="lock-icon" style={{ fontSize: 13 }}>🔒</span>
+                    <span className="lock-icon" style={{ fontSize: 13 }}><Glyph n="lock" /></span>
                     <span>@{studentHandle}</span>
-                    <span className="verified-badge" title="Official Student Identity Verified">✓</span>
+                    <span className="verified-badge" title="Official Student Identity Verified"><Glyph n="check" /></span>
                   </div>
                   <div className="insta-topbar-actions">
                     <button
@@ -3476,7 +3480,7 @@ export default function Home() {
                       aria-label="Edit Profile & Settings"
                       title="Edit Profile & Settings"
                     >
-                      ⚙️
+                      <Glyph n="gear" />
                     </button>
                   </div>
                 </div>
@@ -3520,16 +3524,16 @@ export default function Home() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                     <h1 className="insta-bio-fullname" style={{ margin: 0, fontSize: 22, fontWeight: 700, lineHeight: 1.25 }}>{authName || 'AU Student'}</h1>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, fontWeight: 600, color: 'var(--gold)', background: 'rgba(198, 155, 69, 0.12)', padding: '2px 6px', borderRadius: 4 }}>
-                      ✓ Verified
+                      <Glyph n="check" /> Verified
                     </span>
                     {isHeadAccount(authEmail) && (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: '#f59e0b', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.35)', padding: '2px 8px', borderRadius: 9999 }}>
-                        👑 Head Administrator
+                        <Glyph n="crown" /> Head Administrator
                       </span>
                     )}
                   </div>
                   <div className="insta-bio-college" style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4 }}>
-                    🎓 AU College of Engineering (Autonomous)
+                    <Glyph n="cap" /> AU College of Engineering (Autonomous)
                   </div>
                   <div className="profile-identity-stack" style={{ display: 'flex', flexDirection: 'column', gap: 4, margin: '8px 0', fontSize: 13, fontWeight: 400, color: 'var(--muted)', lineHeight: 1.4 }}>
                     <span>Roll: {authRollNo || '325506402371'}</span>
@@ -3542,7 +3546,7 @@ export default function Home() {
                   {isHeadAccount(authEmail) && (
                     <div className="head-admin-compact-strip">
                       <div className="head-admin-compact-left">
-                        <span style={{ fontSize: 14 }}>👑</span>
+                        <span style={{ fontSize: 14 }}><Glyph n="crown" /></span>
                         <div>
                           <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink)' }}>Head Administrator</div>
                           <div style={{ fontSize: 11, color: 'var(--muted)' }}>Master ID: 325506402371</div>
@@ -3569,7 +3573,7 @@ export default function Home() {
                     className="insta-action-button primary"
                     onClick={() => setIsEditingProfile(!isEditingProfile)}
                   >
-                    <span>{isEditingProfile ? '✕ Close Editor' : '✏️ Edit Profile / Bio'}</span>
+                    <span>{isEditingProfile ? <><Glyph n="x" /> Close Editor</> : <><Glyph n="pencil" /> Edit Profile / Bio</>}</span>
                   </button>
                   <button
                     type="button"
@@ -3581,14 +3585,14 @@ export default function Home() {
                       setToast('Profile link copied to clipboard!');
                     }}
                   >
-                    <span>🔗 Share</span>
+                    <span><Glyph n="link" /> Share</span>
                   </button>
                   <button
                     type="button"
                     className="insta-action-button danger"
                     onClick={handleSignOut}
                   >
-                    <span>🚪 Sign Out</span>
+                    <span><Glyph n="logout" /> Sign Out</span>
                   </button>
                 </div>
 
@@ -3597,7 +3601,7 @@ export default function Home() {
                   <div className="insta-edit-drawer card">
                     <div className="insta-edit-header">
                       <h3>Edit Profile & Bio</h3>
-                      <button className="icon-button" onClick={() => setIsEditingProfile(false)}>✕</button>
+                      <button className="icon-button" onClick={() => setIsEditingProfile(false)}><Glyph n="x" /></button>
                     </div>
 
                     <div className="stack" style={{ gap: 12 }}>
@@ -3728,7 +3732,7 @@ export default function Home() {
                           <div style={{ marginTop: 14, padding: 14, borderRadius: 12, background: 'var(--surface-elevated)', border: '1px solid rgba(212, 168, 87, 0.35)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                               <strong style={{ fontSize: 13, color: 'var(--gold)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                                👑 Head Account Master Controls
+                                <Glyph n="crown" /> Head Account Master Controls
                               </strong>
                               <span style={{ fontSize: 11, background: 'rgba(212, 168, 87, 0.15)', color: 'var(--gold)', padding: '2px 8px', borderRadius: 9999, fontWeight: 600 }}>
                                 Master Admin
@@ -3748,7 +3752,7 @@ export default function Home() {
                                   setShowAddUserModal(true);
                                 }}
                               >
-                                ➕ Add Another One
+                                <Glyph n="plus" /> Add Another One
                               </button>
                               <button
                                 type="button"
@@ -3760,7 +3764,7 @@ export default function Home() {
                                   setAboutSubTab('admin');
                                 }}
                               >
-                                👑 Open Head Console
+                                <Glyph n="crown" /> Open Head Console
                               </button>
                             </div>
                           </div>
@@ -3768,7 +3772,7 @@ export default function Home() {
                       </div>
 
                       <button className="signout-button" onClick={handleSignOut} style={{ marginTop: 8 }}>
-                        <span>🚪</span>
+                        <span><Glyph n="logout" /></span>
                         <span>Sign Out of AuPro</span>
                       </button>
                     </div>
@@ -3783,7 +3787,7 @@ export default function Home() {
                     className={`insta-tab-btn ${aboutSubTab === 'posts' ? 'active' : ''}`}
                     onClick={() => setAboutSubTab('posts')}
                   >
-                    <span className="tab-icon">📸</span>
+                    <span className="tab-icon"><Glyph n="camera" /></span>
                     <span className="tab-label">Posts {myPosts.length > 0 ? `(${myPosts.length})` : ''}</span>
                   </button>
 
@@ -3793,7 +3797,7 @@ export default function Home() {
                     className={`insta-tab-btn ${aboutSubTab === 'saved' ? 'active' : ''}`}
                     onClick={() => setAboutSubTab('saved')}
                   >
-                    <span className="tab-icon">🔖</span>
+                    <span className="tab-icon"><Glyph n="bookmark" /></span>
                     <span className="tab-label">Saved {savedPosts.length > 0 ? `(${savedPosts.length})` : ''}</span>
                   </button>
 
@@ -3803,7 +3807,7 @@ export default function Home() {
                     className={`insta-tab-btn ${(aboutSubTab as string) === 'college' ? 'active' : ''}`}
                     onClick={() => setAboutSubTab('college')}
                   >
-                    <span className="tab-icon">🏛️</span>
+                    <span className="tab-icon"><Glyph n="landmark" /></span>
                     <span className="tab-label">AU Info</span>
                   </button>
 
@@ -3819,7 +3823,7 @@ export default function Home() {
                       }}
                       title="Open Head Administrator Console"
                     >
-                      <span className="tab-icon">👑</span>
+                      <span className="tab-icon"><Glyph n="crown" /></span>
                       <span className="tab-label">Console</span>
                     </button>
                   )}
@@ -3837,7 +3841,7 @@ export default function Home() {
 
                     {myPosts.length === 0 ? (
                       <div className="profile-feed-empty card">
-                        <div style={{ fontSize: 36, marginBottom: 10 }}>📝</div>
+                        <svg className="empty-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>
                         <h3>No Posts Published Yet</h3>
                         <p className="lead">You haven't posted anything to the campus feed yet. Share updates, questions, or report campus issues.</p>
                         <button
@@ -3880,7 +3884,7 @@ export default function Home() {
 
                     {savedPosts.length === 0 ? (
                       <div className="profile-feed-empty card">
-                        <div style={{ fontSize: 36, marginBottom: 10 }}>★</div>
+                        <div style={{ fontSize: 36, marginBottom: 10 }}><Glyph n="star" /></div>
                         <h3>No Saved Posts</h3>
                         <p className="lead">Tap the bookmark ribbon icon on any post in the feed to save it here for reference.</p>
                         <button
@@ -3901,7 +3905,7 @@ export default function Home() {
                               onClick={() => handleSaveToggle(post.id)}
                               title="Remove bookmark"
                             >
-                              ✕ Remove from Saved
+                              <Glyph n="x" /> Remove from Saved
                             </button>
                           </div>
                           <MomentCard
@@ -4002,7 +4006,7 @@ export default function Home() {
           <div className="insta-modal-sheet" style={{ maxWidth: 480, maxHeight: '80vh', overflowY: 'auto', padding: 22 }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 20 }}>🔔</span>
+                <span style={{ fontSize: 20 }}><Glyph n="bell" /></span>
                 <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Head Administrator Notifications</h3>
               </div>
               <button
@@ -4010,7 +4014,7 @@ export default function Home() {
                 onClick={() => setShowAdminNotifications(false)}
                 style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: 'var(--ink)' }}
               >
-                ✕
+                <Glyph n="x" />
               </button>
             </div>
             {studentApplications.length === 0 ? (
@@ -4042,7 +4046,7 @@ export default function Home() {
                           color: app.status === 'approved' ? '#22c55e' : '#eab308',
                         }}
                       >
-                        {app.status === 'approved' ? '✓ Approved' : '⏳ Pending'}
+                        {app.status === 'approved' ? <><Glyph n="check" /> Approved</> : <><Glyph n="clock" /> Pending</>}
                       </span>
                     </div>
                     <div style={{ fontSize: 13, color: 'var(--ink)', marginBottom: 4 }}>
@@ -4070,7 +4074,7 @@ export default function Home() {
                           } catch {}
                         }}
                       >
-                        ✓ Approve Application
+                        <Glyph n="check" /> Approve Application
                       </button>
                     )}
                   </div>
@@ -4087,13 +4091,13 @@ export default function Home() {
           <div className="insta-modal-sheet head-modal-sheet" style={{ maxWidth: 460, padding: 22 }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 22 }}>👑</span>
+                <span style={{ fontSize: 22 }}><Glyph n="crown" /></span>
                 <div>
                   <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>Add Another Student Account</h3>
                   <span style={{ fontSize: 12, color: 'var(--muted)' }}>Authorize a student under Andhra University</span>
                 </div>
               </div>
-              <button className="icon-button" onClick={() => setShowAddUserModal(false)} aria-label="Close dialog">✕</button>
+              <button className="icon-button" onClick={() => setShowAddUserModal(false)} aria-label="Close dialog"><Glyph n="x" /></button>
             </div>
 
             {addUserError && (

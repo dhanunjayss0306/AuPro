@@ -61,7 +61,7 @@ test('UI requirements: page.tsx matches user specifications', async () => {
 });
 
 test('IntroCinematic has streaming-service style animation and reduced motion check without skip button', async () => {
-  const introContent = await readFile(new URL('../app/IntroCinematic.tsx', import.meta.url), 'utf8');
+  const introContent = await readFile(new URL('../app/components/IntroCinematic.tsx', import.meta.url), 'utf8');
 
   assert.ok(introContent.includes('prefers-reduced-motion'), 'Must check prefers-reduced-motion');
   assert.ok(!introContent.includes('intro-skip-button'), 'Must NOT have skip button per user instruction');
@@ -71,7 +71,7 @@ test('IntroCinematic has streaming-service style animation and reduced motion ch
 });
 
 test('ThreadsComposer has Threads posting layout with 3 categories and Announcement authorization', async () => {
-  const composerContent = await readFile(new URL('../app/ThreadsComposer.tsx', import.meta.url), 'utf8');
+  const composerContent = await readFile(new URL('../app/components/ThreadsComposer.tsx', import.meta.url), 'utf8');
 
   // Layout elements
   assert.ok(composerContent.includes('threads-left-col'), 'Must have left column for profile picture');
@@ -93,7 +93,7 @@ test('ThreadsComposer has Threads posting layout with 3 categories and Announcem
 });
 
 test('Auth module validates college domain and announcement authorization', async () => {
-  const authContent = await readFile(new URL('../app/auth.ts', import.meta.url), 'utf8');
+  const authContent = await readFile(new URL('../app/lib/auth.ts', import.meta.url), 'utf8');
 
   assert.ok(authContent.includes('isValidCollegeEmail'), 'Must export college email validator');
   assert.ok(authContent.includes('isAnnouncementAuthorized'), 'Must export announcement authorization checker');
@@ -118,7 +118,7 @@ test('OTP verification security: No skip button and mandatory 6-digit verificati
 });
 
 test('MomentCard has Instagram interactions and category badges', async () => {
-  const cardContent = await readFile(new URL('../app/MomentCard.tsx', import.meta.url), 'utf8');
+  const cardContent = await readFile(new URL('../app/components/MomentCard.tsx', import.meta.url), 'utf8');
 
   assert.ok(cardContent.includes('post-category-tag'), 'Must have post category tags');
   assert.ok(cardContent.includes('InstagramLikeIcon'), 'Must have Instagram like icon');
@@ -131,7 +131,7 @@ test('MomentCard has Instagram interactions and category badges', async () => {
 test('Dark mode support and profile email wrapping', async () => {
   const pageContent = await readFile(new URL('../app/page.tsx', import.meta.url), 'utf8');
   const cssContent = await readFile(new URL('../app/globals.css', import.meta.url), 'utf8');
-  const iconsContent = await readFile(new URL('../app/icons.tsx', import.meta.url), 'utf8');
+  const iconsContent = await readFile(new URL('../app/components/icons.tsx', import.meta.url), 'utf8');
 
   // Dark mode in page
   assert.ok(pageContent.includes('toggleTheme'), 'Must have toggleTheme function');
@@ -148,7 +148,7 @@ test('Dark mode support and profile email wrapping', async () => {
 });
 
 test('Threads Feed & Check About post management requirements', async () => {
-  const cardContent = await readFile(new URL('../app/MomentCard.tsx', import.meta.url), 'utf8');
+  const cardContent = await readFile(new URL('../app/components/MomentCard.tsx', import.meta.url), 'utf8');
   const pageContent = await readFile(new URL('../app/page.tsx', import.meta.url), 'utf8');
   const cssContent = await readFile(new URL('../app/globals.css', import.meta.url), 'utf8');
 
@@ -182,7 +182,7 @@ test('Threads Feed & Check About post management requirements', async () => {
 });
 
 test('Content Moderation analyzes every post for university problems, campus life, and academic studies', async () => {
-  const modContent = await readFile(new URL('../app/content_moderation.ts', import.meta.url), 'utf8');
+  const modContent = await readFile(new URL('../app/lib/content_moderation.ts', import.meta.url), 'utf8');
 
   assert.ok(modContent.includes('CAMPUS_PROBLEM_KEYWORDS'), 'Must define campus problem keyword dictionary');
   assert.ok(modContent.includes('UNIVERSITY_CAMPUS_KEYWORDS'), 'Must define university campus keyword dictionary');
@@ -196,7 +196,7 @@ test('Headteacher Administrator central server accounts, live activity stream, a
   const accountsRoute = await readFile(new URL('../app/api/accounts/route.ts', import.meta.url), 'utf8');
   const activityRoute = await readFile(new URL('../app/api/activity/route.ts', import.meta.url), 'utf8');
   const feedRoute = await readFile(new URL('../app/api/feed/route.ts', import.meta.url), 'utf8');
-  const authModule = await readFile(new URL('../app/auth.ts', import.meta.url), 'utf8');
+  const authModule = await readFile(new URL('../app/lib/auth.ts', import.meta.url), 'utf8');
   const pageContent = await readFile(new URL('../app/page.tsx', import.meta.url), 'utf8');
 
   // Accounts API
@@ -226,7 +226,7 @@ test('Headteacher Administrator central server accounts, live activity stream, a
 });
 
 test('Real interactions & strict delete permission enforcement', async () => {
-  const cardContent = await readFile(new URL('../app/MomentCard.tsx', import.meta.url), 'utf8');
+  const cardContent = await readFile(new URL('../app/components/MomentCard.tsx', import.meta.url), 'utf8');
   const feedRoute = await readFile(new URL('../app/api/feed/route.ts', import.meta.url), 'utf8');
   const registryContent = await readFile(new URL('../app/api/auth/account-registry.ts', import.meta.url), 'utf8');
   const layoutContent = await readFile(new URL('../app/layout.tsx', import.meta.url), 'utf8');

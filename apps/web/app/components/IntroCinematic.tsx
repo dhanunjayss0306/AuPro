@@ -24,12 +24,12 @@ export function IntroCinematic({ onComplete }: IntroCinematicProps) {
     // 0.5s - 1.5s: Reveal AuPro lettermark
     // 1.5s - 2.0s: Cinematic zoom & light bloom
     // 2.0s - 2.3s: Smooth dissolve into sign-in
-    const t1 = setTimeout(() => setPhase('reveal'), 500);
-    const t2 = setTimeout(() => setPhase('bloom'), 1500);
-    const t3 = setTimeout(() => setPhase('fade-out'), 2000);
+    const t1 = setTimeout(() => setPhase('reveal'), 200);
+    const t2 = setTimeout(() => setPhase('bloom'), 700);
+    const t3 = setTimeout(() => setPhase('fade-out'), 1000);
     const t4 = setTimeout(() => {
       onComplete();
-    }, 2300);
+    }, 1250);
 
     return () => {
       clearTimeout(t1);

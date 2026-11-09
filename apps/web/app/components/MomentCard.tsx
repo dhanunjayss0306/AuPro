@@ -11,7 +11,8 @@ import {
   InstagramMoreIcon,
   InstagramLocationIcon,
 } from './icons';
-import { compressImageFile } from './image_compressor';
+import { compressImageFile } from '../lib/image_compressor';
+import { Glyph } from './Glyph';
 
 export interface MomentComment {
   id: string;
@@ -429,6 +430,11 @@ export function MomentCard({
 
   const hasMedia = Boolean(post.documentUrl || (post.imageUrl && !mediaUnavailable));
 
+  // Safety Gate: If a post has no caption, no image caption, and no media, do not render a blank ghost card
+  if (!Boolean(post.caption?.trim()) && !Boolean(post.imageCaption?.trim()) && !hasMedia) {
+    return null;
+  }
+
   return (
     <article className="insta-card threads-post-card" id={`post-${post.id}`}>
       {/* Authentic Meta Threads Two-Column Structure */}
@@ -463,14 +469,14 @@ export function MomentCard({
                 <span className="threads-post-author-name">{post.username}</span>
                 {post.isOfficial && (
                   <span className="insta-verified-badge" title="Verified Campus Official">
-                    ✓
+                    <Glyph n="check" />
                   </span>
                 )}
                 {post.category === 'problem' && (
-                  <span className="post-category-tag problem">⚠️ Problem</span>
+                  <span className="post-category-tag problem"><Glyph n="warn" /> Problem</span>
                 )}
                 {post.category === 'announcement' && (
-                  <span className="post-category-tag announcement">📢 Notice</span>
+                  <span className="post-category-tag announcement"><Glyph n="megaphone" /> Notice</span>
                 )}
                 <span className="threads-post-dot">•</span>
                 <span className="threads-post-time">{post.timeAgo}</span>
@@ -492,7 +498,7 @@ export function MomentCard({
                   title="Delete post"
                   aria-label="Delete post"
                 >
-                  🗑️
+                  <Glyph n="trash" />
                 </button>
               )}
               <button
@@ -690,16 +696,16 @@ export function MomentCard({
           <div className="insta-modal-sheet" onClick={(e) => e.stopPropagation()}>
             {reportSuccess ? (
               <div className="insta-modal-success">
-                <span className="insta-modal-check">✓</span>
+                <span className="insta-modal-check"><Glyph n="check" /></span>
                 <p>Thank you for reporting. Campus moderation has been notified.</p>
               </div>
             ) : (
               <>
                 <button className="insta-modal-item" onClick={handleSaveToggle}>
-                  {isSaved ? '★ Remove from Saved Posts' : '☆ Save Post to Bookmarks'}
+                  {isSaved ? <><Glyph n="star" /> Remove from Saved Posts</> : <><Glyph n="bookmark" /> Save Post to Bookmarks</>}
                 </button>
                 <button className="insta-modal-item" onClick={handleCopyLink}>
-                  📋 Copy Link
+                  <Glyph n="clipboard" /> Copy Link
                 </button>
                 <button className="insta-modal-item" onClick={handleShare}>
                   ↗ Share Post
@@ -710,11 +716,11 @@ export function MomentCard({
                     onClick={handleDelete}
                     style={{ color: '#ef4444', fontWeight: 700 }}
                   >
-                    🗑️ Delete Post
+                    <Glyph n="trash" /> Delete Post
                   </button>
                 )}
                 <button className="insta-modal-item danger" onClick={handleReport}>
-                  ⚠️ Report Post
+                  <Glyph n="warn" /> Report Post
                 </button>
                 <button className="insta-modal-item cancel" onClick={() => setShowOptions(false)}>
                   Cancel

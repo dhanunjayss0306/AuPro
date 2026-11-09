@@ -2,8 +2,9 @@
 
 import React, { useState, useRef } from 'react';
 import { InstagramLocationIcon } from './icons';
-import { validateTextContent, validateImageSafety, analyzePostTopic } from './content_moderation';
-import { compressImageFile } from './image_compressor';
+import { validateTextContent, validateImageSafety, analyzePostTopic } from '../lib/content_moderation';
+import { compressImageFile } from '../lib/image_compressor';
+import { Glyph } from './Glyph';
 
 export interface ThreadsPostData {
   category: 'normal' | 'problem' | 'announcement';
@@ -234,7 +235,7 @@ export function ThreadsComposer({
                         onClick={() => setShowLocationInput(false)}
                         style={{ background: 'transparent', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 13 }}
                       >
-                        ✓
+                        <Glyph n="check" />
                       </button>
                     </div>
                     <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
@@ -265,7 +266,7 @@ export function ThreadsComposer({
                     onClick={() => setShowLocationInput(true)}
                     title="Click to tag a campus location"
                   >
-                    {location ? `${location} ✏️` : '+ Add Campus Location'}
+                    {location ? `${location}` : '+ Add Campus Location'}
                   </span>
                 )}
               </div>
@@ -284,17 +285,17 @@ export function ThreadsComposer({
               <div style={{ margin: '4px 0 6px 0' }}>
                 {caption.trim().length < 3 ? (
                   <div className="threads-topic-pill neutral">
-                    <span style={{ fontSize: 12 }}>🎓</span>
+                    <span style={{ fontSize: 12 }}><Glyph n="cap" /></span>
                     <span>AuPro Focus: Posts must relate to AU campus problems, college life, or studies</span>
                   </div>
                 ) : analyzePostTopic(`${caption} ${location}`, kind).isRelevant ? (
                   <div className="threads-topic-pill valid">
-                    <span style={{ fontSize: 12 }}>✓</span>
+                    <span style={{ fontSize: 12 }}><Glyph n="check" /></span>
                     <span>Verified: {analyzePostTopic(`${caption} ${location}`, kind).categoryName} topic</span>
                   </div>
                 ) : (
                   <div className="threads-topic-pill warning">
-                    <span style={{ fontSize: 12 }}>⚠️</span>
+                    <span style={{ fontSize: 12 }}><Glyph n="warn" /></span>
                     <span>Must be related to AU problems, campus life, or academic studies</span>
                   </div>
                 )}
@@ -334,7 +335,7 @@ export function ThreadsComposer({
               {/* Attached Audio Memo Preview */}
               {audioAttached && (
                 <div className="threads-audio-pill">
-                  <span className="threads-audio-icon">🎵</span>
+                  <span className="threads-audio-icon"><Glyph n="music" /></span>
                   <span className="threads-audio-text">{audioAttached}</span>
                   <button
                     type="button"

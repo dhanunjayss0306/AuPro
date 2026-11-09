@@ -71,6 +71,14 @@ export interface ServerStudentApplication {
   year?: string;
   submittedAt: string;
   status: 'pending' | 'approved' | 'rejected';
+  documentUrl?: string;
+  documentName?: string;
+  letterContent?: string;
+  appointmentDate?: string;
+  appointmentTime?: string;
+  appointmentVenue?: string;
+  requiredDocuments?: string;
+  verificationNote?: string;
 }
 
 interface ServerDataStore {
@@ -634,6 +642,14 @@ export function addStudentApplication(app: Partial<ServerStudentApplication>): S
     year: app.year || '4th Year',
     submittedAt: app.submittedAt || new Date().toISOString(),
     status: (app.status as any) || 'pending',
+    documentUrl: app.documentUrl,
+    documentName: app.documentName,
+    letterContent: app.letterContent,
+    appointmentDate: app.appointmentDate,
+    appointmentTime: app.appointmentTime,
+    appointmentVenue: app.appointmentVenue,
+    requiredDocuments: app.requiredDocuments,
+    verificationNote: app.verificationNote,
   };
 
   store.applications.unshift(newApp);
@@ -649,16 +665,39 @@ export function addStudentApplication(app: Partial<ServerStudentApplication>): S
   return newApp;
 }
 
-export function updateApplicationStatus(refId: string, status: 'pending' | 'approved' | 'rejected'): boolean {
+export function updateApplicationStatus(
+  refId: string,
+  status: 'pending' | 'approved' | 'rejected',
+  details?: {
+    appointmentDate?: string;
+    appointmentTime?: string;
+    appointmentVenue?: string;
+    requiredDocuments?: string;
+    verificationNote?: string;
+  }
+): boolean {
   const store = loadStore();
   store.applications = Array.isArray(store.applications) ? store.applications : [];
   const app = store.applications.find((a) => a.refId === refId || a.id === refId);
   if (!app) return false;
   app.status = status;
+  if (details) {
+    if (details.appointmentDate) app.appointmentDate = details.appointmentDate;
+    if (details.appointmentTime) app.appointmentTime = details.appointmentTime;
+    if (details.appointmentVenue) app.appointmentVenue = details.appointmentVenue;
+    if (details.requiredDocuments) app.requiredDocuments = details.requiredDocuments;
+    if (details.verificationNote) {
+      app.verificationNote = details.verificationNote;
+    } else if (status === 'approved') {
+      app.verificationNote = 'It is okay. You are verified. You can come to the Hachure manager for the sign.';
+    }
+  } else if (status === 'approved' && !app.verificationNote) {
+    app.verificationNote = 'It is okay. You are verified. You can come to the Hachure manager for the sign.';
+  }
   saveStoreToFile(store);
 
   logServerActivity(
-    'Application ' + (status === 'approved' ? 'Approved' : 'Status Updated'),
+    'Application ' + (status === 'approved' ? 'Approved & Appointment Scheduled' : 'Status Updated'),
     MAIN_ADMIN_EMAIL,
     app.serviceTitle + ' for ' + app.studentName + ' (' + app.refId + ') marked as ' + status
   );

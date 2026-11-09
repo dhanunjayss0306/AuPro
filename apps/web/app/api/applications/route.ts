@@ -9,16 +9,18 @@ import {
   getClientIp,
   sanitizeText,
   sanitizeEmail,
+  sanitizeImageUrl,
+  isAllowedOrigin,
   isRequestAuthorizedAsAdmin,
 } from '../auth/security';
 
 const DEFAULT_SERVICES = [
   { id: 'bonafide', name: 'Bonafide certificate', status: 'available' },
-  { id: 'fees', name: 'Fee-related request', status: 'available' },
-  { id: 'hall-ticket', name: 'Hall ticket duplicate', status: 'available' },
-  { id: 'migration', name: 'Migration certificate', status: 'available' },
-  { id: 'custodian', name: 'Original certificate custodian', status: 'available' },
-  { id: 'other', name: 'Other academic application', status: 'admin-managed' },
+  { id: 'e-sign', name: 'E-signature certificate', status: 'available' },
+  { id: 'fee-view', name: 'Fee view certificate', status: 'available' },
+  { id: 'hall-ticket-bus', name: 'Hall ticket and bus pass endorsement', status: 'available' },
+  { id: 'hostel-outpass', name: 'Hostel outpass', status: 'available' },
+  { id: 'custom-request', name: 'Custom request', status: 'available' },
 ];
 
 /**
@@ -58,6 +60,13 @@ export async function GET(req: Request) {
  */
 export async function POST(req: Request) {
   try {
+    if (!isAllowedOrigin(req)) {
+      return NextResponse.json(
+        { error: 'Forbidden: Request domain not authorized.' },
+        { status: 403 }
+      );
+    }
+
     const ip = getClientIp(req);
     const limit = checkRateLimit(`post_apps:${ip}`, 15, 60 * 1000);
     if (!limit.allowed) {
@@ -77,6 +86,9 @@ export async function POST(req: Request) {
       department,
       year,
       refId,
+      documentUrl,
+      documentName,
+      letterContent,
     } = body;
 
     const cleanService = sanitizeText(serviceTitle, 100);
@@ -99,6 +111,9 @@ export async function POST(req: Request) {
       department: sanitizeText(department, 100) || 'AU Engineering',
       year: sanitizeText(year, 50) || '4th Year',
       status: 'pending',
+      documentUrl: sanitizeImageUrl(documentUrl) || (typeof documentUrl === 'string' && documentUrl.startsWith('data:') ? documentUrl : undefined),
+      documentName: sanitizeText(documentName, 120) || 'Supporting Document',
+      letterContent: sanitizeText(letterContent, 3000),
     });
 
     return NextResponse.json({
@@ -121,8 +136,24 @@ export async function POST(req: Request) {
  */
 export async function PATCH(req: Request) {
   try {
+    if (!isAllowedOrigin(req)) {
+      return NextResponse.json(
+        { error: 'Forbidden: Request domain not authorized.' },
+        { status: 403 }
+      );
+    }
+
     const body = await req.json();
-    const { refId, status, adminEmail } = body;
+    const {
+      refId,
+      status,
+      adminEmail,
+      appointmentDate,
+      appointmentTime,
+      appointmentVenue,
+      requiredDocuments,
+      verificationNote,
+    } = body;
 
     const isAuthorized = isRequestAuthorizedAsAdmin(req, adminEmail);
     if (!isAuthorized) {
@@ -147,7 +178,14 @@ export async function PATCH(req: Request) {
       );
     }
 
-    const updated = updateApplicationStatus(refId, validStatus);
+    const updated = updateApplicationStatus(refId, validStatus, {
+      appointmentDate: sanitizeText(appointmentDate, 60),
+      appointmentTime: sanitizeText(appointmentTime, 60),
+      appointmentVenue: sanitizeText(appointmentVenue, 120),
+      requiredDocuments: sanitizeText(requiredDocuments, 300),
+      verificationNote: sanitizeText(verificationNote, 300),
+    });
+
     if (!updated) {
       return NextResponse.json(
         { error: 'Application not found with the given Reference ID.' },

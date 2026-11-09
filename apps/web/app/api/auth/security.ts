@@ -258,3 +258,28 @@ export function sanitizeEmail(email: unknown): string {
   if (typeof email !== 'string') return '';
   return email.toLowerCase().trim().replace(/[^a-z0-9._%+-@]/g, '');
 }
+
+/**
+ * Origin Verification Gate (Cross-Site Request Forgery & Domain Restriction)
+ * Protects mutating APIs by verifying that calls originate from trusted domains.
+ */
+export function isAllowedOrigin(req: Request): boolean {
+  const origin = req.headers.get('origin');
+  const referer = req.headers.get('referer');
+  const target = origin || referer || '';
+  if (!target) return true; // Direct same-origin or local test
+
+  try {
+    const parsed = new URL(target);
+    const host = parsed.hostname.toLowerCase();
+    return (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host.endsWith('.vercel.app') ||
+      host.endsWith('andhrauniversity.edu.in')
+    );
+  } catch {
+    return false;
+  }
+}
+

@@ -379,12 +379,145 @@ function resolveDestinationQuery(destName: string, selected?: CampusLandmark | n
 const initialPosts: MomentPost[] = [];
 
 const services = [
-  { title: 'Bonafide Certificate', icon: 'document' as const, detail: 'Request an official student-status certificate for scholarships, travel, or other verified needs.' },
-  { title: 'Fee-Related Request', icon: 'payment' as const, detail: 'Submit a fee receipt, payment clarification, or fee-clearance request to the college office.' },
-  { title: 'Hall Ticket Duplicate', icon: 'ticket' as const, detail: 'Request help with a missing or incorrect examination hall ticket.' },
-  { title: 'Bus Pass Endorsement', icon: 'bus' as const, detail: 'Request the college endorsement needed for a student bus-pass application.' },
-  { title: 'Hostel Out-Pass', icon: 'home' as const, detail: 'Submit a hostel out-pass request for review by the relevant authority.' },
-  { title: 'Custom Request', icon: 'help' as const, detail: 'Describe a college-office request that is not covered by the listed services.' },
+  {
+    title: 'Bonafide Certificate',
+    icon: 'document' as const,
+    detail: 'Official student-status certificate for passport, higher education, railway concession, or internship verification.',
+    requiredDocs: 'College ID Card, Current Semester Fee Receipt',
+    defaultLetter: (name: string, roll: string, dept: string, yr: string, purpose: string) =>
+`To,
+The Principal / Hachure Manager,
+AU College of Engineering,
+Andhra University, Visakhapatnam.
+
+Respected Sir/Madam,
+
+Subject: Application for Bonafide Certificate - Reg.
+
+I, ${name}, bearing Roll No: ${roll}, am a bonafide student of ${dept}, currently pursuing ${yr} at AU College of Engineering.
+
+I kindly request you to issue me a Bonafide Certificate for the following academic need:
+"${purpose || 'Academic and official documentation verification'}".
+
+I have attached my supporting identity documents and fee receipt for your verification. Kindly approve my request and grant me an appointment slot for the physical endorsement.
+
+Thanking you,
+
+Yours obediently,
+${name}
+Roll No: ${roll}
+Department of ${dept}`,
+  },
+  {
+    title: 'E-Signature Certificate',
+    icon: 'document' as const,
+    detail: 'Digitally signed bonafide and conduct certificate for National Scholarship Portal (NSP), Jnanabhumi, and e-pass portals.',
+    requiredDocs: 'College ID Card, Scholarship Application Form Preview',
+    defaultLetter: (name: string, roll: string, dept: string, yr: string, purpose: string) =>
+`To,
+The Head of Academic Affairs / Hachure Manager,
+AU College of Engineering,
+Andhra University, Visakhapatnam.
+
+Respected Authority,
+
+Subject: Request for Digitally Signed E-Signature Certificate - Reg.
+
+I, ${name} (Roll No: ${roll}), student of ${dept}, ${yr}, submit this application for an official digital / e-signature certificate required for ${purpose || 'scholarship and higher studies portal verification'}.
+
+All necessary supporting documents are attached herewith. I request you to verify my academic standing and issue the authenticated digital certificate.
+
+Yours faithfully,
+${name}
+Roll: ${roll} | ${dept}`,
+  },
+  {
+    title: 'Fee View Certificate',
+    icon: 'payment' as const,
+    detail: 'Official fee structure and clearance certificate breakdown for Vidya Deevena, education bank loans, or reimbursement.',
+    requiredDocs: 'SBI Collect Payment Receipts, Previous Year Fee Card',
+    defaultLetter: (name: string, roll: string, dept: string, yr: string, purpose: string) =>
+`To,
+The Accounts & Academic Section / Hachure Manager,
+AU College of Engineering, Visakhapatnam.
+
+Respected Sir/Madam,
+
+Subject: Application for Fee Breakdown and Clearance Certificate - Reg.
+
+I, ${name}, Roll No: ${roll}, student of ${dept} (${yr}), request an official Fee View / Clearance Certificate detailing tuition and college dues for ${purpose || 'bank education loan / government fee reimbursement (Vidya Deevena)'}.
+
+I have cleared my dues and attached my payment challan copies for verification.
+
+Thanking you,
+${name} (Roll: ${roll})`,
+  },
+  {
+    title: 'Hall Ticket & Bus Pass Endorsement',
+    icon: 'bus' as const,
+    detail: 'APSRTC student bus pass attestation and duplicate semester examination hall ticket endorsement.',
+    requiredDocs: 'APSRTC Application Form / Lost Hall Ticket Report, College ID',
+    defaultLetter: (name: string, roll: string, dept: string, yr: string, purpose: string) =>
+`To,
+The Dean of Student Affairs / Hachure Manager,
+AU College of Engineering, Visakhapatnam.
+
+Respected Sir,
+
+Subject: Request for Hall Ticket Duplicate / Bus Pass Endorsement - Reg.
+
+I, ${name} (Roll No: ${roll}, ${dept}, ${yr}), respectfully submit my request for ${purpose || 'APSRTC student bus concession pass endorsement / duplicate examination hall ticket'}.
+
+The requisite institution declaration form and identification proofs are uploaded herewith. Kindly verify and endorse the application.
+
+Yours obediently,
+${name} (Roll: ${roll})`,
+  },
+  {
+    title: 'Hostel Outpass & Gate Permission',
+    icon: 'home' as const,
+    detail: 'Official overnight / weekend gate outpass with automatic record logging for Chief Warden and security.',
+    requiredDocs: 'Hostel Room ID Card, Parent Consent Letter or Contact',
+    defaultLetter: (name: string, roll: string, dept: string, yr: string, purpose: string) =>
+`To,
+The Chief Warden / Hostel Administration,
+AU College of Engineering Hostels, Visakhapatnam.
+
+Respected Sir/Madam,
+
+Subject: Request for Official Hostel Gate Outpass - Reg.
+
+I, ${name}, resident student bearing Roll No: ${roll}, Department of ${dept}, request permission for an outpass for the following reason:
+"${purpose || 'Visiting hometown / family commitment'}".
+
+I confirm that my parents/guardian are informed and agree to this journey. I request you to kindly sanction my outpass.
+
+Yours respectfully,
+${name} (Roll: ${roll})`,
+  },
+  {
+    title: 'Custom Academic Request',
+    icon: 'help' as const,
+    detail: 'Transfer certificate (TC), syllabus copy, course completion certificate, or special Dean authorization.',
+    requiredDocs: 'Identity Proof, Relevant Academic Marksheets',
+    defaultLetter: (name: string, roll: string, dept: string, yr: string, purpose: string) =>
+`To,
+The Principal / Hachure Manager,
+AU College of Engineering, Andhra University, Visakhapatnam.
+
+Respected Sir,
+
+Subject: Official Academic Application - Reg.
+
+I, ${name}, Roll No: ${roll}, Department of ${dept}, ${yr}, am writing to formally request:
+"${purpose || 'Special academic documentation and administrative authorization'}".
+
+Kindly review the enclosed credentials and grant the required approval.
+
+Yours faithfully,
+${name}
+Roll: ${roll}`,
+  },
 ];
 
 const aboutSections = [
@@ -555,9 +688,20 @@ export default function Home() {
   const [showNavStepsSheet, setShowNavStepsSheet] = useState(false);
 
   // Application Dedicated Page State
-  const [activeApplication, setActiveApplication] = useState<{ title: string; icon: ServiceIconKind; detail: string } | null>(null);
+  const [activeApplication, setActiveApplication] = useState<any>(null);
   const [clickedApplyId, setClickedApplyId] = useState<string | null>(null);
   const [applicationPurpose, setApplicationPurpose] = useState('');
+  const [appStep, setAppStep] = useState<1 | 2>(1);
+  const [appDocumentUrl, setAppDocumentUrl] = useState<string | null>(null);
+  const [appDocumentName, setAppDocumentName] = useState('');
+  const [appLetterContent, setAppLetterContent] = useState('');
+  const [selectedReviewApp, setSelectedReviewApp] = useState<any>(null);
+  const [adminApptDate, setAdminApptDate] = useState('12 Nov 2026');
+  const [adminApptTime, setAdminApptTime] = useState('11:30 AM - 12:30 PM');
+  const [adminApptVenue, setAdminApptVenue] = useState('Academic Section Counter 3 / Hachure Manager Office, AU Eng');
+  const [adminRequiredDocs, setAdminRequiredDocs] = useState('Original Student ID Card, Fee Receipt Challan, 2 Passport Photos');
+  const [adminVerificationNote, setAdminVerificationNote] = useState('It is okay. You are verified. You can come to the Hachure manager for the sign.');
+  const [showAppointmentSlipFor, setShowAppointmentSlipFor] = useState<any>(null);
 
   // Google Maps State (Authentic Google Maps UI)
   const [mapLocationQuery, setMapLocationQuery] = useState('Andhra University College of Engineering, Visakhapatnam');
@@ -2183,8 +2327,8 @@ export default function Home() {
                 className="profile-dropdown-btn"
                 onClick={toggleTheme}
               >
-                <span><Glyph n={theme === 'dark' ? 'sun' : 'moon'} /></span>
-                <span>{theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}</span>
+                <span className="profile-dropdown-icon"><Glyph n={theme === 'dark' ? 'sun' : 'moon'} /></span>
+                <span className="profile-dropdown-label">{theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}</span>
               </button>
               <button
                 className="profile-dropdown-btn"
@@ -2194,7 +2338,8 @@ export default function Home() {
                   setShowProfileMenu(false);
                 }}
               >
-                <span><Glyph n="user" /></span> View Full Profile &amp; Bio
+                <span className="profile-dropdown-icon"><Glyph n="user" /></span>
+                <span className="profile-dropdown-label">View Full Profile &amp; Bio</span>
               </button>
               <button
                 className="profile-dropdown-btn"
@@ -2204,10 +2349,12 @@ export default function Home() {
                   setShowProfileMenu(false);
                 }}
               >
-                <span><Glyph n="gear" /></span> Account Preferences &amp; Settings
+                <span className="profile-dropdown-icon"><Glyph n="gear" /></span>
+                <span className="profile-dropdown-label">Account Preferences &amp; Settings</span>
               </button>
               <button className="profile-dropdown-signout" onClick={handleSignOut}>
-                <span><Glyph n="logout" /></span> Sign Out of AuPro
+                <span className="profile-dropdown-icon"><Glyph n="logout" /></span>
+                <span className="profile-dropdown-label">Sign Out of AuPro</span>
               </button>
             </div>
           </div>
@@ -2274,148 +2421,434 @@ export default function Home() {
 
         {/* TAB 2: APPLICATIONS / SERVICES (Dedicated Page View + Burgundy Click) */}
         {tab === 'applications' && (
-          <div className="stack">
+          <div className="stack" style={{ gap: 20 }}>
             {activeApplication ? (
               <div className="application-page-view">
-                <button className="app-breadcrumb" onClick={() => setActiveApplication(null)}>
-                  ← Back to Applications List
+                <button
+                  className="app-breadcrumb"
+                  onClick={() => {
+                    setActiveApplication(null);
+                    setAppStep(1);
+                    setAppDocumentUrl(null);
+                    setAppDocumentName('');
+                    setAppLetterContent('');
+                  }}
+                >
+                  ← Back to Services &amp; Applications
                 </button>
 
-                <div className="card" style={{ borderLeft: '4px solid #701d32', padding: '24px 20px' }}>
+                <div className="card" style={{ borderLeft: '4px solid #701d32', padding: '24px 20px', borderRadius: 14 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12 }}>
                     <div className={`service-icon service-icon-${activeApplication.icon}`} style={{ width: 48, height: 48, fontSize: 22, flexShrink: 0 }}>
                       <ServiceIcon kind={activeApplication.icon} size={24} />
                     </div>
                     <div>
                       <div className="eyebrow" style={{ color: '#701d32', marginBottom: 2 }}>AU College of Engineering · Official Service</div>
-                      <h2 style={{ margin: 0, fontSize: 22 }}>{activeApplication.title}</h2>
+                      <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700 }}>{activeApplication.title}</h2>
                     </div>
                   </div>
-                  <p className="lead" style={{ margin: '0 0 20px 0', fontSize: 13 }}>{activeApplication.detail}</p>
+                  <p className="lead" style={{ margin: '0 0 18px 0', fontSize: 13.5 }}>{activeApplication.detail}</p>
 
                   {/* Step Progress Tracker */}
-                  <div className="app-step-tracker">
-                    <div className="app-step-item active">
+                  <div className="app-step-tracker" style={{ marginBottom: 24 }}>
+                    <div className={`app-step-item ${appStep >= 1 ? 'active' : ''}`}>
                       <div className="app-step-circle">1</div>
-                      <span>Details Form</span>
+                      <span>Details &amp; Upload</span>
                     </div>
-                    <div style={{ flex: 1, height: 2, background: '#701d32', margin: '0 8px' }} />
-                    <div className="app-step-item active">
+                    <div style={{ flex: 1, height: 2, background: appStep >= 2 ? '#701d32' : '#dedfda', margin: '0 8px' }} />
+                    <div className={`app-step-item ${appStep >= 2 ? 'active' : ''}`}>
                       <div className="app-step-circle">2</div>
-                      <span>Verification</span>
+                      <span>Editable Letter</span>
                     </div>
-                    <div style={{ flex: 1, height: 2, background: '#cbd5e1', margin: '0 8px' }} />
+                    <div style={{ flex: 1, height: 2, background: '#dedfda', margin: '0 8px' }} />
                     <div className="app-step-item">
                       <div className="app-step-circle">3</div>
-                      <span>Dept Endorsement</span>
-                    </div>
-                    <div style={{ flex: 1, height: 2, background: '#cbd5e1', margin: '0 8px' }} />
-                    <div className="app-step-item">
-                      <div className="app-step-circle">4</div>
-                      <span>Ready for Pickup</span>
+                      <span>Hachure Manager Sign</span>
                     </div>
                   </div>
 
-                  {/* Application Form Pre-filled with Student Credentials */}
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      const refId = `AU-${Math.floor(100000 + Math.random() * 900000)}`;
-                      logPlatformActivity('Applied for Certificate', authEmail || 'Student', `${activeApplication.title} (Ref ID: ${refId})`);
-                      setToast(`Application for ${activeApplication.title} submitted! Ref ID: ${refId}`);
-                      setApplicationStatus(`Application submitted for ${activeApplication.title} (Ref ID: ${refId}). Track at Academic Section Counter 3.`);
-                      setActiveApplication(null);
-                      setApplicationPurpose('');
-                    }}
-                    className="stack"
-                    style={{ gap: 14 }}
-                  >
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-                      <div>
-                        <label className="field-label" style={{ fontSize: 14, fontWeight: 500 }}>Applicant Full Name</label>
-                        <input className="search" value={authName || 'Student Name'} readOnly style={{ background: 'var(--input-bg)', color: 'var(--text-main)' }} />
-                      </div>
-                      <div>
-                        <label className="field-label" style={{ fontSize: 14, fontWeight: 500 }}>Roll / Registration Number</label>
-                        <input className="search" value={authRollNo || '321101234'} readOnly style={{ background: 'var(--input-bg)', color: 'var(--text-main)' }} />
-                      </div>
-                      <div>
-                        <label className="field-label" style={{ fontSize: 14, fontWeight: 500 }}>Department & Branch</label>
-                        <div
-                          className="search"
-                          style={{
-                            background: 'var(--input-bg)',
-                            color: 'var(--text-main)',
-                            minHeight: 44,
-                            height: 'auto',
-                            display: 'flex',
-                            alignItems: 'center',
-                            lineHeight: 1.35,
-                            padding: '8px 14px',
-                            wordBreak: 'break-word',
-                            whiteSpace: 'normal',
-                            borderRadius: 12,
-                            fontSize: 15,
-                            fontWeight: 400,
-                          }}
-                        >
-                          {authDept}
+                  {appStep === 1 ? (
+                    /* STEP 1: Applicant Info, Purpose, and Document Upload */
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (!applicationPurpose.trim()) {
+                          setToast('Please provide a reason or purpose for your application.');
+                          return;
+                        }
+                        const letterDraft = typeof activeApplication.defaultLetter === 'function'
+                          ? activeApplication.defaultLetter(authName || 'AU Student', authRollNo || '321101234', authDept || 'AU Engineering', authYear || '4th Year', applicationPurpose)
+                          : `To,\nThe Principal / Hachure Manager,\nAU College of Engineering, Visakhapatnam.\n\nSubject: Application for ${activeApplication.title} - Reg.\n\nI, ${authName || 'AU Student'} (Roll No: ${authRollNo || '321101234'}, ${authDept}, ${authYear}), respectfully request ${activeApplication.title} for the purpose of ${applicationPurpose}.\n\nSupporting documents are attached herewith.\n\nYours obediently,\n${authName || 'AU Student'}`;
+                        setAppLetterContent(letterDraft);
+                        setAppStep(2);
+                      }}
+                      className="stack"
+                      style={{ gap: 14 }}
+                    >
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+                        <div>
+                          <label className="field-label" style={{ fontSize: 13, fontWeight: 600 }}>Applicant Full Name</label>
+                          <input className="search" value={authName || 'Student Name'} readOnly style={{ background: 'var(--input-bg)', color: 'var(--text-main)' }} />
+                        </div>
+                        <div>
+                          <label className="field-label" style={{ fontSize: 13, fontWeight: 600 }}>Roll / Registration Number</label>
+                          <input className="search" value={authRollNo || '321101234'} readOnly style={{ background: 'var(--input-bg)', color: 'var(--text-main)' }} />
+                        </div>
+                        <div>
+                          <label className="field-label" style={{ fontSize: 13, fontWeight: 600 }}>Department &amp; Branch</label>
+                          <input className="search" value={authDept || 'College of Engineering'} readOnly style={{ background: 'var(--input-bg)', color: 'var(--text-main)' }} />
+                        </div>
+                        <div>
+                          <label className="field-label" style={{ fontSize: 13, fontWeight: 600 }}>Year of Study</label>
+                          <input className="search" value={authYear} readOnly style={{ background: 'var(--input-bg)', color: 'var(--text-main)' }} />
+                        </div>
+                        <div>
+                          <label className="field-label" style={{ fontSize: 13, fontWeight: 600 }}>University Email</label>
+                          <input className="search" value={authEmail} readOnly style={{ background: 'var(--input-bg)', color: 'var(--text-main)' }} />
+                        </div>
+                        <div>
+                          <label className="field-label" style={{ fontSize: 13, fontWeight: 600 }}>Contact Phone</label>
+                          <input className="search" value={authPhone || '+91 9876543210'} readOnly style={{ background: 'var(--input-bg)', color: 'var(--text-main)' }} />
                         </div>
                       </div>
-                      <div>
-                        <label className="field-label" style={{ fontSize: 14, fontWeight: 500 }}>Year of Study</label>
-                        <input className="search" value={authYear} readOnly style={{ background: 'var(--input-bg)', color: 'var(--text-main)' }} />
-                      </div>
-                      <div>
-                        <label className="field-label" style={{ fontSize: 14, fontWeight: 500 }}>University College Email</label>
-                        <input className="search" value={authEmail} readOnly style={{ background: 'var(--input-bg)', color: 'var(--text-main)' }} />
-                      </div>
-                      <div>
-                        <label className="field-label" style={{ fontSize: 14, fontWeight: 500 }}>Contact Phone</label>
-                        <input className="search" value={authPhone || '+91 9876543210'} readOnly style={{ background: 'var(--input-bg)', color: 'var(--text-main)' }} />
-                      </div>
-                    </div>
 
-                    <div>
-                      <label className="field-label" style={{ fontSize: 12 }}>Purpose / Specific Requirements *</label>
-                      <textarea
-                        className="search"
-                        rows={4}
-                        placeholder="Specify reason (e.g. Higher studies scholarship, passport verification, bus concession pass, or duplicate grade card)..."
-                        value={applicationPurpose}
-                        onChange={(e) => setApplicationPurpose(e.target.value)}
-                        required
-                      />
-                    </div>
+                      <div>
+                        <label className="field-label" style={{ fontSize: 13, fontWeight: 600 }}>
+                          Purpose / Academic Need *
+                        </label>
+                        <textarea
+                          className="search"
+                          rows={3}
+                          placeholder="State the reason (e.g. Higher studies passport verification, Vidya Deevena fee reimbursement, APSRTC bus concession, or scholarship portal)..."
+                          value={applicationPurpose}
+                          onChange={(e) => setApplicationPurpose(e.target.value)}
+                          required
+                        />
+                      </div>
 
-                    <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-                      <button type="submit" className="primary-button" style={{ background: '#701d32', borderColor: '#701d32', fontWeight: 700 }}>
-                        Submit Official Application
-                      </button>
-                      <button type="button" className="secondary-button" onClick={() => setActiveApplication(null)}>
-                        Cancel
-                      </button>
+                      {/* File Upload Box for Required Supporting Documents */}
+                      <div style={{ background: 'var(--hover-subtle)', border: '1.5px dashed var(--border)', borderRadius: 10, padding: 16 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>
+                            Upload Supporting Document / ID Proof
+                          </span>
+                          <span style={{ fontSize: 11, color: 'var(--muted)' }}>
+                            Recommended: {activeApplication.requiredDocs || 'ID card, fee receipt'}
+                          </span>
+                        </div>
+
+                        <input
+                          type="file"
+                          id="app-doc-upload"
+                          accept="image/*,application/pdf"
+                          style={{ display: 'none' }}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setAppDocumentName(file.name);
+                              const reader = new FileReader();
+                              reader.onload = () => {
+                                setAppDocumentUrl(reader.result as string);
+                                setToast(`Document attached: ${file.name}`);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+
+                        {appDocumentUrl ? (
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface)', padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <span style={{ fontSize: 18 }}><Glyph n="document" /></span>
+                              <div>
+                                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>{appDocumentName || 'Document attached'}</div>
+                                <div style={{ fontSize: 11, color: '#16a34a' }}>✓ Ready for administrative verification</div>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              className="secondary-button"
+                              style={{ fontSize: 12, padding: '4px 10px', height: 'auto', minHeight: 32 }}
+                              onClick={() => {
+                                setAppDocumentUrl(null);
+                                setAppDocumentName('');
+                              }}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ) : (
+                          <label
+                            htmlFor="app-doc-upload"
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              padding: '16px 12px',
+                              cursor: 'pointer',
+                              textAlign: 'center',
+                            }}
+                          >
+                            <span style={{ fontSize: 24, marginBottom: 4 }}><Glyph n="plus" /></span>
+                            <span style={{ fontSize: 13, fontWeight: 600, color: '#701d32' }}>Click to select and upload document</span>
+                            <span style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>Supports PNG, JPG, PDF up to 10MB</span>
+                          </label>
+                        )}
+                      </div>
+
+                      <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+                        <button type="submit" className="primary-button" style={{ background: '#701d32', borderColor: '#701d32', fontWeight: 700 }}>
+                          Generate Formal Request Letter →
+                        </button>
+                        <button
+                          type="button"
+                          className="secondary-button"
+                          onClick={() => {
+                            setActiveApplication(null);
+                            setAppStep(1);
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    /* STEP 2: Editable University Formal Letter Preview */
+                    <div className="stack" style={{ gap: 14 }}>
+                      <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: 10, padding: 16, color: '#1e293b' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, borderBottom: '1px solid #e2e8f0', paddingBottom: 8 }}>
+                          <div>
+                            <span style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, color: '#701d32' }}>
+                              AU College of Engineering · Official Request Letter
+                            </span>
+                            <div style={{ fontSize: 12, color: '#64748b' }}>
+                              Review and edit any sentences below before final submission to the administration.
+                            </div>
+                          </div>
+                          <span style={{ fontSize: 11, background: '#e0f2fe', color: '#0369a1', padding: '3px 8px', borderRadius: 6, fontWeight: 600 }}>
+                            Editable Draft
+                          </span>
+                        </div>
+
+                        <textarea
+                          rows={12}
+                          value={appLetterContent}
+                          onChange={(e) => setAppLetterContent(e.target.value)}
+                          style={{
+                            width: '100%',
+                            fontFamily: 'var(--font-mono, monospace)',
+                            fontSize: 13,
+                            lineHeight: 1.6,
+                            padding: 12,
+                            borderRadius: 8,
+                            border: '1px solid #94a3b8',
+                            background: '#ffffff',
+                            color: '#0f172a',
+                            resize: 'vertical',
+                          }}
+                        />
+                      </div>
+
+                      {appDocumentName && (
+                        <div style={{ fontSize: 12, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <Glyph n="check" /> Enclosure: <strong>{appDocumentName}</strong> (Attached to this application)
+                        </div>
+                      )}
+
+                      <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                        <button
+                          type="button"
+                          className="primary-button"
+                          style={{ background: '#701d32', borderColor: '#701d32', fontWeight: 700 }}
+                          onClick={async () => {
+                            const refId = `AU-${Math.floor(100000 + Math.random() * 900000)}`;
+                            const payload = {
+                              refId,
+                              serviceTitle: activeApplication.title,
+                              purpose: applicationPurpose,
+                              studentName: authName || 'AU Student',
+                              studentEmail: authEmail,
+                              rollNo: authRollNo || '321101234',
+                              department: authDept || 'AU Engineering',
+                              year: authYear || '4th Year',
+                              documentUrl: appDocumentUrl || undefined,
+                              documentName: appDocumentName || undefined,
+                              letterContent: appLetterContent,
+                            };
+
+                            try {
+                              const res = await fetch('/api/applications', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload),
+                              });
+                              if (res.ok) {
+                                const data = await res.json();
+                                if (data?.application) {
+                                  setStudentApplications((prev) => [data.application, ...prev]);
+                                }
+                              }
+                            } catch {}
+
+                            logPlatformActivity('Applied for Certificate', authEmail || 'Student', `${activeApplication.title} (Ref ID: ${refId})`);
+                            setToast(`Application submitted! Ref ID: ${refId}`);
+                            setApplicationStatus(`Application for ${activeApplication.title} submitted (Ref ID: ${refId}). Awaiting administrative verification.`);
+                            setActiveApplication(null);
+                            setAppStep(1);
+                            setAppDocumentUrl(null);
+                            setAppDocumentName('');
+                            setApplicationPurpose('');
+                            setAppLetterContent('');
+                          }}
+                        >
+                          <Glyph n="check" /> Submit Official Application to Administration
+                        </button>
+
+                        <button
+                          type="button"
+                          className="secondary-button"
+                          onClick={() => setAppStep(1)}
+                        >
+                          ← Back to Edit Details
+                        </button>
+                      </div>
                     </div>
-                  </form>
+                  )}
                 </div>
               </div>
             ) : (
               <>
+                {/* Header Row */}
                 <div>
-                  <div className="eyebrow">College Office Services</div>
-                  <h1>Applications</h1>
-                  <p className="lead">Find student services, submit forms step-by-step, and track your approval status.</p>
+                  <div className="eyebrow" style={{ color: '#701d32' }}>AU College of Engineering · Student Services</div>
+                  <h1 style={{ fontSize: 26, fontWeight: 700, margin: '4px 0 8px' }}>Applications &amp; Official Endorsements</h1>
+                  <p className="lead" style={{ margin: 0, fontSize: 14 }}>
+                    Submit certificate requests, upload proofs, generate formal letters, and track official appointment slots for physical verification.
+                  </p>
                 </div>
+
+                {/* SECTION 1: MY SUBMITTED APPLICATIONS & APPOINTMENT PASSES */}
+                {(() => {
+                  const myApps = studentApplications.filter(
+                    (a) => a.studentEmail === authEmail || a.rollNo === authRollNo
+                  );
+                  if (myApps.length === 0) return null;
+
+                  return (
+                    <div className="card" style={{ background: 'var(--surface-elevated, var(--surface))', border: '1px solid var(--border)', borderRadius: 14, padding: 18 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 18 }}><Glyph n="document" /></span>
+                          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>My Submitted Applications &amp; Appointment Slips</h3>
+                        </div>
+                        <span style={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>
+                          {myApps.length} {myApps.length === 1 ? 'application' : 'applications'}
+                        </span>
+                      </div>
+
+                      <div className="stack" style={{ gap: 12 }}>
+                        {myApps.map((app) => (
+                          <div
+                            key={app.id || app.refId}
+                            style={{
+                              background: 'var(--surface)',
+                              border: app.status === 'approved' ? '1.5px solid #22c55e' : '1px solid var(--border)',
+                              borderRadius: 10,
+                              padding: 14,
+                            }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+                              <div>
+                                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink)' }}>{app.serviceTitle}</span>
+                                <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
+                                  Ref ID: <code style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: '#701d32' }}>{app.refId}</code> · Submitted: {new Date(app.submittedAt || Date.now()).toLocaleDateString()}
+                                </div>
+                              </div>
+                              <span
+                                style={{
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  padding: '3px 10px',
+                                  borderRadius: 999,
+                                  background: app.status === 'approved' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(234, 179, 8, 0.15)',
+                                  color: app.status === 'approved' ? '#15803d' : '#b45309',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: 4,
+                                }}
+                              >
+                                {app.status === 'approved' ? <><Glyph n="check" /> Verified &amp; Scheduled</> : <><Glyph n="clock" /> Pending Admin Review</>}
+                              </span>
+                            </div>
+
+                            {/* IF APPROVED: SHOW OFFICIAL VERIFIED NOTICE & APPOINTMENT DETAILS */}
+                            {app.status === 'approved' ? (
+                              <div style={{ marginTop: 10 }}>
+                                <div style={{ background: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.3)', borderRadius: 8, padding: '10px 12px', marginBottom: 10 }}>
+                                  <div style={{ fontSize: 11, fontWeight: 700, color: '#16a34a', textTransform: 'uppercase', marginBottom: 2 }}>
+                                    Official Verification Note
+                                  </div>
+                                  <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--ink)' }}>
+                                    "{app.verificationNote || 'It is okay. You are verified. You can come to the Hachure manager for the sign.'}"
+                                  </div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 8, background: 'var(--hover-subtle)', padding: 10, borderRadius: 8, fontSize: 12 }}>
+                                  <div>
+                                    <span style={{ color: 'var(--muted)', fontSize: 10, textTransform: 'uppercase', fontWeight: 600 }}>Appointment Date</span>
+                                    <div style={{ fontWeight: 700, color: 'var(--ink)', marginTop: 2 }}>{app.appointmentDate || 'Next Working Day'}</div>
+                                  </div>
+                                  <div>
+                                    <span style={{ color: 'var(--muted)', fontSize: 10, textTransform: 'uppercase', fontWeight: 600 }}>Time Slot</span>
+                                    <div style={{ fontWeight: 700, color: 'var(--ink)', marginTop: 2 }}>{app.appointmentTime || '11:30 AM - 12:30 PM'}</div>
+                                  </div>
+                                  <div>
+                                    <span style={{ color: 'var(--muted)', fontSize: 10, textTransform: 'uppercase', fontWeight: 600 }}>Venue &amp; Counter</span>
+                                    <div style={{ fontWeight: 700, color: 'var(--ink)', marginTop: 2 }}>{app.appointmentVenue || 'Hachure Manager / Counter 3'}</div>
+                                  </div>
+                                </div>
+
+                                <div style={{ marginTop: 8, fontSize: 12, color: 'var(--ink)' }}>
+                                  <strong>Documents to Bring:</strong> {app.requiredDocuments || 'Original Student ID Card, Fee Receipt Challan'}
+                                </div>
+
+                                <div style={{ marginTop: 10 }}>
+                                  <button
+                                    type="button"
+                                    className="primary-button"
+                                    style={{ fontSize: 12, padding: '6px 14px', borderRadius: 8, background: '#701d32', borderColor: '#701d32' }}
+                                    onClick={() => setShowAppointmentSlipFor(app)}
+                                  >
+                                    <Glyph n="document" /> View Official Appointment Pass
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 6, lineHeight: 1.45 }}>
+                                Your application has been received by the Academic Section. After the Hachure Manager reviews your uploaded document, an official appointment date and time slot for signing will be scheduled here.
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Search Bar for Services */}
                 <input
                   className="search"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search applications (e.g. bonafide, bus pass)..."
+                  placeholder="Search student services (e.g. bonafide, e-signature, fee view, hostel outpass)..."
                   aria-label="Search applications"
                 />
+
+                {/* Available Services Catalog Grid */}
                 <div className="grid service-grid">
                   {filteredServices.map((service) => (
-                    <article className="card service-card" key={service.title}>
+                    <article className="card service-card" key={service.title} style={{ borderRadius: 12 }}>
                       <div className="service-heading">
                         <div className={`service-icon service-icon-${service.icon}`}>
                           <ServiceIcon kind={service.icon} size={22} />
@@ -2430,7 +2863,11 @@ export default function Home() {
                           setTimeout(() => {
                             setClickedApplyId(null);
                             setActiveApplication(service);
-                          }, 220);
+                            setAppStep(1);
+                            setAppDocumentUrl(null);
+                            setAppDocumentName('');
+                            setApplicationPurpose('');
+                          }, 180);
                         }}
                       >
                         Apply now <Glyph n="arrow" />
@@ -4078,35 +4515,289 @@ export default function Home() {
                     <div style={{ fontSize: 13, color: 'var(--ink)', marginBottom: 4 }}>
                       <strong>{app.studentName}</strong> · Roll: {app.rollNo} · {app.department}
                     </div>
-                    <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 8 }}>
-                      Purpose: {app.purpose || 'Verification'} · Ref ID: <code>{app.refId}</code>
+                    <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>
+                      Purpose: {app.purpose || 'Verification'} · Ref ID: <code style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: '#701d32' }}>{app.refId}</code>
                     </div>
-                    {app.status !== 'approved' && (
-                      <button
-                        type="button"
-                        className="primary-button"
-                        style={{ fontSize: 12, padding: '6px 14px', borderRadius: 8 }}
-                        onClick={async () => {
-                          try {
-                            await fetch('/api/applications', {
-                              method: 'PATCH',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ refId: app.refId, status: 'approved' }),
-                            });
-                            setStudentApplications((prev) =>
-                              prev.map((item: any) => (item.refId === app.refId ? { ...item, status: 'approved' } : item))
-                            );
-                            setToast(`Application ${app.refId} for ${app.studentName} marked as Approved.`);
-                          } catch {}
-                        }}
-                      >
-                        <Glyph n="check" /> Approve Application
-                      </button>
+                    {app.documentName && (
+                      <div style={{ fontSize: 12, margin: '4px 0 6px', color: 'var(--ink)' }}>
+                        Attached Proof: <strong>{app.documentName}</strong> {app.documentUrl && (<a href={app.documentUrl} target="_blank" rel="noreferrer" style={{ color: '#0369a1', textDecoration: 'underline', marginLeft: 4 }}>(View Attached Document)</a>)}
+                      </div>
+                    )}
+                    {app.letterContent && (
+                      <details style={{ fontSize: 12, margin: '6px 0', background: 'var(--hover-subtle)', padding: '6px 10px', borderRadius: 6 }}>
+                        <summary style={{ cursor: 'pointer', fontWeight: 600, color: 'var(--ink)' }}>View Formal Request Letter</summary>
+                        <pre style={{ whiteSpace: 'pre-wrap', marginTop: 6, fontSize: 11.5, fontFamily: 'var(--font-mono)', color: 'var(--ink)' }}>{app.letterContent}</pre>
+                      </details>
+                    )}
+                    {app.status === 'approved' ? (
+                      <div style={{ fontSize: 12, color: '#15803d', fontWeight: 600, marginTop: 6, background: 'rgba(34, 197, 94, 0.1)', padding: '6px 10px', borderRadius: 6 }}>
+                        ✓ Appointment Scheduled: <strong>{app.appointmentDate || 'Next working day'}</strong> ({app.appointmentTime || '11:30 AM'}) at {app.appointmentVenue || 'Hachure Manager Counter'}
+                      </div>
+                    ) : (
+                      <div style={{ marginTop: 8 }}>
+                        <button
+                          type="button"
+                          className="primary-button"
+                          style={{ fontSize: 12, padding: '6px 14px', borderRadius: 8, background: '#701d32', borderColor: '#701d32' }}
+                          onClick={() => {
+                            setSelectedReviewApp(app);
+                            setAdminApptDate('12 Nov 2026');
+                            setAdminApptTime('11:30 AM - 12:30 PM');
+                            setAdminApptVenue('Academic Section Counter 3 / Hachure Manager Office, AU Eng');
+                            setAdminRequiredDocs('Original Student ID Card, Fee Receipt Challan, 2 Passport Photos');
+                            setAdminVerificationNote('It is okay. You are verified. You can come to the Hachure manager for the sign.');
+                          }}
+                        >
+                          <Glyph n="clock" /> Review &amp; Schedule Appointment
+                        </button>
+                      </div>
                     )}
                   </div>
                 ))}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* HEAD ADMINISTRATOR: REVIEW & SCHEDULE APPOINTMENT MODAL */}
+      {selectedReviewApp && (
+        <div className="insta-modal-backdrop" onClick={() => setSelectedReviewApp(null)}>
+          <div className="insta-modal-sheet head-modal-sheet" style={{ maxWidth: 520, padding: 22, maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 20 }}><Glyph n="check" /></span>
+                <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Schedule Verification Appointment</h3>
+              </div>
+              <button onClick={() => setSelectedReviewApp(null)} style={{ background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: 'var(--ink)' }}>
+                <Glyph n="x" />
+              </button>
+            </div>
+
+            <div style={{ background: 'var(--hover-subtle)', padding: 12, borderRadius: 8, marginBottom: 14, fontSize: 13 }}>
+              <div style={{ fontWeight: 700, color: 'var(--ink)' }}>{selectedReviewApp.serviceTitle}</div>
+              <div style={{ color: 'var(--muted)', marginTop: 2 }}>
+                Applicant: <strong>{selectedReviewApp.studentName}</strong> (Roll: {selectedReviewApp.rollNo}) · Ref ID: {selectedReviewApp.refId}
+              </div>
+              {selectedReviewApp.documentName && (
+                <div style={{ marginTop: 4, color: '#0369a1' }}>
+                  Enclosed Proof: {selectedReviewApp.documentName} {selectedReviewApp.documentUrl && (<a href={selectedReviewApp.documentUrl} target="_blank" rel="noreferrer" style={{ textDecoration: 'underline', marginLeft: 4 }}>(Open Document)</a>)}
+                </div>
+              )}
+            </div>
+
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                try {
+                  const res = await fetch('/api/applications', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      refId: selectedReviewApp.refId,
+                      status: 'approved',
+                      adminEmail: authEmail,
+                      appointmentDate: adminApptDate,
+                      appointmentTime: adminApptTime,
+                      appointmentVenue: adminApptVenue,
+                      requiredDocuments: adminRequiredDocs,
+                      verificationNote: adminVerificationNote,
+                    }),
+                  });
+                  if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data?.applications)) {
+                      setStudentApplications(data.applications);
+                    } else {
+                      setStudentApplications((prev) =>
+                        prev.map((item: any) =>
+                          item.refId === selectedReviewApp.refId
+                            ? {
+                                ...item,
+                                status: 'approved',
+                                appointmentDate: adminApptDate,
+                                appointmentTime: adminApptTime,
+                                appointmentVenue: adminApptVenue,
+                                requiredDocuments: adminRequiredDocs,
+                                verificationNote: adminVerificationNote,
+                              }
+                            : item
+                        )
+                      );
+                    }
+                    setToast(`Appointment scheduled for ${selectedReviewApp.studentName} (${selectedReviewApp.refId}).`);
+                    setSelectedReviewApp(null);
+                  }
+                } catch {
+                  setToast('Error updating appointment.');
+                }
+              }}
+              className="stack"
+              style={{ gap: 12 }}
+            >
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div>
+                  <label className="field-label" style={{ fontSize: 12, fontWeight: 600 }}>Appointment Date *</label>
+                  <input
+                    className="search"
+                    value={adminApptDate}
+                    onChange={(e) => setAdminApptDate(e.target.value)}
+                    placeholder="e.g. 12 Nov 2026"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="field-label" style={{ fontSize: 12, fontWeight: 600 }}>Time Slot *</label>
+                  <input
+                    className="search"
+                    value={adminApptTime}
+                    onChange={(e) => setAdminApptTime(e.target.value)}
+                    placeholder="e.g. 11:30 AM - 12:30 PM"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="field-label" style={{ fontSize: 12, fontWeight: 600 }}>Venue / Counter Location *</label>
+                <input
+                  className="search"
+                  value={adminApptVenue}
+                  onChange={(e) => setAdminApptVenue(e.target.value)}
+                  placeholder="e.g. Academic Section Counter 3 / Hachure Manager Office"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="field-label" style={{ fontSize: 12, fontWeight: 600 }}>Required Original Documents to Bring *</label>
+                <input
+                  className="search"
+                  value={adminRequiredDocs}
+                  onChange={(e) => setAdminRequiredDocs(e.target.value)}
+                  placeholder="e.g. Original Student ID Card, Fee Receipt Challan"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="field-label" style={{ fontSize: 12, fontWeight: 600 }}>Official Verification Note to Student *</label>
+                <textarea
+                  className="search"
+                  rows={2}
+                  value={adminVerificationNote}
+                  onChange={(e) => setAdminVerificationNote(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                <button type="submit" className="primary-button" style={{ background: '#701d32', borderColor: '#701d32', fontWeight: 700 }}>
+                  <Glyph n="check" /> Confirm &amp; Issue Appointment
+                </button>
+                <button type="button" className="secondary-button" onClick={() => setSelectedReviewApp(null)}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* STUDENT & ADMIN: OFFICIAL APPOINTMENT PASS MODAL */}
+      {showAppointmentSlipFor && (
+        <div className="insta-modal-backdrop" onClick={() => setShowAppointmentSlipFor(null)}>
+          <div className="insta-modal-sheet head-modal-sheet" style={{ maxWidth: 480, padding: 24, textAlign: 'left', borderRadius: 16 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #701d32', paddingBottom: 12, marginBottom: 14 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#701d32' }}>
+                  Andhra University College of Engineering
+                </div>
+                <h2 style={{ margin: '2px 0 0', fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>
+                  Official Verification Appointment Pass
+                </h2>
+              </div>
+              <button onClick={() => setShowAppointmentSlipFor(null)} style={{ background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: 'var(--ink)' }}>
+                <Glyph n="x" />
+              </button>
+            </div>
+
+            {/* Official Notice Banner */}
+            <div style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1.5px solid #22c55e', borderRadius: 10, padding: 12, marginBottom: 14 }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: '#15803d', textTransform: 'uppercase', marginBottom: 2 }}>
+                Administrative Decision
+              </div>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>
+                "{showAppointmentSlipFor.verificationNote || 'It is okay. You are verified. You can come to the Hachure manager for the sign.'}"
+              </p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12, fontSize: 13 }}>
+              <div>
+                <span style={{ color: 'var(--muted)', fontSize: 11, textTransform: 'uppercase' }}>Applicant</span>
+                <div style={{ fontWeight: 700, color: 'var(--ink)' }}>{showAppointmentSlipFor.studentName}</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)' }}>Roll: {showAppointmentSlipFor.rollNo}</div>
+              </div>
+              <div>
+                <span style={{ color: 'var(--muted)', fontSize: 11, textTransform: 'uppercase' }}>Department</span>
+                <div style={{ fontWeight: 700, color: 'var(--ink)' }}>{showAppointmentSlipFor.department || 'AU Eng'}</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)' }}>{showAppointmentSlipFor.year || '4th Year'}</div>
+              </div>
+            </div>
+
+            {/* Appointment Slot Box */}
+            <div style={{ background: 'var(--hover-subtle)', border: '1px solid var(--border)', borderRadius: 10, padding: 12, marginBottom: 12, fontSize: 13 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
+                <div>
+                  <span style={{ color: 'var(--muted)', fontSize: 11, textTransform: 'uppercase' }}>Appointment Date</span>
+                  <div style={{ fontWeight: 700, color: '#701d32', fontSize: 14 }}>{showAppointmentSlipFor.appointmentDate || 'Next working day'}</div>
+                </div>
+                <div>
+                  <span style={{ color: 'var(--muted)', fontSize: 11, textTransform: 'uppercase' }}>Time Slot</span>
+                  <div style={{ fontWeight: 700, color: '#701d32', fontSize: 14 }}>{showAppointmentSlipFor.appointmentTime || '11:30 AM - 12:30 PM'}</div>
+                </div>
+              </div>
+              <div>
+                <span style={{ color: 'var(--muted)', fontSize: 11, textTransform: 'uppercase' }}>Designated Counter / Venue</span>
+                <div style={{ fontWeight: 700, color: 'var(--ink)' }}>{showAppointmentSlipFor.appointmentVenue || 'Hachure Manager / Academic Section Counter 3'}</div>
+              </div>
+            </div>
+
+            {/* Required Checklist */}
+            <div style={{ fontSize: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 10, marginBottom: 14 }}>
+              <strong>Documents to Present for Physical Sign:</strong>
+              <div style={{ color: 'var(--ink)', marginTop: 2 }}>
+                {showAppointmentSlipFor.requiredDocuments || 'Original Student ID Card, Fee Receipt Challan'}
+              </div>
+            </div>
+
+            {/* Barcode & Reference Stamp */}
+            <div style={{ textAlign: 'center', borderTop: '1px dashed var(--border)', paddingTop: 10, marginBottom: 12 }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, letterSpacing: '0.25em', fontWeight: 700, color: 'var(--ink)' }}>
+                ||||| | |||| ||| |||| | |||||
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--muted)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>
+                PASS REF: {showAppointmentSlipFor.refId} · AUTHORIZED BY AU ACADEMIC SECTION
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                type="button"
+                className="primary-button"
+                style={{ flex: 1, background: '#701d32', borderColor: '#701d32', fontWeight: 700 }}
+                onClick={() => window.print()}
+              >
+                Print / Save Appointment Slip (PDF)
+              </button>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => setShowAppointmentSlipFor(null)}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

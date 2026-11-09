@@ -17,6 +17,7 @@ import {
   sanitizeEmail,
   isHeadAdmin,
   isRequestAuthorizedAsAdmin,
+  isAllowedOrigin,
 } from '../auth/security';
 
 /**
@@ -55,6 +56,13 @@ export async function GET(req: Request) {
  */
 export async function POST(req: Request) {
   try {
+    if (!isAllowedOrigin(req)) {
+      return NextResponse.json(
+        { error: 'Forbidden: Request domain not authorized.' },
+        { status: 403 }
+      );
+    }
+
     const ip = getClientIp(req);
     const limit = checkRateLimit(`post_feed:${ip}`, 20, 60 * 1000);
     if (!limit.allowed) {
@@ -159,6 +167,13 @@ export async function POST(req: Request) {
  */
 export async function PATCH(req: Request) {
   try {
+    if (!isAllowedOrigin(req)) {
+      return NextResponse.json(
+        { error: 'Forbidden: Request domain not authorized.' },
+        { status: 403 }
+      );
+    }
+
     const ip = getClientIp(req);
     const limit = checkRateLimit(`patch_feed:${ip}`, 60, 60 * 1000);
     if (!limit.allowed) {
@@ -271,6 +286,13 @@ export async function PATCH(req: Request) {
  */
 export async function DELETE(req: Request) {
   try {
+    if (!isAllowedOrigin(req)) {
+      return NextResponse.json(
+        { error: 'Forbidden: Request domain not authorized.' },
+        { status: 403 }
+      );
+    }
+
     const url = new URL(req.url);
     const postId = url.searchParams.get('id');
     const userEmail = sanitizeEmail(url.searchParams.get('userEmail') || '');

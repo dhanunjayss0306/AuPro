@@ -91,9 +91,18 @@ export function MomentCard({
 
   // Sync state whenever post prop changes (e.g. from server polling / refresh)
   useEffect(() => {
-    setLikes(post.likesCount ?? 0);
-    setComments(post.comments ?? []);
-    setCommentsCount(post.commentsCount ?? (post.comments?.length ?? 0));
+    setLikes((prev) => Math.max(prev, post.likesCount ?? 0));
+    setComments((prev) => {
+      const serverCmts = Array.isArray(post.comments) ? post.comments : [];
+      if (serverCmts.length === 0) return prev;
+      const ids = new Set(serverCmts.map((c) => c.id));
+      const combined = [...serverCmts];
+      for (const p of prev) {
+        if (p && p.id && !ids.has(p.id)) combined.push(p);
+      }
+      return combined;
+    });
+    setCommentsCount((prev) => Math.max(prev, post.commentsCount ?? (post.comments?.length ?? 0)));
     setReposts(post.repostsCount ?? 0);
     if (Array.isArray(post.likedBy) && cleanUserEmail) {
       setLiked(post.likedBy.includes(cleanUserEmail));
@@ -204,12 +213,13 @@ export function MomentCard({
       if (res.ok) {
         const data = await res.json();
         if (typeof data.likesCount === 'number') {
-          setLikes(data.likesCount);
+          const finalLikes = Math.max(data.likesCount, nextLikes);
+          setLikes(finalLikes);
           setLiked(Boolean(data.liked));
           if (onPostUpdated) {
             onPostUpdated({
               ...post,
-              likesCount: data.likesCount,
+              likesCount: finalLikes,
               likedBy: data.likedBy || updatedLikedBy,
             });
           }
@@ -404,19 +414,29 @@ export function MomentCard({
             location: post.location,
             isOfficial: post.isOfficial,
             timeAgo: post.timeAgo,
+            likesCount: likes,
+            likedBy: Array.isArray(post.likedBy) ? post.likedBy : [],
+            comments: nextComments,
+            commentsCount: nextCount,
           },
         }),
       });
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data.comments)) {
-          setComments(data.comments);
-          setCommentsCount(data.comments.length);
+          const sIds = new Set(data.comments.map((c: any) => c.id));
+          const allCmts = [...data.comments];
+          for (const c of nextComments) {
+            if (c && c.id && !sIds.has(c.id)) allCmts.push(c);
+          }
+          const finalCount = Math.max(allCmts.length, nextCount);
+          setComments(allCmts);
+          setCommentsCount(finalCount);
           if (onPostUpdated) {
             onPostUpdated({
               ...post,
-              comments: data.comments,
-              commentsCount: data.comments.length,
+              comments: allCmts,
+              commentsCount: finalCount,
             });
           }
         }

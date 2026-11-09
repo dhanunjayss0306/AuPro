@@ -907,10 +907,27 @@ export default function Home() {
         setFeedPosts((currentPosts) => {
           const serverPostMap = new Map(cleanServerPosts.map((p: any) => [p.id, p]));
 
-          // Reconcile: merge server posts with any richer local data
+          // Reconcile: merge server posts with any richer local data, likes, and comments
           const mergedServer = cleanServerPosts.map((sp: any) => {
             const localMatch = currentPosts.find((lp) => lp.id === sp.id);
             if (localMatch) {
+              // Combine likedBy sets from local and server so likes are NEVER lost
+              const localLikes = Array.isArray(localMatch.likedBy) ? localMatch.likedBy : [];
+              const serverLikes = Array.isArray(sp.likedBy) ? sp.likedBy : [];
+              const combinedLikes = Array.from(new Set([...serverLikes, ...localLikes]));
+              const maxLikesCount = Math.max(sp.likesCount || 0, localMatch.likesCount || 0, combinedLikes.length);
+
+              // Combine comments from local and server so user comments are NEVER lost
+              const localComments = Array.isArray(localMatch.comments) ? localMatch.comments : [];
+              const serverComments = Array.isArray(sp.comments) ? sp.comments : [];
+              const commentIds = new Set(serverComments.map((c: any) => c.id));
+              const mergedComments = [...serverComments];
+              for (const lc of localComments) {
+                if (lc && lc.id && !commentIds.has(lc.id)) {
+                  mergedComments.push(lc);
+                }
+              }
+
               return {
                 ...sp,
                 caption: sp.caption?.trim() ? sp.caption : localMatch.caption,
@@ -918,18 +935,31 @@ export default function Home() {
                 username: (sp.username && sp.username !== 'AU Student') ? sp.username : (localMatch.username || sp.username),
                 authorEmail: sp.authorEmail || localMatch.authorEmail,
                 avatarText: sp.avatarText || localMatch.avatarText,
+                likesCount: maxLikesCount,
+                likedBy: combinedLikes,
+                comments: mergedComments,
+                commentsCount: Math.max(sp.commentsCount || 0, mergedComments.length),
               };
             }
             return sp;
           });
 
-          // Preserve any newly submitted local post created within the last 5 minutes so it is never wiped out
+          // Preserve all local posts that the server doesn't have yet (NEVER delete them!)
           const pendingRecent = currentPosts.filter((p) => {
             if (!p || (!p.caption?.trim() && !p.imageUrl)) return false;
-            if (serverPostMap.has(p.id)) return false;
-            const numPart = Number(p.id.replace(/\D/g, '')) || 0;
-            return Date.now() - numPart < 5 * 60 * 1000;
+            return !serverPostMap.has(p.id);
           });
+
+          // Self-heal: If server is missing any of our valid local posts, sync them back to the server in background!
+          if (pendingRecent.length > 0) {
+            pendingRecent.forEach((postToSync) => {
+              fetch('/api/feed', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(postToSync),
+              }).catch(() => {});
+            });
+          }
 
           const merged = [...pendingRecent, ...mergedServer].filter(
             (p) => p && (Boolean(p.caption?.trim()) || Boolean(p.imageUrl))
@@ -1545,9 +1575,7 @@ export default function Home() {
             const serverPostIds = new Set(cleanServerPosts.map((p: any) => p.id));
             const pendingRecent = currentPosts.filter((p) => {
               if (!p || (!p.caption?.trim() && !p.imageUrl)) return false;
-              if (serverPostIds.has(p.id)) return false;
-              const numPart = Number(p.id.replace(/\D/g, '')) || 0;
-              return Date.now() - numPart < 5 * 60 * 1000;
+              return !serverPostIds.has(p.id);
             });
             const merged = [...pendingRecent, ...cleanServerPosts];
             try {
@@ -1633,9 +1661,7 @@ export default function Home() {
             const serverPostIds = new Set(cleanServerPosts.map((p: any) => p.id));
             const pendingRecent = currentPosts.filter((p) => {
               if (!p || (!p.caption?.trim() && !p.imageUrl)) return false;
-              if (serverPostIds.has(p.id)) return false;
-              const numPart = Number(p.id.replace(/\D/g, '')) || 0;
-              return Date.now() - numPart < 5 * 60 * 1000;
+              return !serverPostIds.has(p.id);
             });
             const merged = [...pendingRecent, ...cleanServerPosts];
             try {

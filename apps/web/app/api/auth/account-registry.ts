@@ -401,11 +401,17 @@ export function togglePostLike(
 ): { likesCount: number; liked: boolean; likedBy: string[] } {
   const store = loadStore();
   let post = store.posts.find((p) => p.id === postId);
+  const cleanEmail = (userEmail || 'student@andhrauniversity.edu.in').toLowerCase().trim();
+
   if (!post) {
     const hasContent = Boolean(postDetails?.caption?.trim()) || Boolean(postDetails?.imageUrl);
     if (!hasContent) {
       // Do not create an empty ghost post
       return { likesCount: 0, liked: false, likedBy: [] };
+    }
+    const initialLikedBy = Array.isArray(postDetails?.likedBy) ? [...postDetails.likedBy] : [];
+    if (!initialLikedBy.includes(cleanEmail)) {
+      initialLikedBy.push(cleanEmail);
     }
     post = {
       id: postId,
@@ -419,15 +425,17 @@ export function togglePostLike(
       imageUrl: postDetails?.imageUrl,
       imageCaption: postDetails?.imageCaption,
       caption: postDetails?.caption || '',
-      likesCount: typeof postDetails?.likesCount === 'number' ? postDetails.likesCount : 0,
-      likedBy: Array.isArray(postDetails?.likedBy) ? postDetails.likedBy : [],
+      likesCount: Math.max(initialLikedBy.length, typeof postDetails?.likesCount === 'number' ? postDetails.likesCount : 1),
+      likedBy: initialLikedBy,
       repostsCount: typeof postDetails?.repostsCount === 'number' ? postDetails.repostsCount : 0,
-      commentsCount: typeof postDetails?.commentsCount === 'number' ? postDetails.commentsCount : 0,
-      comments: Array.isArray(postDetails?.comments) ? postDetails.comments : [],
+      commentsCount: typeof postDetails?.commentsCount === 'number' ? postDetails.commentsCount : (Array.isArray(postDetails?.comments) ? postDetails.comments.length : 0),
+      comments: Array.isArray(postDetails?.comments) ? [...postDetails.comments] : [],
       timeAgo: postDetails?.timeAgo || 'Just now',
       durationDays: postDetails?.durationDays || 30,
     };
     store.posts.unshift(post);
+    saveStoreToFile(store);
+    return { likesCount: post.likesCount, liked: true, likedBy: post.likedBy || initialLikedBy };
   } else if (postDetails) {
     // Enrich existing post if it was previously incomplete
     if (!post.caption?.trim() && postDetails.caption?.trim()) {
@@ -447,7 +455,6 @@ export function togglePostLike(
     }
   }
 
-  const cleanEmail = (userEmail || 'student@andhrauniversity.edu.in').toLowerCase().trim();
   post.likedBy = Array.isArray(post.likedBy) ? post.likedBy : [];
   const idx = post.likedBy.indexOf(cleanEmail);
   let liked = false;
@@ -485,6 +492,7 @@ export function addPostComment(
       // Do not create a ghost post in central store
       return { comments: [comment], commentsCount: 1 };
     }
+    const priorComments = Array.isArray(postDetails?.comments) ? [...postDetails.comments] : [];
     post = {
       id: postId,
       username: postDetails?.username || 'AU Student',
@@ -497,11 +505,11 @@ export function addPostComment(
       imageUrl: postDetails?.imageUrl,
       imageCaption: postDetails?.imageCaption,
       caption: postDetails?.caption || '',
-      likesCount: typeof postDetails?.likesCount === 'number' ? postDetails.likesCount : 0,
+      likesCount: typeof postDetails?.likesCount === 'number' ? postDetails.likesCount : (Array.isArray(postDetails?.likedBy) ? postDetails.likedBy.length : 0),
       likedBy: Array.isArray(postDetails?.likedBy) ? postDetails.likedBy : [],
       repostsCount: typeof postDetails?.repostsCount === 'number' ? postDetails.repostsCount : 0,
-      commentsCount: 0,
-      comments: [],
+      commentsCount: priorComments.length,
+      comments: priorComments,
       timeAgo: postDetails?.timeAgo || 'Just now',
       durationDays: postDetails?.durationDays || 30,
     };
@@ -535,7 +543,12 @@ export function addPostComment(
     timeAgo: comment.timeAgo || 'Just now',
     ...(comment.imageUrl ? { imageUrl: comment.imageUrl } : {}),
   };
-  post.comments.push(newComment);
+  const existingIdx = post.comments.findIndex((c) => c.id === newComment.id);
+  if (existingIdx >= 0) {
+    post.comments[existingIdx] = newComment;
+  } else {
+    post.comments.push(newComment);
+  }
   post.commentsCount = post.comments.length;
   saveStoreToFile(store);
 

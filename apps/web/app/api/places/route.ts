@@ -3,5 +3,12 @@ const places = [
 ];
 
 export function GET() {
-  return Response.json({ places, notice: 'Sample data only until verified campus data is imported.' });
+  return Response.json(
+    { places, notice: 'Sample data only until verified campus data is imported.' },
+    {
+      headers: {
+        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+      },
+    }
+  );
 }

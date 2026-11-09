@@ -32,6 +32,7 @@ import { Glyph } from './components/Glyph';
 import { CampusPhoto } from './components/CampusPhoto';
 import { IntroCinematic } from './components/IntroCinematic';
 import { ThreadsComposer, ThreadsPostData } from './components/ThreadsComposer';
+import { SkeletonFeedCard } from './components/SkeletonFeedCard';
 import {
   getGoogleOAuthUrl,
   isValidCollegeEmail,
@@ -687,6 +688,27 @@ export default function Home() {
   const [navStepIndex, setNavStepIndex] = useState(0);
   const [showNavStepsSheet, setShowNavStepsSheet] = useState(false);
 
+  // Mobile Performance, Caching & Network Optimization State
+  const inFlightFetches = useRef<Map<string, Promise<any>>>(new Map());
+  const [isFeedLoading, setIsFeedLoading] = useState(true);
+  const [feedPage, setFeedPage] = useState(1);
+  const [feedHasMore, setFeedHasMore] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [debouncedMapSearch, setDebouncedMapSearch] = useState('');
+
+  // Request deduplication manager: prevents duplicate network calls during rapid tab switching
+  const dedupFetch = (key: string, fetcher: () => Promise<any>): Promise<any> => {
+    if (inFlightFetches.current.has(key)) {
+      return inFlightFetches.current.get(key)!;
+    }
+    const promise = fetcher().finally(() => {
+      inFlightFetches.current.delete(key);
+    });
+    inFlightFetches.current.set(key, promise);
+    return promise;
+  };
+
   // Application Dedicated Page State
   const [activeApplication, setActiveApplication] = useState<any>(null);
   const [clickedApplyId, setClickedApplyId] = useState<string | null>(null);
@@ -1020,12 +1042,14 @@ export default function Home() {
       setPlatformActivities(getPlatformActivities());
     }
     try {
+      // Deduplicated concurrent fetches: run independent requests simultaneously with in-flight caching
       const [appRes, accRes, actRes, feedRes] = await Promise.all([
-        fetch('/api/applications').then((r) => (r.ok ? r.json() : null)),
-        fetch('/api/accounts').then((r) => (r.ok ? r.json() : null)),
-        fetch('/api/activity').then((r) => (r.ok ? r.json() : null)),
-        fetch('/api/feed').then((r) => (r.ok ? r.json() : null)),
+        dedupFetch('/api/applications', () => fetch('/api/applications').then((r) => (r.ok ? r.json() : null))),
+        dedupFetch('/api/accounts', () => fetch('/api/accounts').then((r) => (r.ok ? r.json() : null))),
+        dedupFetch('/api/activity', () => fetch('/api/activity').then((r) => (r.ok ? r.json() : null))),
+        dedupFetch('/api/feed', () => fetch('/api/feed').then((r) => (r.ok ? r.json() : null))),
       ]);
+
       if (accRes?.accounts && Object.keys(accRes.accounts).length > 0) {
         setRegisteredUsersList(accRes.accounts);
         if (typeof window !== 'undefined') {
@@ -1045,23 +1069,22 @@ export default function Home() {
         }
       }
       if (Array.isArray(feedRes?.posts)) {
+        setFeedHasMore(Boolean(feedRes.hasMore));
+        setFeedPage(1);
         const cleanServerPosts = feedRes.posts.filter(
           (p: any) => p && !p.id.startsWith('post_init_') && (Boolean(p.caption?.trim()) || Boolean(p.imageUrl))
         );
         setFeedPosts((currentPosts) => {
           const serverPostMap = new Map(cleanServerPosts.map((p: any) => [p.id, p]));
 
-          // Reconcile: merge server posts with any richer local data, likes, and comments
           const mergedServer = cleanServerPosts.map((sp: any) => {
             const localMatch = currentPosts.find((lp) => lp.id === sp.id);
             if (localMatch) {
-              // Combine likedBy sets from local and server so likes are NEVER lost
               const localLikes = Array.isArray(localMatch.likedBy) ? localMatch.likedBy : [];
               const serverLikes = Array.isArray(sp.likedBy) ? sp.likedBy : [];
               const combinedLikes = Array.from(new Set([...serverLikes, ...localLikes]));
               const maxLikesCount = Math.max(sp.likesCount || 0, localMatch.likesCount || 0, combinedLikes.length);
 
-              // Combine comments from local and server so user comments are NEVER lost
               const localComments = Array.isArray(localMatch.comments) ? localMatch.comments : [];
               const serverComments = Array.isArray(sp.comments) ? sp.comments : [];
               const commentIds = new Set(serverComments.map((c: any) => c.id));
@@ -1088,13 +1111,11 @@ export default function Home() {
             return sp;
           });
 
-          // Preserve all local posts that the server doesn't have yet (NEVER delete them!)
           const pendingRecent = currentPosts.filter((p) => {
             if (!p || (!p.caption?.trim() && !p.imageUrl)) return false;
             return !serverPostMap.has(p.id);
           });
 
-          // Self-heal: If server is missing any of our valid local posts, sync them back to the server in background!
           if (pendingRecent.length > 0) {
             pendingRecent.forEach((postToSync) => {
               fetch('/api/feed', {
@@ -1118,6 +1139,41 @@ export default function Home() {
       }
     } catch (e) {
       console.error('Error synchronizing central server data:', e);
+    } finally {
+      setIsFeedLoading(false);
+    }
+  };
+
+  const handleLoadMoreFeed = async () => {
+    if (isLoadingMore || !feedHasMore) return;
+    setIsLoadingMore(true);
+    try {
+      const nextPage = feedPage + 1;
+      const res = await dedupFetch(`/api/feed?page=${nextPage}&limit=10`);
+      if (res?.posts && Array.isArray(res.posts)) {
+        const cleanNewPosts = res.posts.filter(
+          (p: any) => p && !p.id.startsWith('post_init_') && (Boolean(p.caption?.trim()) || Boolean(p.imageUrl))
+        );
+        setFeedPosts((prev) => {
+          const existingIds = new Set(prev.map((p) => p.id));
+          const additions = cleanNewPosts.filter((p: any) => !existingIds.has(p.id));
+          const updated = [...prev, ...additions];
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem('aupro_feed_posts', JSON.stringify(updated));
+            } catch {}
+          }
+          return updated;
+        });
+        setFeedPage(nextPage);
+        setFeedHasMore(Boolean(res.hasMore));
+      } else {
+        setFeedHasMore(false);
+      }
+    } catch {
+      setFeedHasMore(false);
+    } finally {
+      setIsLoadingMore(false);
     }
   };
 
@@ -1143,6 +1199,17 @@ export default function Home() {
 
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
+
+  // 200ms debounce for search inputs to prevent CPU stutter on budget mobile devices
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(query), 200);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedMapSearch(mapSearchInput), 200);
+    return () => clearTimeout(t);
+  }, [mapSearchInput]);
   const [feedFilter, setFeedFilter] = useState<FeedFilter>('all');
   const [feedPosts, setFeedPosts] = useState<MomentPost[]>(initialPosts);
   const [showCreateMenu, setShowCreateMenu] = useState(false);
@@ -1559,7 +1626,7 @@ export default function Home() {
   const savedPosts = feedPosts.filter((post) => savedPostIds.includes(post.id));
 
   const filteredServices = services.filter((service) =>
-    service.title.toLowerCase().includes(query.toLowerCase())
+    service.title.toLowerCase().includes((debouncedQuery || query).toLowerCase())
   );
 
   const filteredLandmarks = campusLandmarks.filter((loc) => {
@@ -2395,7 +2462,13 @@ export default function Home() {
               />
             ))}
 
-            {filteredFeedPosts.length === 0 ? (
+            {isFeedLoading && feedPosts.length === 0 ? (
+              <div className="stack" style={{ gap: 12 }}>
+                <SkeletonFeedCard />
+                <SkeletonFeedCard />
+                <SkeletonFeedCard />
+              </div>
+            ) : filteredFeedPosts.length === 0 ? (
               <div className="card feed-empty-card">
                 <svg className="empty-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>
                 <h3>No Posts in Feed Yet</h3>
@@ -2414,7 +2487,23 @@ export default function Home() {
                 </button>
               </div>
             ) : (
-              <div className="feed-end-note"><strong>You’re all caught up</strong><span>You’ve seen all recent updates.</span></div>
+              <>
+                {feedHasMore ? (
+                  <div style={{ textAlign: 'center', margin: '20px 0 28px' }}>
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      disabled={isLoadingMore}
+                      onClick={handleLoadMoreFeed}
+                      style={{ fontSize: 13, minHeight: 42, paddingInline: 24, borderRadius: 24, margin: '0 auto' }}
+                    >
+                      {isLoadingMore ? 'Loading older campus updates...' : 'Load older campus updates ↓'}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="feed-end-note"><strong>You’re all caught up</strong><span>You’ve seen all recent updates.</span></div>
+                )}
+              </>
             )}
           </div>
         )}

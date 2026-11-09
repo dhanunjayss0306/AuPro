@@ -1,26 +1,27 @@
 /**
- * AuPro Client-Side Image Compression & Downscaling Engine
+ * AuPro Client-Side Image Compression & Modern WebP Engine
  * 
  * Automatically downsizes large camera photos (e.g. 12MP-48MP iPhone/Android captures)
- * to crisp mobile-optimized web dimensions (max 1200px, 85% JPEG).
+ * to crisp mobile-optimized web dimensions (max 1280px, WebP format with JPEG fallback).
  * 
- * Prevents:
- * 1. Next.js 4.5MB payload exceeded errors.
- * 2. HTML5 localStorage 5MB quota exceeded crashes.
- * 3. Mobile network upload freezes and high latency.
+ * Benefits:
+ * 1. 25-35% smaller payload than JPEG for instant mobile uploads.
+ * 2. Stays comfortably under Next.js 4.5MB payload cap.
+ * 3. Prevents HTML5 localStorage 5MB quota crashes.
+ * 4. Enables smooth rendering on budget phones without memory spikes.
  */
 
 export async function compressImageFile(
   file: File,
   maxDimension: number = 1280,
-  quality: number = 0.85
+  quality: number = 0.82
 ): Promise<string> {
   // If not an image, return empty
   if (!file.type.startsWith('image/')) {
     throw new Error('Selected file is not an image');
   }
 
-  // If it's a GIF or SVG, don't rasterize to JPEG, keep as-is
+  // If it's a GIF or SVG, don't rasterize, keep original vector/animation
   if (file.type === 'image/gif' || file.type === 'image/svg+xml') {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -69,8 +70,11 @@ export async function compressImageFile(
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Export as optimized JPEG
-        const optimizedDataUrl = canvas.toDataURL('image/jpeg', quality);
+        // Export as WebP if supported by mobile browser, else fallback to JPEG
+        let optimizedDataUrl = canvas.toDataURL('image/webp', quality);
+        if (!optimizedDataUrl || !optimizedDataUrl.startsWith('data:image/webp')) {
+          optimizedDataUrl = canvas.toDataURL('image/jpeg', quality);
+        }
         resolve(optimizedDataUrl);
       };
 

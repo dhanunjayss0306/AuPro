@@ -7,5 +7,12 @@ const topics = [
 ];
 
 export function GET() {
-  return Response.json({ topics });
+  return Response.json(
+    { topics },
+    {
+      headers: {
+        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+      },
+    }
+  );
 }

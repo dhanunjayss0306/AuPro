@@ -27,20 +27,50 @@ import {
 export async function GET(req: Request) {
   try {
     const ip = getClientIp(req);
-    const limit = checkRateLimit(`get_feed:${ip}`, 120, 60 * 1000);
-    if (!limit.allowed) {
+    const limitCheck = checkRateLimit(`get_feed:${ip}`, 120, 60 * 1000);
+    if (!limitCheck.allowed) {
       return NextResponse.json(
         { error: 'Rate limit exceeded. Please wait a moment.' },
-        { status: 429, headers: { 'Retry-After': String(limit.resetInSeconds) } }
+        { status: 429, headers: { 'Retry-After': String(limitCheck.resetInSeconds) } }
       );
     }
 
-    const posts = getAllPosts();
+    const allPosts = getAllPosts();
+    const url = new URL(req.url);
+    const limitParam = url.searchParams.get('limit');
+    const pageParam = url.searchParams.get('page');
+
+    // Headers for edge caching & mobile bandwidth optimization
+    const cacheHeaders = {
+      'Cache-Control': 'public, max-age=5, stale-while-revalidate=30',
+    };
+
+    // If client explicitly requests all posts (e.g. initial backup sync or test)
+    if (limitParam === 'all') {
+      return NextResponse.json({
+        success: true,
+        count: allPosts.length,
+        total: allPosts.length,
+        posts: allPosts,
+      }, { headers: cacheHeaders });
+    }
+
+    // Default mobile pagination: 10 posts per page to reduce mobile initial download
+    const page = Math.max(1, parseInt(pageParam || '1', 10) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(limitParam || '10', 10) || 10));
+    const startIndex = (page - 1) * limit;
+    const paginatedPosts = allPosts.slice(startIndex, startIndex + limit);
+    const hasMore = startIndex + limit < allPosts.length;
+
     return NextResponse.json({
       success: true,
-      count: posts.length,
-      posts,
-    });
+      count: paginatedPosts.length,
+      total: allPosts.length,
+      page,
+      limit,
+      hasMore,
+      posts: paginatedPosts,
+    }, { headers: cacheHeaders });
   } catch (err: any) {
     return NextResponse.json(
       { error: err?.message || 'Failed to retrieve feed posts.' },

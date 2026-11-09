@@ -61,12 +61,12 @@ input, textarea, select, .search { border-radius: 8px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
-.profile-dropdown-btn, .avatar, .user-avatar { background: var(--ink); color: var(--bg); }
+.avatar, .user-avatar { background: var(--ink); color: var(--bg); }
 
 /* Legacy cleanups */
 .glyph { display: inline-block; vertical-align: -0.16em; flex: none; }
 .intro-prism, .intro-vignette { display: none !important; }
-.profile-dropdown-btn, .insta-avatar-ring, .insta-avatar-placeholder { background: var(--ink) !important; color: var(--bg) !important; }
+.insta-avatar-ring, .insta-avatar-placeholder { background: var(--ink) !important; color: var(--bg) !important; }
 .search, .threads-topic-pill, .gmaps-preset-pill, .threads-type-pill { border-radius: 8px; }
 
 /* Second pass: pills, side accents, shadows */
@@ -259,7 +259,7 @@ input, textarea, select { font-size: 16px; min-height: 48px; padding-inline: 14p
 button, .primary-button, .secondary-button, .chatbot-chip, .gmaps-chip { user-select: none; -webkit-user-select: none; }
 
 /* Touch-target fixes found by the audit */
-.profile-avatar, .profile-dropdown-btn { width: 44px; height: 44px; min-width: 44px; }
+.profile-avatar { width: 44px; height: 44px; min-width: 44px; }
 .about-link { display: inline-flex; align-items: center; min-height: 44px; padding-block: 12px; }
 .gmaps-directions-btn, .gmaps-action-pill, .gmaps-bottom-sheet button { min-height: 44px; }
 .gmaps-action-pill { padding-inline: 14px; }
@@ -580,4 +580,70 @@ button, .primary-button, .secondary-button, .chatbot-chip, .gmaps-chip { user-se
 .threads-inline-post-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* Profile Dropdown Menu Reset & Polish */
+.profile-dropdown-card {
+  width: 290px !important;
+  max-width: 90vw !important;
+  border-radius: 12px !important;
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25) !important;
+}
+
+.profile-dropdown-btn {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 42px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  background: var(--hover-subtle) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--border-light) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  text-align: left !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+}
+
+.profile-dropdown-btn:hover {
+  background: var(--border) !important;
+  border-color: var(--border) !important;
+  color: var(--ink) !important;
+}
+
+.profile-dropdown-btn span:first-child {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 18px !important;
+  height: 18px !important;
+  flex-shrink: 0 !important;
+  color: var(--muted) !important;
+}
+
+.profile-dropdown-btn span:last-child {
+  white-space: nowrap !important;
+  flex: 1 !important;
+}
+
+.profile-dropdown-signout {
+  width: 100% !important;
+  height: auto !important;
+  min-height: 42px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  white-space: nowrap !important;
 }

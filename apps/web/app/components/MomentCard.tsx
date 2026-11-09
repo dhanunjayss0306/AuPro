@@ -137,12 +137,11 @@ export function MomentCard({
   };
 
   useEffect(() => {
-    if (!commentsOpen && !postDetailsOpen) return;
+    if (!postDetailsOpen) return;
 
     const previousOverflow = document.body.style.overflow;
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setCommentsOpen(false);
         setPostDetailsOpen(false);
       }
     };
@@ -153,7 +152,7 @@ export function MomentCard({
       document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [commentsOpen, postDetailsOpen]);
+  }, [postDetailsOpen]);
 
   useEffect(() => {
     if (!localToast) return;
@@ -596,7 +595,7 @@ export function MomentCard({
                 type="button"
                 className="threads-action-btn insta-action-btn"
                 aria-label="Comment"
-                onClick={() => setCommentsOpen(true)}
+                onClick={() => setCommentsOpen(!commentsOpen)}
               >
                 <InstagramCommentIcon size={20} />
                 {commentsCount > 0 && <span className="threads-count-num">{commentsCount}</span>}
@@ -638,7 +637,7 @@ export function MomentCard({
           <div className="threads-activity-line">
             <span>{likes} {likes === 1 ? 'like' : 'likes'}</span>
             <span>•</span>
-            <span className="threads-replies-link" onClick={() => setCommentsOpen(true)}>
+            <span className="threads-replies-link" onClick={() => setCommentsOpen(!commentsOpen)}>
               {commentsCount} {commentsCount === 1 ? 'reply' : 'replies'}
             </span>
             {reposts > 0 && (
@@ -651,62 +650,84 @@ export function MomentCard({
         </div>
       </div>
 
-      {/* Interactive Comments Dialog (Threads Style) */}
+      {/* Inline Comments Section: Opens directly below the post so the post is always visible */}
       {commentsOpen && (
-        <div
-          className="insta-comments-backdrop"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setCommentsOpen(false);
-          }}
-        >
-          <section className="insta-comments-dialog" role="dialog" aria-modal="true" aria-labelledby={`comments-title-${post.id}`}>
-            <header className="insta-comments-header">
-              <h2 id={`comments-title-${post.id}`}>Replies to @{post.username}</h2>
-              <button className="insta-comments-close" aria-label="Close comments" onClick={() => setCommentsOpen(false)}>×</button>
-            </header>
+        <div className="threads-inline-comments-section">
+          <div className="threads-inline-comments-header">
+            <span className="threads-inline-comments-title">
+              Replies to @{post.username} ({comments.length})
+            </span>
+            <button
+              type="button"
+              className="threads-inline-close-btn"
+              onClick={() => setCommentsOpen(false)}
+              aria-label="Hide replies"
+            >
+              Hide replies ✕
+            </button>
+          </div>
 
-            <div className="insta-comments-list">
-              {comments.length === 0 ? (
-                <p className="insta-comments-empty">No replies yet. Be the first to start the thread.</p>
-              ) : comments.map((item) => (
-                <article className="insta-comment-item" key={item.id}>
-                  <div className="insta-comment-avatar" aria-hidden="true">{item.avatarText}</div>
-                  <div className="insta-comment-content">
-                    <p><strong>{item.username}</strong>{item.text && <> {item.text}</>}</p>
-                    {item.imageUrl && <img className="insta-comment-image" src={item.imageUrl} alt={`Image attached by ${item.username}`} />}
-                    <time>{item.timeAgo}</time>
+          <div className="threads-inline-comments-list">
+            {comments.length === 0 ? (
+              <p className="threads-inline-empty">No replies yet. Be the first to start the thread.</p>
+            ) : (
+              comments.map((item) => (
+                <div className="threads-inline-comment-item" key={item.id}>
+                  <div className="threads-inline-comment-avatar" aria-hidden="true">
+                    {item.avatarText || (item.username ? item.username[0].toUpperCase() : 'A')}
                   </div>
-                </article>
-              ))}
-            </div>
-
-            <div className="insta-comments-composer">
-              {commentImage && (
-                <div className="insta-comment-image-preview">
-                  <img src={commentImage} alt="Selected preview" />
-                  <button type="button" aria-label="Remove image" onClick={() => setCommentImage('')}>×</button>
-                  <span>Preview only</span>
+                  <div className="threads-inline-comment-bubble">
+                    <div className="threads-inline-comment-top">
+                      <strong className="threads-inline-comment-user">{item.username}</strong>
+                      <span className="threads-inline-comment-time">{item.timeAgo}</span>
+                    </div>
+                    {item.text && <p className="threads-inline-comment-text">{item.text}</p>}
+                    {item.imageUrl && (
+                      <img
+                        className="threads-inline-comment-img"
+                        src={item.imageUrl}
+                        alt={`Attachment by ${item.username}`}
+                        loading="lazy"
+                      />
+                    )}
+                  </div>
                 </div>
-              )}
-              {commentError && <p className="insta-comment-error" role="alert">{commentError}</p>}
-              <form className="insta-comment-form" onSubmit={handleCommentSubmit}>
-                <label className="insta-comment-attach" aria-label="Attach an image">
-                  <input type="file" accept="image/*" onChange={handleCommentImage} />
-                  <span aria-hidden="true">＋</span>
-                </label>
-                <input
-                  className="insta-comment-input"
-                  value={comment}
-                  onChange={(event) => setComment(event.target.value)}
-                  placeholder="Reply to thread..."
-                  aria-label="Reply to thread"
-                />
-                <button type="submit" className="insta-comment-post" disabled={!comment.trim() && !commentImage}>
-                  Post
-                </button>
-              </form>
-            </div>
-          </section>
+              ))
+            )}
+          </div>
+
+          <div className="threads-inline-composer">
+            {commentImage && (
+              <div className="threads-inline-image-preview">
+                <img src={commentImage} alt="Selected preview" />
+                <button type="button" aria-label="Remove image" onClick={() => setCommentImage('')}>×</button>
+              </div>
+            )}
+            {commentError && <p className="threads-inline-error" role="alert">{commentError}</p>}
+            <form className="threads-inline-form" onSubmit={handleCommentSubmit}>
+              <div className="threads-inline-current-avatar" aria-hidden="true">
+                {currentUsername ? currentUsername[0].toUpperCase() : 'U'}
+              </div>
+              <label className="threads-inline-attach-btn" aria-label="Attach photo" title="Attach photo">
+                <input type="file" accept="image/*" onChange={handleCommentImage} />
+                <Glyph n="plus" />
+              </label>
+              <input
+                className="threads-inline-input"
+                value={comment}
+                onChange={(event) => setComment(event.target.value)}
+                placeholder={`Reply to @${post.username}...`}
+                aria-label="Reply to post"
+              />
+              <button
+                type="submit"
+                className="threads-inline-post-btn"
+                disabled={!comment.trim() && !commentImage}
+              >
+                Post
+              </button>
+            </form>
+          </div>
         </div>
       )}
 

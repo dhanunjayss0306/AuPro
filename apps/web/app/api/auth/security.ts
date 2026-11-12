@@ -20,7 +20,7 @@ const AUTH_SECRET = process.env.AUTH_SECRET || 'aupro-andhra-university-otp-sign
 
 export interface SessionPayload {
   email: string;
-  role: 'head_admin' | 'student';
+  role: 'head_admin' | 'hod' | 'student';
   issuedAt: number;
   expiresAt: number;
 }
@@ -31,11 +31,11 @@ export interface SessionPayload {
  */
 export function signSessionToken(
   email: string,
-  role: 'head_admin' | 'student' = 'student',
+  role: 'head_admin' | 'hod' | 'student' = 'student',
   durationMs: number = 30 * 24 * 60 * 60 * 1000
 ): string {
   const cleanEmail = email.toLowerCase().trim();
-  const effectiveRole = isHeadAdmin(cleanEmail) ? 'head_admin' : role;
+  const effectiveRole = isHeadAdmin(cleanEmail) ? 'head_admin' : isHod(cleanEmail) ? 'hod' : role;
   const now = Date.now();
   
   const payload: SessionPayload = {
@@ -90,6 +90,84 @@ export function isHeadAdmin(email: string | null | undefined): boolean {
   if (!email) return false;
   const clean = email.toLowerCase().trim();
   return clean === MAIN_ADMIN_EMAIL || clean.startsWith('325506402371');
+}
+
+// ============================================================================
+// HOD (HEAD OF DEPARTMENT) ROLE — SIGNING FLOW
+// HOD accounts are official department mailboxes such as
+// hod.cse@andhrauniversity.edu.in. An HOD can only act on applications
+// from their own department: post a signing time and mark applications
+// signed / collected. An HOD can never approve or reject.
+// ============================================================================
+
+/**
+ * True for official HOD mailboxes: hod.<dept>@andhrauniversity.edu.in
+ * (also accepts the existing hod* prefix pattern, e.g. hod@...).
+ */
+export function isHod(email: string | null | undefined): boolean {
+  if (!email) return false;
+  const clean = email.toLowerCase().trim();
+  return clean.startsWith('hod') && clean.endsWith('@andhrauniversity.edu.in');
+}
+
+/**
+ * Department key for an HOD mailbox: hod.cse -> 'cse', hod.ece -> 'ece',
+ * hod.civil -> 'civil', hod.mech -> 'mech', generic hod.<x> -> 'x'.
+ * Returns 'other' for non-HOD mailboxes or a bare hod@... address.
+ */
+export function getHodDepartment(email: string | null | undefined): string {
+  if (!email || !isHod(email)) return 'other';
+  const local = email.toLowerCase().trim().split('@')[0];
+  if (!local.startsWith('hod.')) return 'other';
+  const key = local.slice(4).split('.')[0];
+  return key || 'other';
+}
+
+/**
+ * Normalizes a free-text department string (as stored on applications)
+ * to a department key: computer science / cse / cs -> 'cse',
+ * electronics / ece -> 'ece', civil -> 'civil', mechanical / mech -> 'mech',
+ * anything else -> 'other'.
+ */
+export function normalizeDepartmentKey(department: string | null | undefined): string {
+  if (!department) return 'other';
+  const d = department.toLowerCase();
+  if (d.includes('computer') || d.includes('cse') || /(^|[^a-z])cs([^a-z]|$)/.test(d)) return 'cse';
+  if (d.includes('electronics') || d.includes('ece') || /(^|[^a-z])ec([^a-z]|$)/.test(d)) return 'ece';
+  if (d.includes('civil')) return 'civil';
+  if (d.includes('mechanical') || d.includes('mech')) return 'mech';
+  return 'other';
+}
+
+/**
+ * Official HOD mailbox for a department, or null when the department has
+ * no mapped HOD mailbox (e.g. 'other').
+ */
+export function getHodEmailForDepartment(department: string | null | undefined): string | null {
+  const key = normalizeDepartmentKey(department);
+  if (key === 'other') return null;
+  return `hod.${key}@andhrauniversity.edu.in`;
+}
+
+/**
+ * Checks if the request is authorized as an HOD.
+ * Accepts a verified session token with role 'hod' OR a validated client
+ * verification payload claiming an HOD email. When a department is given,
+ * the HOD's department must match it.
+ */
+export function isRequestAuthorizedAsHod(req: Request, claimingEmail?: string, department?: string): boolean {
+  const session = getAuthenticatedUser(req);
+  let hodEmail: string | null = null;
+  if (session && session.role === 'hod') {
+    hodEmail = session.email;
+  } else if (claimingEmail && isHod(claimingEmail)) {
+    hodEmail = claimingEmail.toLowerCase().trim();
+  }
+  if (!hodEmail) return false;
+  if (department) {
+    return getHodDepartment(hodEmail) === normalizeDepartmentKey(department);
+  }
+  return true;
 }
 
 /**

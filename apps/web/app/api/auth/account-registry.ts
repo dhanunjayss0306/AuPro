@@ -13,6 +13,33 @@ import os from 'node:os';
 
 export const MAIN_ADMIN_EMAIL = '325506402371@andhrauniversity.edu.in';
 
+// Department helpers mirrored from app/api/auth/security.ts (kept local
+// instead of imported: this registry is also loaded directly by node --test,
+// where an extensionless relative import cannot resolve).
+function normalizeDepartmentKey(department: string | null | undefined): string {
+  if (!department) return 'other';
+  const d = department.toLowerCase();
+  if (d.includes('computer') || d.includes('cse') || /(^|[^a-z])cs([^a-z]|$)/.test(d)) return 'cse';
+  if (d.includes('electronics') || d.includes('ece') || /(^|[^a-z])ec([^a-z]|$)/.test(d)) return 'ece';
+  if (d.includes('civil')) return 'civil';
+  if (d.includes('mechanical') || d.includes('mech')) return 'mech';
+  return 'other';
+}
+
+function getHodEmailForDepartment(department: string | null | undefined): string | null {
+  const key = normalizeDepartmentKey(department);
+  if (key === 'other') return null;
+  return `hod.${key}@andhrauniversity.edu.in`;
+}
+
+// Application lifecycle for the HOD signing flow:
+// pending     = submitted, awaiting Head Administrator verification
+// approved    = Head Administrator verified, HOD notified, awaiting HOD to post a signing time
+// time_posted = HOD posted a signing date/time/venue; student comes in person
+// signed      = student came in person and got it signed / collected (end state)
+// rejected    = Head Administrator rejected
+export type ApplicationStatus = 'pending' | 'approved' | 'time_posted' | 'signed' | 'rejected';
+
 export interface ServerStudentProfile {
   email: string;
   name: string;
@@ -70,7 +97,7 @@ export interface ServerStudentApplication {
   department?: string;
   year?: string;
   submittedAt: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: ApplicationStatus;
   documentUrl?: string;
   documentName?: string;
   letterContent?: string;
@@ -670,21 +697,45 @@ export function addStudentApplication(app: Partial<ServerStudentApplication>): S
   return newApp;
 }
 
+export function getApplicationByRefId(refId: string): ServerStudentApplication | null {
+  const store = loadStore();
+  return (store.applications || []).find((a) => a.refId === refId || a.id === refId) || null;
+}
+
+/**
+ * Number of applications in a department that the Head Administrator has
+ * verified and are now waiting for the HOD's signature (status 'approved').
+ */
+export function countApprovedAwaitingHod(department: string | null | undefined): number {
+  const store = loadStore();
+  const key = normalizeDepartmentKey(department);
+  return (store.applications || []).filter(
+    (a) => a.status === 'approved' && normalizeDepartmentKey(a.department) === key
+  ).length;
+}
+
+// Alias kept for readability at call sites that talk about the HOD queue.
+export function getHodPendingCount(department: string | null | undefined): number {
+  return countApprovedAwaitingHod(department);
+}
+
 export function updateApplicationStatus(
   refId: string,
-  status: 'pending' | 'approved' | 'rejected',
+  status: ApplicationStatus,
   details?: {
     appointmentDate?: string;
     appointmentTime?: string;
     appointmentVenue?: string;
     requiredDocuments?: string;
     verificationNote?: string;
-  }
-): boolean {
+  },
+  actor?: { email?: string; role?: 'head_admin' | 'hod' | 'student' }
+): { updated: boolean; hodPendingCount: number; hodBatchAlert: boolean } {
   const store = loadStore();
   store.applications = Array.isArray(store.applications) ? store.applications : [];
   const app = store.applications.find((a) => a.refId === refId || a.id === refId);
-  if (!app) return false;
+  if (!app) return { updated: false, hodPendingCount: 0, hodBatchAlert: false };
+  const previousStatus = app.status;
   app.status = status;
   if (details) {
     if (details.appointmentDate) app.appointmentDate = details.appointmentDate;
@@ -701,10 +752,44 @@ export function updateApplicationStatus(
   }
   saveStoreToFile(store);
 
+  const actorEmail = actor?.email || MAIN_ADMIN_EMAIL;
+  const actionLabel =
+    status === 'approved'
+      ? 'Application Approved — HOD Notified'
+      : status === 'time_posted'
+        ? 'Signing Time Posted by HOD'
+        : status === 'signed'
+          ? 'Certificate Signed & Collected'
+          : 'Application Status Updated';
   logServerActivity(
-    'Application ' + (status === 'approved' ? 'Approved & Appointment Scheduled' : 'Status Updated'),
-    MAIN_ADMIN_EMAIL,
+    actionLabel,
+    actorEmail,
     app.serviceTitle + ' for ' + app.studentName + ' (' + app.refId + ') marked as ' + status
   );
-  return true;
+
+  // On approval the HOD of the student's department is notified, and if
+  // more than 10 students are now waiting for that HOD's signature, a
+  // batch alert goes to the HOD and to the Head Administrator account.
+  let hodPendingCount = countApprovedAwaitingHod(app.department);
+  let hodBatchAlert = false;
+  if (status === 'approved' && previousStatus !== 'approved') {
+    const deptLabel = app.department || 'AU Engineering';
+    const hodEmail = getHodEmailForDepartment(app.department);
+    logServerActivity(
+      'HOD Notified — Signature Requested',
+      hodEmail || MAIN_ADMIN_EMAIL,
+      app.serviceTitle + ' for ' + app.studentName + ' (' + app.refId + ') verified by the Head Administrator. ' +
+        (hodEmail ? 'HOD ' + hodEmail : 'Head Administrator') + ' notified — ' +
+        hodPendingCount + ' student' + (hodPendingCount === 1 ? '' : 's') + ' now waiting for the HOD signature in ' + deptLabel + '.'
+    );
+    if (hodPendingCount > 10) {
+      hodBatchAlert = true;
+      const alertDetails =
+        hodPendingCount + ' students in ' + deptLabel + ' are waiting for the HOD signature. ' +
+        'Please post a signing time so they can come and collect their signed documents.';
+      logServerActivity('HOD Signing Queue Alert — More Than 10 Waiting', hodEmail || MAIN_ADMIN_EMAIL, alertDetails);
+      logServerActivity('HOD Signing Queue Alert — More Than 10 Waiting', MAIN_ADMIN_EMAIL, alertDetails);
+    }
+  }
+  return { updated: true, hodPendingCount, hodBatchAlert };
 }

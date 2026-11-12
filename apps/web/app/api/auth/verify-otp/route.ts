@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
 import { registerAccount, logServerActivity } from '../account-registry';
-import { signSessionToken, isHeadAdmin } from '../security';
+import { signSessionToken, isHeadAdmin, isHod } from '../security';
 
 const COLLEGE_DOMAIN = '@andhrauniversity.edu.in';
 const AUTH_SECRET = process.env.AUTH_SECRET || 'aupro-andhra-university-otp-signing-secret-2026';
@@ -132,7 +132,7 @@ export async function POST(req: Request) {
     );
 
     // Verified! Generate proof of verification timestamp & signed session token
-    const role = isHeadAdmin(cleanEmail) ? 'head_admin' : 'student';
+    const role = isHeadAdmin(cleanEmail) ? 'head_admin' : isHod(cleanEmail) ? 'hod' : 'student';
     const sessionToken = signSessionToken(cleanEmail, role);
 
     const response = NextResponse.json({

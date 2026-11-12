@@ -44,6 +44,10 @@ import {
   saveRegisteredUser,
   HEAD_ACCOUNT_EMAIL,
   isHeadAccount,
+  isHodAccount,
+  getHodDepartment,
+  normalizeDepartmentKey,
+  HOD_DEPARTMENT_NAMES,
   getRegisteredUsers,
   deleteRegisteredUser,
   purgeAllExceptHeadAccount,
@@ -1032,6 +1036,8 @@ export default function Home() {
   // Head Account Master Administrator State (Only for 325506402371@andhrauniversity.edu.in)
   const [registeredUsersList, setRegisteredUsersList] = useState<Record<string, StudentProfile>>({});
   const [studentApplications, setStudentApplications] = useState<any[]>([]);
+  // HOD signing-time draft: one open form at a time, keyed by application ref ID.
+  const [hodTimeDraft, setHodTimeDraft] = useState<{ refId: string; date: string; time: string; venue: string } | null>(null);
   const [showAdminNotifications, setShowAdminNotifications] = useState(false);
   const [platformActivities, setPlatformActivities] = useState<PlatformActivity[]>([]);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
@@ -2824,6 +2830,221 @@ export default function Home() {
                   </p>
                 </div>
 
+                {/* HOD SIGNING QUEUE: shown only to signed-in HOD accounts */}
+                {isHodAccount(authEmail) && (() => {
+                  const hodDeptKey = getHodDepartment(authEmail);
+                  const hodDeptName = HOD_DEPARTMENT_NAMES[hodDeptKey] || 'Andhra University College of Engineering';
+                  const hodQueue = studentApplications.filter(
+                    (a) => normalizeDepartmentKey(a.department) === hodDeptKey && (a.status === 'approved' || a.status === 'time_posted')
+                  );
+                  return (
+                    <div className="card" style={{ background: 'var(--surface-elevated, var(--surface))', border: '1px solid var(--border)', borderRadius: 14, padding: 18 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 18 }}><Glyph n="check" /></span>
+                          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>HOD Signing Queue — {hodDeptName}</h3>
+                        </div>
+                        <span style={{ fontSize: 12, color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>
+                          {hodQueue.length} waiting for your signature
+                        </span>
+                      </div>
+                      <p style={{ margin: '0 0 14px 0', fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.5 }}>
+                        Applications verified by the Head Administrator for your department. Post a signing date and time, and students will come in person to get it signed.
+                      </p>
+                      {hodQueue.length > 10 && (
+                        <div style={{ background: 'rgba(220, 38, 38, 0.08)', border: '1px solid rgba(220, 38, 38, 0.35)', borderRadius: 8, padding: '10px 12px', marginBottom: 12, fontSize: 13, fontWeight: 600, color: '#b91c1c' }}>
+                          <Glyph n="bell" /> More than 10 students are waiting for your signature ({hodQueue.length}). Please post a signing time soon.
+                        </div>
+                      )}
+                      {hodQueue.length === 0 ? (
+                        <div style={{ fontSize: 13, color: 'var(--muted)', padding: '8px 0' }}>
+                          No verified applications are waiting for your signature right now.
+                        </div>
+                      ) : (
+                        <div className="stack" style={{ gap: 12 }}>
+                          {hodQueue.map((app) => (
+                            <div
+                              key={app.id || app.refId}
+                              style={{
+                                background: 'var(--surface)',
+                                border: app.status === 'time_posted' ? '1.5px solid #22c55e' : '1px solid var(--border)',
+                                borderRadius: 10,
+                                padding: 14,
+                              }}
+                            >
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+                                <div>
+                                  <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink)' }}>{app.serviceTitle}</span>
+                                  <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
+                                    <strong style={{ color: 'var(--ink)' }}>{app.studentName}</strong> · Roll: {app.rollNo} · Ref ID: <code style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: '#701d32' }}>{app.refId}</code>
+                                  </div>
+                                  <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
+                                    Purpose: {app.purpose || 'Verification'} · Submitted: {new Date(app.submittedAt || Date.now()).toLocaleDateString()}
+                                  </div>
+                                </div>
+                                <span
+                                  style={{
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                    padding: '3px 10px',
+                                    borderRadius: 999,
+                                    background: 'rgba(34, 197, 94, 0.15)',
+                                    color: '#15803d',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 4,
+                                  }}
+                                >
+                                  {app.status === 'time_posted' ? <><Glyph n="check" /> Signing Time Posted</> : <><Glyph n="clock" /> Verified — Awaiting Signing Time</>}
+                                </span>
+                              </div>
+
+                              {app.status === 'time_posted' ? (
+                                <>
+                                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 8, background: 'var(--hover-subtle)', padding: 10, borderRadius: 8, fontSize: 12 }}>
+                                    <div>
+                                      <span style={{ color: 'var(--muted)', fontSize: 10, textTransform: 'uppercase', fontWeight: 600 }}>Signing Date</span>
+                                      <div style={{ fontWeight: 700, color: 'var(--ink)', marginTop: 2 }}>{app.appointmentDate || 'Next Working Day'}</div>
+                                    </div>
+                                    <div>
+                                      <span style={{ color: 'var(--muted)', fontSize: 10, textTransform: 'uppercase', fontWeight: 600 }}>Time Slot</span>
+                                      <div style={{ fontWeight: 700, color: 'var(--ink)', marginTop: 2 }}>{app.appointmentTime || '11:30 AM - 12:30 PM'}</div>
+                                    </div>
+                                    <div>
+                                      <span style={{ color: 'var(--muted)', fontSize: 10, textTransform: 'uppercase', fontWeight: 600 }}>Venue</span>
+                                      <div style={{ fontWeight: 700, color: 'var(--ink)', marginTop: 2 }}>{app.appointmentVenue || 'HOD Office'}</div>
+                                    </div>
+                                  </div>
+                                  <div style={{ marginTop: 10 }}>
+                                    <button
+                                      type="button"
+                                      className="primary-button"
+                                      style={{ fontSize: 12, padding: '6px 14px', borderRadius: 8, background: '#701d32', borderColor: '#701d32' }}
+                                      onClick={async () => {
+                                        try {
+                                          const res = await fetch('/api/applications', {
+                                            method: 'PATCH',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                              refId: app.refId,
+                                              status: 'signed',
+                                              hodEmail: authEmail,
+                                            }),
+                                          });
+                                          if (res.ok) {
+                                            const data = await res.json();
+                                            if (Array.isArray(data?.applications)) setStudentApplications(data.applications);
+                                            setToast(`Marked signed & collected for ${app.studentName} (${app.refId}).`);
+                                          } else {
+                                            const data = await res.json().catch(() => null);
+                                            setToast(data?.error || 'Could not mark as signed.');
+                                          }
+                                        } catch {
+                                          setToast('Error marking as signed.');
+                                        }
+                                      }}
+                                    >
+                                      <Glyph n="check" /> Mark Signed / Collected
+                                    </button>
+                                  </div>
+                                </>
+                              ) : hodTimeDraft?.refId === app.refId ? (
+                                <form
+                                  onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    if (!hodTimeDraft.date.trim() || !hodTimeDraft.time.trim()) {
+                                      setToast('Please enter a signing date and time.');
+                                      return;
+                                    }
+                                    try {
+                                      const res = await fetch('/api/applications', {
+                                        method: 'PATCH',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                          refId: app.refId,
+                                          status: 'time_posted',
+                                          hodEmail: authEmail,
+                                          appointmentDate: hodTimeDraft.date,
+                                          appointmentTime: hodTimeDraft.time,
+                                          appointmentVenue: hodTimeDraft.venue,
+                                        }),
+                                      });
+                                      if (res.ok) {
+                                        const data = await res.json();
+                                        if (Array.isArray(data?.applications)) setStudentApplications(data.applications);
+                                        setToast(`Signing time posted for ${app.studentName} (${app.refId}).`);
+                                        setHodTimeDraft(null);
+                                      } else {
+                                        const data = await res.json().catch(() => null);
+                                        setToast(data?.error || 'Could not post signing time.');
+                                      }
+                                    } catch {
+                                      setToast('Error posting signing time.');
+                                    }
+                                  }}
+                                  className="stack"
+                                  style={{ gap: 10, marginTop: 10 }}
+                                >
+                                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10 }}>
+                                    <div>
+                                      <label className="field-label" style={{ fontSize: 12, fontWeight: 600 }}>Signing Date *</label>
+                                      <input
+                                        className="search"
+                                        value={hodTimeDraft.date}
+                                        onChange={(e) => setHodTimeDraft({ ...hodTimeDraft, date: e.target.value })}
+                                        placeholder="e.g. 13 Nov 2026"
+                                        required
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="field-label" style={{ fontSize: 12, fontWeight: 600 }}>Time Slot *</label>
+                                      <input
+                                        className="search"
+                                        value={hodTimeDraft.time}
+                                        onChange={(e) => setHodTimeDraft({ ...hodTimeDraft, time: e.target.value })}
+                                        placeholder="e.g. 11:30 AM - 12:30 PM"
+                                        required
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="field-label" style={{ fontSize: 12, fontWeight: 600 }}>Venue</label>
+                                      <input
+                                        className="search"
+                                        value={hodTimeDraft.venue}
+                                        onChange={(e) => setHodTimeDraft({ ...hodTimeDraft, venue: e.target.value })}
+                                        placeholder="e.g. HOD Office, CSE Block"
+                                      />
+                                    </div>
+                                  </div>
+                                  <div style={{ display: 'flex', gap: 10 }}>
+                                    <button type="submit" className="primary-button" style={{ fontSize: 12, padding: '6px 14px', borderRadius: 8, background: '#701d32', borderColor: '#701d32' }}>
+                                      <Glyph n="check" /> Confirm &amp; Post Signing Time
+                                    </button>
+                                    <button type="button" className="secondary-button" onClick={() => setHodTimeDraft(null)}>
+                                      Cancel
+                                    </button>
+                                  </div>
+                                </form>
+                              ) : (
+                                <div style={{ marginTop: 10 }}>
+                                  <button
+                                    type="button"
+                                    className="primary-button"
+                                    style={{ fontSize: 12, padding: '6px 14px', borderRadius: 8, background: '#701d32', borderColor: '#701d32' }}
+                                    onClick={() => setHodTimeDraft({ refId: app.refId, date: '', time: '', venue: '' })}
+                                  >
+                                    <Glyph n="clock" /> Post Signing Time
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
                 {/* SECTION 1: MY SUBMITTED APPLICATIONS & APPOINTMENT PASSES */}
                 {(() => {
                   const myApps = studentApplications.filter(
@@ -2844,12 +3065,20 @@ export default function Home() {
                       </div>
 
                       <div className="stack" style={{ gap: 12 }}>
-                        {myApps.map((app) => (
+                        {myApps.map((app) => {
+                          const isVerifiedFlow = app.status === 'approved' || app.status === 'time_posted' || app.status === 'signed';
+                          const badgeStyle =
+                            app.status === 'rejected'
+                              ? { background: 'rgba(220, 38, 38, 0.12)', color: '#b91c1c' }
+                              : isVerifiedFlow
+                                ? { background: 'rgba(34, 197, 94, 0.15)', color: '#15803d' }
+                                : { background: 'rgba(234, 179, 8, 0.15)', color: '#b45309' };
+                          return (
                           <div
                             key={app.id || app.refId}
                             style={{
                               background: 'var(--surface)',
-                              border: app.status === 'approved' ? '1.5px solid #22c55e' : '1px solid var(--border)',
+                              border: isVerifiedFlow ? '1.5px solid #22c55e' : app.status === 'rejected' ? '1.5px solid #ef4444' : '1px solid var(--border)',
                               borderRadius: 10,
                               padding: 14,
                             }}
@@ -2867,19 +3096,23 @@ export default function Home() {
                                   fontWeight: 700,
                                   padding: '3px 10px',
                                   borderRadius: 999,
-                                  background: app.status === 'approved' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(234, 179, 8, 0.15)',
-                                  color: app.status === 'approved' ? '#15803d' : '#b45309',
+                                  background: badgeStyle.background,
+                                  color: badgeStyle.color,
                                   display: 'inline-flex',
                                   alignItems: 'center',
                                   gap: 4,
                                 }}
                               >
-                                {app.status === 'approved' ? <><Glyph n="check" /> Verified &amp; Scheduled</> : <><Glyph n="clock" /> Pending Admin Review</>}
+                                {app.status === 'approved' ? <><Glyph n="check" /> Verified — waiting for the HOD to post a signing time</>
+                                  : app.status === 'time_posted' ? <><Glyph n="check" /> Signing time posted — come in person</>
+                                  : app.status === 'signed' ? <><Glyph n="check" /> Signed &amp; collected</>
+                                  : app.status === 'rejected' ? <><Glyph n="x" /> Rejected</>
+                                  : <><Glyph n="clock" /> Pending Admin Review</>}
                               </span>
                             </div>
 
-                            {/* IF APPROVED: SHOW OFFICIAL VERIFIED NOTICE & APPOINTMENT DETAILS */}
-                            {app.status === 'approved' ? (
+                            {/* VERIFIED FLOW (approved / time_posted / signed): OFFICIAL VERIFIED NOTICE & APPOINTMENT DETAILS */}
+                            {isVerifiedFlow ? (
                               <div style={{ marginTop: 10 }}>
                                 <div style={{ background: 'rgba(34, 197, 94, 0.08)', border: '1px solid rgba(34, 197, 94, 0.3)', borderRadius: 8, padding: '10px 12px', marginBottom: 10 }}>
                                   <div style={{ fontSize: 11, fontWeight: 700, color: '#16a34a', textTransform: 'uppercase', marginBottom: 2 }}>
@@ -2909,6 +3142,22 @@ export default function Home() {
                                   <strong>Documents to Bring:</strong> {app.requiredDocuments || 'Original Student ID Card, Fee Receipt Challan'}
                                 </div>
 
+                                {app.status === 'approved' && (
+                                  <div style={{ marginTop: 8, fontSize: 12, color: 'var(--muted)', lineHeight: 1.45 }}>
+                                    The HOD has been notified and will post a signing time. Please check back here.
+                                  </div>
+                                )}
+                                {app.status === 'time_posted' && (
+                                  <div style={{ marginTop: 8, fontSize: 12, color: 'var(--ink)', lineHeight: 1.45 }}>
+                                    Signing time posted — come in person at the time above with the documents listed.
+                                  </div>
+                                )}
+                                {app.status === 'signed' && (
+                                  <div style={{ marginTop: 8, fontSize: 12, color: 'var(--ink)', lineHeight: 1.45 }}>
+                                    Signed &amp; collected in person.
+                                  </div>
+                                )}
+
                                 <div style={{ marginTop: 10 }}>
                                   <button
                                     type="button"
@@ -2920,13 +3169,18 @@ export default function Home() {
                                   </button>
                                 </div>
                               </div>
+                            ) : app.status === 'rejected' ? (
+                              <div style={{ fontSize: 12, color: '#b91c1c', marginTop: 6, lineHeight: 1.45, background: 'rgba(220, 38, 38, 0.08)', border: '1px solid rgba(220, 38, 38, 0.3)', borderRadius: 8, padding: '10px 12px' }}>
+                                This application was rejected by the Head Administrator. Please contact the Academic Section for the reason.
+                              </div>
                             ) : (
                               <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 6, lineHeight: 1.45 }}>
                                 Your application has been received by the Academic Section. After the Hachure Manager reviews your uploaded document, an official appointment date and time slot for signing will be scheduled here.
                               </div>
                             )}
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   );
@@ -4633,11 +4887,15 @@ export default function Home() {
                           fontWeight: 600,
                           padding: '2px 8px',
                           borderRadius: 999,
-                          background: app.status === 'approved' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(234, 179, 8, 0.2)',
-                          color: app.status === 'approved' ? '#22c55e' : '#eab308',
+                          background: app.status === 'rejected' ? 'rgba(220, 38, 38, 0.2)' : (app.status === 'approved' || app.status === 'time_posted' || app.status === 'signed') ? 'rgba(34, 197, 94, 0.2)' : 'rgba(234, 179, 8, 0.2)',
+                          color: app.status === 'rejected' ? '#b91c1c' : (app.status === 'approved' || app.status === 'time_posted' || app.status === 'signed') ? '#22c55e' : '#eab308',
                         }}
                       >
-                        {app.status === 'approved' ? <><Glyph n="check" /> Approved</> : <><Glyph n="clock" /> Pending</>}
+                        {app.status === 'approved' ? <><Glyph n="check" /> Approved</>
+                          : app.status === 'time_posted' ? <><Glyph n="check" /> Time Posted</>
+                          : app.status === 'signed' ? <><Glyph n="check" /> Signed</>
+                          : app.status === 'rejected' ? <><Glyph n="x" /> Rejected</>
+                          : <><Glyph n="clock" /> Pending</>}
                       </span>
                     </div>
                     <div style={{ fontSize: 13, color: 'var(--ink)', marginBottom: 4 }}>
@@ -4660,6 +4918,18 @@ export default function Home() {
                     {app.status === 'approved' ? (
                       <div style={{ fontSize: 12, color: '#15803d', fontWeight: 600, marginTop: 6, background: 'rgba(34, 197, 94, 0.1)', padding: '6px 10px', borderRadius: 6 }}>
                         ✓ Appointment Scheduled: <strong>{app.appointmentDate || 'Next working day'}</strong> ({app.appointmentTime || '11:30 AM'}) at {app.appointmentVenue || 'Hachure Manager Counter'}
+                      </div>
+                    ) : app.status === 'time_posted' ? (
+                      <div style={{ fontSize: 12, color: '#15803d', fontWeight: 600, marginTop: 6, background: 'rgba(34, 197, 94, 0.1)', padding: '6px 10px', borderRadius: 6 }}>
+                        ✓ Signing Time Posted by HOD: <strong>{app.appointmentDate || 'Next working day'}</strong> ({app.appointmentTime || '11:30 AM'}) at {app.appointmentVenue || 'HOD Office'}
+                      </div>
+                    ) : app.status === 'signed' ? (
+                      <div style={{ fontSize: 12, color: '#15803d', fontWeight: 600, marginTop: 6, background: 'rgba(34, 197, 94, 0.1)', padding: '6px 10px', borderRadius: 6 }}>
+                        ✓ Signed &amp; Collected: <strong>{app.appointmentDate || 'Next working day'}</strong> ({app.appointmentTime || '11:30 AM'}) at {app.appointmentVenue || 'HOD Office'}
+                      </div>
+                    ) : app.status === 'rejected' ? (
+                      <div style={{ fontSize: 12, color: '#b91c1c', fontWeight: 600, marginTop: 6, background: 'rgba(220, 38, 38, 0.08)', padding: '6px 10px', borderRadius: 6 }}>
+                        ✕ Rejected by Head Administrator.
                       </div>
                     ) : (
                       <div style={{ marginTop: 8 }}>

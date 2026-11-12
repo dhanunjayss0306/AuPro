@@ -133,6 +133,46 @@ export function isHeadAccount(email?: string): boolean {
   return clean === HEAD_ACCOUNT_EMAIL || clean.startsWith('325506402371');
 }
 
+// HOD (Head of Department) accounts: hod.<dept>@andhrauniversity.edu.in.
+// Mirrors the server-side HOD role in app/api/auth/security.ts.
+export function isHodAccount(email?: string): boolean {
+  if (!email) return false;
+  const clean = email.toLowerCase().trim();
+  return clean.startsWith('hod') && clean.endsWith('@andhrauniversity.edu.in');
+}
+
+// Department key for an HOD mailbox: hod.cse -> 'cse', hod.ece -> 'ece',
+// hod.civil -> 'civil', hod.mech -> 'mech', generic hod.<x> -> 'x'.
+export function getHodDepartment(email?: string): string {
+  if (!email || !isHodAccount(email)) return 'other';
+  const local = email.toLowerCase().trim().split('@')[0];
+  if (!local.startsWith('hod.')) return 'other';
+  const key = local.slice(4).split('.')[0];
+  return key || 'other';
+}
+
+// Normalizes a free-text department string (as stored on applications)
+// to a department key: computer science / cse / cs -> 'cse',
+// electronics / ece -> 'ece', civil -> 'civil', mechanical / mech -> 'mech'.
+export function normalizeDepartmentKey(department?: string | null): string {
+  if (!department) return 'other';
+  const d = department.toLowerCase();
+  if (d.includes('computer') || d.includes('cse') || /(^|[^a-z])cs([^a-z]|$)/.test(d)) return 'cse';
+  if (d.includes('electronics') || d.includes('ece') || /(^|[^a-z])ec([^a-z]|$)/.test(d)) return 'ece';
+  if (d.includes('civil')) return 'civil';
+  if (d.includes('mechanical') || d.includes('mech')) return 'mech';
+  return 'other';
+}
+
+// Display name for each HOD department key.
+export const HOD_DEPARTMENT_NAMES: Record<string, string> = {
+  cse: 'Computer Science & Systems Engineering',
+  ece: 'Electronics & Communication Engineering',
+  civil: 'Civil Engineering',
+  mech: 'Mechanical Engineering',
+  other: 'Andhra University College of Engineering',
+};
+
 export const DEFAULT_INITIAL_ACCOUNTS: Record<string, StudentProfile> = {
   [HEAD_ACCOUNT_EMAIL]: {
     email: HEAD_ACCOUNT_EMAIL,

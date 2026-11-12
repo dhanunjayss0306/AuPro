@@ -3,6 +3,7 @@ import {
   getAllApplications,
   addStudentApplication,
   updateApplicationStatus,
+  getApplicationByRefId,
 } from '../auth/account-registry';
 import {
   checkRateLimit,
@@ -12,6 +13,8 @@ import {
   sanitizeImageUrl,
   isAllowedOrigin,
   isRequestAuthorizedAsAdmin,
+  isRequestAuthorizedAsHod,
+  normalizeDepartmentKey,
 } from '../auth/security';
 
 const DEFAULT_SERVICES = [
@@ -26,6 +29,7 @@ const DEFAULT_SERVICES = [
 /**
  * GET /api/applications
  * Returns all submitted student applications and the service catalog.
+ * Optional ?department= filters to one department (e.g. the HOD's own).
  */
 export async function GET(req: Request) {
   try {
@@ -38,7 +42,12 @@ export async function GET(req: Request) {
       );
     }
 
-    const list = getAllApplications();
+    const department = new URL(req.url).searchParams.get('department');
+    let list = getAllApplications();
+    if (department) {
+      const key = normalizeDepartmentKey(department);
+      list = list.filter((a) => normalizeDepartmentKey(a.department) === key);
+    }
     return NextResponse.json({
       success: true,
       count: list.length,
@@ -131,8 +140,15 @@ export async function POST(req: Request) {
 
 /**
  * PATCH /api/applications
- * Updates an application's status (e.g. approved, rejected) by the Head Administrator.
- * Strictly checks that the requester has Head Administrator privileges.
+ * Head Administrator path (unchanged): pending / approved / rejected plus
+ * appointment fields. Approving notifies the HOD of the student's
+ * department; the response carries hodPendingCount and hodBatchAlert.
+ *
+ * HOD path: an HOD of the application's department may ONLY
+ * (a) post a signing date/time/venue, which sets status to 'time_posted'
+ *     (only from 'approved'), and
+ * (b) mark an application 'signed' (only from 'approved' or 'time_posted').
+ * An HOD may NOT approve or reject. Anything else is a 403.
  */
 export async function PATCH(req: Request) {
   try {
@@ -148,20 +164,13 @@ export async function PATCH(req: Request) {
       refId,
       status,
       adminEmail,
+      hodEmail,
       appointmentDate,
       appointmentTime,
       appointmentVenue,
       requiredDocuments,
       verificationNote,
     } = body;
-
-    const isAuthorized = isRequestAuthorizedAsAdmin(req, adminEmail);
-    if (!isAuthorized) {
-      return NextResponse.json(
-        { error: 'Unauthorized: Only the Head Administrator may approve or reject student applications.' },
-        { status: 403 }
-      );
-    }
 
     if (!refId || !status) {
       return NextResponse.json(
@@ -170,34 +179,124 @@ export async function PATCH(req: Request) {
       );
     }
 
-    const validStatus = ['pending', 'approved', 'rejected'].includes(status) ? status : null;
-    if (!validStatus) {
-      return NextResponse.json(
-        { error: 'Invalid application status. Allowed: pending, approved, rejected.' },
-        { status: 400 }
-      );
+    // ---- Head Administrator path (unchanged semantics) ----
+    if (isRequestAuthorizedAsAdmin(req, adminEmail)) {
+      const validStatus = ['pending', 'approved', 'rejected'].includes(status) ? status : null;
+      if (!validStatus) {
+        return NextResponse.json(
+          { error: 'Invalid application status. Allowed: pending, approved, rejected.' },
+          { status: 400 }
+        );
+      }
+
+      const result = updateApplicationStatus(refId, validStatus, {
+        appointmentDate: sanitizeText(appointmentDate, 60),
+        appointmentTime: sanitizeText(appointmentTime, 60),
+        appointmentVenue: sanitizeText(appointmentVenue, 120),
+        requiredDocuments: sanitizeText(requiredDocuments, 300),
+        verificationNote: sanitizeText(verificationNote, 300),
+      }, { email: adminEmail, role: 'head_admin' });
+
+      if (!result.updated) {
+        return NextResponse.json(
+          { error: 'Application not found with the given Reference ID.' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `Application ${refId} updated to ${status}.`,
+        hodPendingCount: result.hodPendingCount,
+        hodBatchAlert: result.hodBatchAlert,
+        applications: getAllApplications(),
+      });
     }
 
-    const updated = updateApplicationStatus(refId, validStatus, {
-      appointmentDate: sanitizeText(appointmentDate, 60),
-      appointmentTime: sanitizeText(appointmentTime, 60),
-      appointmentVenue: sanitizeText(appointmentVenue, 120),
-      requiredDocuments: sanitizeText(requiredDocuments, 300),
-      verificationNote: sanitizeText(verificationNote, 300),
-    });
-
-    if (!updated) {
+    // ---- HOD path: only time_posted and signed, own department only ----
+    const app = getApplicationByRefId(refId);
+    if (!app) {
       return NextResponse.json(
         { error: 'Application not found with the given Reference ID.' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      message: `Application ${refId} updated to ${status}.`,
-      applications: getAllApplications(),
-    });
+    if (!isRequestAuthorizedAsHod(req, hodEmail, app.department)) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Only the HOD of this department may post a signing time or mark an application signed.' },
+        { status: 403 }
+      );
+    }
+
+    if (status === 'time_posted') {
+      if (app.status !== 'approved') {
+        return NextResponse.json(
+          { error: 'Only a verified (approved) application can receive a signing time.' },
+          { status: 409 }
+        );
+      }
+      const cleanDate = sanitizeText(appointmentDate, 60);
+      const cleanTime = sanitizeText(appointmentTime, 60);
+      const cleanVenue = sanitizeText(appointmentVenue, 120);
+      if (!cleanDate || !cleanTime) {
+        return NextResponse.json(
+          { error: 'Signing date and time are required.' },
+          { status: 400 }
+        );
+      }
+      const result = updateApplicationStatus(refId, 'time_posted', {
+        appointmentDate: cleanDate,
+        appointmentTime: cleanTime,
+        appointmentVenue: cleanVenue,
+        requiredDocuments: sanitizeText(requiredDocuments, 300),
+        verificationNote: sanitizeText(verificationNote, 300),
+      }, { email: hodEmail, role: 'hod' });
+      if (!result.updated) {
+        return NextResponse.json(
+          { error: 'Application not found with the given Reference ID.' },
+          { status: 404 }
+        );
+      }
+      return NextResponse.json({
+        success: true,
+        message: `Signing time posted for application ${refId}. Students can now come in person to get it signed.`,
+        hodPendingCount: result.hodPendingCount,
+        hodBatchAlert: result.hodBatchAlert,
+        applications: getAllApplications(),
+      });
+    }
+
+    if (status === 'signed') {
+      if (app.status !== 'approved' && app.status !== 'time_posted') {
+        return NextResponse.json(
+          { error: 'Only an approved or time-posted application can be marked signed.' },
+          { status: 409 }
+        );
+      }
+      const result = updateApplicationStatus(refId, 'signed', {
+        requiredDocuments: sanitizeText(requiredDocuments, 300),
+        verificationNote: sanitizeText(verificationNote, 300),
+      }, { email: hodEmail, role: 'hod' });
+      if (!result.updated) {
+        return NextResponse.json(
+          { error: 'Application not found with the given Reference ID.' },
+          { status: 404 }
+        );
+      }
+      return NextResponse.json({
+        success: true,
+        message: `Application ${refId} marked signed and collected.`,
+        hodPendingCount: result.hodPendingCount,
+        hodBatchAlert: result.hodBatchAlert,
+        applications: getAllApplications(),
+      });
+    }
+
+    return NextResponse.json(
+      { error: 'Unauthorized: HODs may only post a signing time or mark an application signed. Approval and rejection are done by the Head Administrator.' },
+      { status: 403 }
+    );
   } catch (err: any) {
     return NextResponse.json(
       { error: err?.message || 'Server error updating application status.' },

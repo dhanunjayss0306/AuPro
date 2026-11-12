@@ -1,25 +1,31 @@
 @import '@fontsource-variable/instrument-sans';
-@import '@fontsource-variable/jetbrains-mono';
 
-/* Signal theme: flat, no gradients, no glow. Loaded after globals.css, tokens only. */
+/* Signal theme: flat, no gradients, no glow. Loaded after globals.css, tokens only.
+   Fonts: ONE pair only — Instrument Sans for display + body. --font-mono repoints
+   to the same family (tabular numbers only); no second font is loaded.
+   Colours: the LOCKED AuPro palette — burgundy #701D32 + ocean blue #0B5CAD
+   are the two brand colours; gold #C69B45 is the accent. */
 :root {
   --bg: #f6f6f3; --surface: #ffffff; --card-bg: #ffffff; --input-bg: #ffffff;
-  --ink: #121417; --text-main: #121417; --muted: #5c6168;
-  --primary: #1f3fd1; --secondary: #1f3fd1; --gold: #121417;
+  --ink: #121417; --text-main: #121417; --muted: #3f444b;
+  --primary: #701d32; --secondary: #0b5cad; --gold: #c69b45;
   --border: #dedfda; --border-light: #e8e8e3; --chip-bg: #ecece7; --hover-subtle: #efefea;
-  --success: #12805c; --warning: #b45309; --error: #c62828;
+  --success: #16a34a; --warning: #f59e0b; --error: #dc2626;
   --font-display: 'Instrument Sans Variable', 'Instrument Sans', system-ui, sans-serif;
   --font-body: 'Instrument Sans Variable', 'Instrument Sans', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+  --font-mono: 'Instrument Sans Variable', 'Instrument Sans', system-ui, sans-serif;
   --ease: cubic-bezier(.2,.7,.2,1);
   color-scheme: light;
   --teal: color-mix(in srgb, var(--c-blue) 10%, var(--surface)); --soft: color-mix(in srgb, var(--c-blue) 10%, var(--surface));
+  /* Spacing scale (8px base): every gap/padding in the app is one of these. */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px;
 }
 [data-theme='dark'], .dark {
   color-scheme: dark;
   --bg: #0e1013; --surface: #16191d; --card-bg: #16191d; --input-bg: #16191d;
-  --ink: #f2f3f1; --text-main: #f2f3f1; --muted: #9aa0a8;
-  --primary: #7d97ff; --secondary: #7d97ff; --gold: #f2f3f1;
+  --ink: #f2f3f1; --text-main: #f2f3f1; --muted: #b9bec4;
+  --primary: #8e2c43; --secondary: #1e6fb8; --gold: #d4a857;
   --border: #2a2e34; --border-light: #22262b; --chip-bg: #1e2227; --hover-subtle: #1e2227;
 }
 body { font-family: var(--font-body); }
@@ -44,7 +50,7 @@ input, textarea, select, .search { border-radius: 8px; }
   transition: transform .16s var(--ease), background-color .16s var(--ease), border-color .16s var(--ease);
 }
 @media (hover: hover) {
-  .primary-button:hover { background: #1a35b0; }
+  .primary-button:hover { background: #5a1626; }
   .secondary-button:hover, .icon-button:hover { border-color: var(--ink); }
   .card:hover { border-color: var(--ink); }
 }
@@ -81,17 +87,17 @@ input, textarea, select, .search { border-radius: 8px; }
 .gmaps-chip.active, .gmaps-chip.selected { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .card, .gmaps-sheet-place-card:not(.active):not(.selected) { border-left-color: var(--border) !important; }
 
-/* ===== Four-colour system: flat blocks, each colour has one job ===== */
+/* ===== Two brand colours (locked palette) + gold accent + semantic only ===== */
 :root {
-  --c-blue: #1f3fd1;   /* actions, navigation, links */
-  --c-gold: #c69b45;   /* highlights, campus identity */
-  --c-coral: #e8553d;  /* problems, alerts, destructive */
-  --c-green: #12805c;  /* verified, success, directions */
+  --c-blue: #0b5cad;   /* ocean blue: secondary brand colour — links, navigation, info */
+  --c-gold: #c69b45;   /* gold: accent only — badges, rules, highlights */
+  --c-coral: #dc2626;  /* error red: destructive / alerts only */
+  --c-green: #16a34a;  /* green: verified / success only */
   --on-gold: #121417;
   --gold: #8f6a17; --warning: #8f6a17;
 }
 [data-theme='dark'], .dark {
-  --c-blue: #7d97ff; --c-gold: #d4a857; --c-coral: #ff7a63; --c-green: #3ccf9a; --on-gold: #121417;
+  --c-blue: #1e6fb8; --c-gold: #d4a857; --c-coral: #ff7a63; --c-green: #3ccf9a; --on-gold: #121417;
 }
 .tint-blue  { background: color-mix(in srgb, var(--c-blue) 12%, var(--surface)); color: var(--c-blue); }
 .tint-gold  { background: color-mix(in srgb, var(--c-gold) 22%, var(--surface)); color: var(--ink); }
@@ -101,14 +107,14 @@ input, textarea, select, .search { border-radius: 8px; }
 /* Brand and identity */
 .brand-badge { background: var(--c-gold); color: var(--on-gold); border-color: var(--c-gold); font-weight: 600; }
 .topbar { border-bottom: 3px solid var(--c-gold); }
-.eyebrow { color: var(--c-coral); font-weight: 600; }
+.eyebrow { color: var(--secondary); font-weight: 600; }
 
-/* Services: one colour per service type */
+/* Services: tints of the two brand colours + gold accent + neutral only */
 .service-icon { width: 44px; height: 44px; border-radius: 10px; display: grid; place-items: center; }
 .service-icon-document, .service-icon-home { background: color-mix(in srgb, var(--c-blue) 14%, var(--surface)); color: var(--c-blue); }
-.service-icon-payment, .service-icon-help { background: color-mix(in srgb, var(--c-green) 16%, var(--surface)); color: var(--c-green); }
+.service-icon-payment, .service-icon-help { background: color-mix(in srgb, var(--primary) 14%, var(--surface)); color: var(--primary); }
 .service-icon-ticket { background: color-mix(in srgb, var(--c-gold) 30%, var(--surface)); color: var(--ink); }
-.service-icon-bus { background: color-mix(in srgb, var(--c-coral) 15%, var(--surface)); color: var(--c-coral); }
+.service-icon-bus { background: var(--chip-bg); color: var(--ink); }
 .service-card .secondary-button { border-color: var(--c-blue); color: var(--c-blue); }
 .service-card:hover .secondary-button { background: var(--c-blue); color: #fff; }
 
@@ -118,15 +124,15 @@ input, textarea, select, .search { border-radius: 8px; }
 .post-category-tag.announcement { background: color-mix(in srgb, var(--c-gold) 28%, var(--surface)); color: var(--ink); }
 .verified-badge { background: color-mix(in srgb, var(--c-green) 16%, var(--surface)); color: var(--c-green); }
 
-/* AU Info: solid colour blocks */
-.au-info-hero-card { background: var(--c-blue) !important; color: #fff; border-color: var(--c-blue) !important; }
+/* AU Info: solid colour blocks — two brand colours, gold accent, neutral */
+.au-info-hero-card { background: var(--primary) !important; color: #fff; border-color: var(--primary) !important; }
 .au-info-hero-card h1, .au-info-hero-card p, .au-info-hero-card .lead { color: #fff !important; }
 .au-info-hero-card .eyebrow { color: var(--c-gold); }
 .college-stat-card { border: 0 !important; color: var(--ink); }
-.college-stats-grid > :nth-child(1) { background: var(--c-blue) !important; color: #fff; }
-.college-stats-grid > :nth-child(2) { background: var(--c-gold) !important; color: var(--on-gold); }
-.college-stats-grid > :nth-child(3) { background: var(--c-coral) !important; color: #fff; }
-.college-stats-grid > :nth-child(4) { background: var(--c-green) !important; color: #fff; }
+.college-stats-grid > :nth-child(1) { background: var(--primary) !important; color: #fff; }
+.college-stats-grid > :nth-child(2) { background: var(--c-blue) !important; color: #fff; }
+.college-stats-grid > :nth-child(3) { background: var(--c-gold) !important; color: var(--on-gold); }
+.college-stats-grid > :nth-child(4) { background: var(--surface) !important; color: var(--ink); border: 1px solid var(--border) !important; }
 .college-stats-grid > * * { color: inherit !important; }
 
 /* Chat, map and navigation accents */
@@ -136,11 +142,13 @@ input, textarea, select, .search { border-radius: 8px; }
 .secondary-button.danger, .danger-button { color: var(--c-coral); border-color: var(--c-coral); }
 
 /* Dark-mode corrections for the colour blocks */
-[data-theme='dark'] .au-info-hero-card, .dark .au-info-hero-card { background: var(--c-blue) !important; border-color: var(--c-blue) !important; }
+[data-theme='dark'] .au-info-hero-card, .dark .au-info-hero-card { background: var(--primary) !important; border-color: var(--primary) !important; }
 [data-theme='dark'] .au-info-hero-card h1, [data-theme='dark'] .au-info-hero-card p, [data-theme='dark'] .au-info-hero-card .lead,
-.dark .au-info-hero-card h1, .dark .au-info-hero-card p, .dark .au-info-hero-card .lead { color: #0e1013 !important; }
-[data-theme='dark'] .au-info-hero-card .eyebrow, .dark .au-info-hero-card .eyebrow { color: #0e1013; }
-[data-theme='dark'] .college-stats-grid > :nth-child(1), [data-theme='dark'] .college-stats-grid > :nth-child(3), [data-theme='dark'] .college-stats-grid > :nth-child(4) { color: #0e1013; }
+.dark .au-info-hero-card h1, .dark .au-info-hero-card p, .dark .au-info-hero-card .lead { color: #fff !important; }
+[data-theme='dark'] .au-info-hero-card .eyebrow, .dark .au-info-hero-card .eyebrow { color: var(--c-gold); }
+[data-theme='dark'] .college-stats-grid > :nth-child(1), [data-theme='dark'] .college-stats-grid > :nth-child(2) { color: #fff; }
+[data-theme='dark'] .college-stats-grid > :nth-child(3) { color: #121417; }
+[data-theme='dark'] .college-stats-grid > :nth-child(4) { color: var(--ink); }
 [data-theme='dark'] .topbar, .dark .topbar { border-bottom: 3px solid var(--c-gold) !important; }
 [data-theme='dark'] .feed-empty-card, [data-theme='dark'] .profile-feed-empty, .dark .feed-empty-card { background: var(--surface) !important; }
 
@@ -216,14 +224,14 @@ input, textarea, select, .search { border-radius: 8px; }
 
 /* Beat the legacy dark tokens on specificity; keep the plus button on-palette */
 :root[data-theme='dark'], html[data-theme='dark'], html.dark {
-  --primary: #7d97ff; --secondary: #7d97ff; --gold: #d4a857; --warning: #d4a857;
+  --primary: #8e2c43; --secondary: #1e6fb8; --gold: #d4a857; --warning: #d4a857;
   --bg: #0e1013; --surface: #16191d; --surface-elevated: #16191d; --card-bg: #16191d; --input-bg: #16191d; --chip-bg: #1e2227;
 }
 .big-plus-bubble { background: var(--c-blue) !important; color: #fff; border: 0; box-shadow: none !important; }
-[data-theme='dark'] .big-plus-bubble { color: #0e1013; }
+[data-theme='dark'] .big-plus-bubble { color: #fff; }
 .chat-send-btn:disabled { background: var(--chip-bg); color: var(--muted); border-color: var(--border); opacity: 1; }
 .primary-button.chat-send-btn:not(:disabled) { background: var(--c-blue) !important; border-color: var(--c-blue) !important; color: #fff; }
-[data-theme='dark'] .primary-button.chat-send-btn:not(:disabled) { color: #0e1013; }
+[data-theme='dark'] .primary-button.chat-send-btn:not(:disabled) { color: #fff; }
 
 /* ===== Campus photo band: flat frame, no overlay, no text on the image ===== */
 .campus-photo { position: relative; margin: 0 0 16px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--chip-bg); aspect-ratio: 16 / 7; }
@@ -240,8 +248,8 @@ input, textarea, select { font-size: 16px; min-height: 48px; padding-inline: 14p
 .primary-button, .secondary-button, .icon-button, .head-action-btn, .text-button { min-height: 48px; min-width: 48px; }
 .icon-button { display: inline-grid; place-items: center; }
 .chatbot-chip, .gmaps-chip { min-height: 44px; padding-inline: 16px; display: inline-flex; align-items: center; }
-.card, .service-card { padding: 18px; }
-.stack { gap: 16px; }
+.card, .service-card { padding: var(--space-5); }
+.stack { gap: var(--space-5); }
 
 /* Bottom nav: bigger targets, thumb zone, safe-area aware */
 .bottom-nav { padding-bottom: env(safe-area-inset-bottom, 0px); }
@@ -284,7 +292,7 @@ button, .primary-button, .secondary-button, .chatbot-chip, .gmaps-chip { user-se
 .intro-logo-container::after { content: ''; display: block; height: 3px; width: 64px; margin: 14px auto 0; background: var(--c-gold); transform-origin: center; animation: draw .6s .25s var(--ease-out) both; }
 @keyframes introSettle { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 .apply-burgundy-btn:hover, .apply-burgundy-btn:active, .apply-burgundy-btn.clicked { background: var(--c-blue) !important; border-color: var(--c-blue) !important; color: #fff !important; box-shadow: none !important; }
-[data-theme='dark'] .apply-burgundy-btn:hover, [data-theme='dark'] .apply-burgundy-btn:active { color: #0e1013 !important; }
+[data-theme='dark'] .apply-burgundy-btn:hover, [data-theme='dark'] .apply-burgundy-btn:active { color: #fff !important; }
 .gmaps-directions-btn { min-width: 44px; }
 
 /* ===== Flat dark mode: neutralise the legacy dark drop shadows (same selectors, loaded later) ===== */
@@ -500,7 +508,7 @@ button, .primary-button, .secondary-button, .chatbot-chip, .gmaps-chip { user-se
   gap: 8px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 24px;
+  border-radius: 12px;
   padding: 4px 6px 4px 10px;
   transition: border-color 0.16s var(--ease), box-shadow 0.16s var(--ease);
 }
@@ -565,7 +573,7 @@ button, .primary-button, .secondary-button, .chatbot-chip, .gmaps-chip { user-se
   border: none;
   font-weight: 600;
   font-size: 12.5px;
-  border-radius: 16px;
+  border-radius: 8px;
   padding: 6px 14px;
   cursor: pointer;
   transition: opacity 0.16s ease, transform 0.16s ease;
@@ -646,4 +654,15 @@ button, .primary-button, .secondary-button, .chatbot-chip, .gmaps-chip { user-se
   border-radius: 8px !important;
   font-size: 13px !important;
   white-space: nowrap !important;
+}
+
+/* ===== Premium mobile layout: more air, one aligned column, bigger headlines ===== */
+@media (max-width: 640px) {
+  .content { padding: var(--space-5) 20px 40px; }
+  .card, .service-card { padding: 20px; }
+  .stack { gap: 20px; }
+  h1 { font-size: 26px; }
+  h2 { font-size: 19px; }
+  .topbar { gap: 10px; }
+  .bottom-nav button span { font-size: 11px; }
 }

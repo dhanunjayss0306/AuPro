@@ -1,32 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import {
-  InstagramFeedIcon,
-  InstagramLikeIcon,
-  InstagramShareIcon,
-  InstagramLocationIcon,
-  NotificationIcon,
-  ServiceIcon,
-  ServiceIconKind,
-  WhatsAppIcon,
-  ApplicationsIcon,
-  ChatbotIcon,
-  DarkenedAboutIcon,
-  InstagramProfileIcon,
-  BigPlusIcon,
-  GoogleGLogo,
-  GoogleMapsPinIcon,
-  DirectionsDiamondIcon,
-  LayersIcon,
-  CrosshairGpsIcon,
-  SwapRouteIcon,
-  WalkIcon,
-  CarIcon,
-  TransitBusIcon,
-  SunIcon,
-  MoonIcon,
-} from './components/icons';
+import { GoogleGLogo } from './components/icons'; // brand logo only; all UI icons are Glyph
 import { MomentCard, MomentPost } from './components/MomentCard';
 import { Glyph } from './components/Glyph';
 import { CampusPhoto } from './components/CampusPhoto';
@@ -530,12 +505,18 @@ Roll: ${roll}`,
   },
 ];
 
+// Service icon kinds (document/payment/ticket/bus/home/help) -> the one Glyph set.
+const serviceGlyph: Record<string, string> = {
+  document: 'clipboard', payment: 'card', ticket: 'ticket',
+  bus: 'bus', home: 'home', help: 'help',
+};
+
 const aboutSections = [
-  { title: 'Academic Departments', icon: 'document' as const, detail: 'Explore engineering programs, academic departments, laboratories, and college resources.', link: 'https://www.andhrauniversity.edu.in/colleges/college-of-engineering' },
-  { title: 'University & College History', icon: 'home' as const, detail: 'Learn about Andhra University and the history of its College of Engineering.', link: 'https://www.andhrauniversity.edu.in/' },
-  { title: 'Faculty & Research', icon: 'help' as const, detail: 'Find faculty, research activities, and department contacts in university directories.', link: 'https://www.andhrauniversity.edu.in/' },
-  { title: 'Placements & Collaborations', icon: 'ticket' as const, detail: 'Look for placement-cell notices, campus recruitment updates, and collaboration news.', link: 'https://www.andhrauniversity.edu.in/' },
-  { title: 'Administration & Contacts', icon: 'payment' as const, detail: 'Use official university contacts for current office information and administrative support.', link: 'https://www.andhrauniversity.edu.in/contact-us' },
+  { title: 'Academic Departments', icon: 'document' as const, detail: 'Engineering programs, departments, labs, and resources.', link: 'https://www.andhrauniversity.edu.in/colleges/college-of-engineering' },
+  { title: 'University & College History', icon: 'home' as const, detail: 'The history of Andhra University and its College of Engineering.', link: 'https://www.andhrauniversity.edu.in/' },
+  { title: 'Faculty & Research', icon: 'help' as const, detail: 'Faculty, research, and department contacts.', link: 'https://www.andhrauniversity.edu.in/' },
+  { title: 'Placements & Collaborations', icon: 'ticket' as const, detail: 'Placement notices, recruitment updates, and collaborations.', link: 'https://www.andhrauniversity.edu.in/' },
+  { title: 'Administration & Contacts', icon: 'payment' as const, detail: 'Official contacts for office information and support.', link: 'https://www.andhrauniversity.edu.in/contact-us' },
 ];
 
 const verifiedBotKnowledge: { keywords: string[]; answer: string }[] = [
@@ -608,7 +589,7 @@ export default function Home() {
   const [authYear, setAuthYear] = useState('2nd Year');
   const [authSection, setAuthSection] = useState('');
   const [authPhone, setAuthPhone] = useState('');
-  const [authBio, setAuthBio] = useState('Student at Andhra University College of Engineering. Passionate about technology, projects, and campus collaboration.');
+  const [authBio, setAuthBio] = useState('Student at AU College of Engineering. Building projects, collaborating on campus.');
   const [authPassword, setAuthPassword] = useState('');
   const [authConfirmPassword, setAuthConfirmPassword] = useState('');
   const [authOtp, setAuthOtp] = useState('');
@@ -1948,7 +1929,7 @@ export default function Home() {
           <CampusPhoto slot="login" />
           <div className="card auth-card">
             <div className="eyebrow" style={{ color: 'var(--secondary)', letterSpacing: '0.08em', textTransform: 'uppercase', fontSize: 12, fontWeight: 600, lineHeight: 1.4, marginBottom: 4 }}>ANDHRA UNIVERSITY</div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.25, marginBottom: 8, color: 'var(--ink)' }}>Welcome to AuPro</h1>
+            <h1 style={{ fontSize: 28, fontWeight: 700, lineHeight: 1.25, marginBottom: 8, color: 'var(--ink)' }}>Welcome to AuPro</h1>
             <p className="lead" style={{ fontSize: 15, fontWeight: 400, lineHeight: 1.5, marginBottom: 20 }}>
               Campus updates, verified applications, student problems, and the engineering campus map.
             </p>
@@ -2385,20 +2366,20 @@ export default function Home() {
             onClick={toggleTheme}
             style={{ color: theme === 'dark' ? '#fbbf24' : 'var(--ink)' }}
           >
-            {theme === 'dark' ? <SunIcon size={20} /> : <MoonIcon size={20} />}
+            <Glyph n={theme === 'dark' ? 'sun' : 'moon'} size={20} />
           </button>
           <button className="icon-button" aria-label="Notifications" onClick={() => setTopNotice('No new unread notices.')}>
-            <NotificationIcon size={22} />
+            <Glyph n="bell" size={22} />
           </button>
           <button className="icon-button" aria-label="Open chatbot" onClick={() => setTab('chatbot')}>
-            <ChatbotIcon size={22} />
+            <Glyph n="chat" size={22} />
           </button>
           <button
             className="profile-avatar"
             aria-label="My Profile and Quick Menu"
             onClick={() => setShowProfileMenu((prev) => !prev)}
           >
-            {(authName.trim()[0] || authEmail.trim()[0] || 'A').toUpperCase()}
+            {isHeadAccount(authEmail) ? <img src="/dhanunjay.jpg" alt="Dhanunjay" /> : (authName.trim()[0] || authEmail.trim()[0] || 'A').toUpperCase()}
           </button>
         </div>
       </header>
@@ -2409,7 +2390,7 @@ export default function Home() {
           <div className="profile-dropdown-card" onClick={(e) => e.stopPropagation()}>
             <div className="profile-dropdown-header">
               <div className="profile-dropdown-avatar">
-                {(authName.trim()[0] || authEmail.trim()[0] || 'A').toUpperCase()}
+                {isHeadAccount(authEmail) ? <img src="/dhanunjay.jpg" alt="Dhanunjay" /> : (authName.trim()[0] || authEmail.trim()[0] || 'A').toUpperCase()}
               </div>
               <div className="profile-dropdown-user">
                 <h3>{authName || 'AU Student'}</h3>
@@ -2501,7 +2482,7 @@ export default function Home() {
                 <svg className="empty-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>
                 <h3>No Posts in Feed Yet</h3>
                 <p className="lead" style={{ fontSize: 13, margin: '0 0 16px 0' }}>
-                  Be the first to share an academic update, tech project, or report a campus issue with fellow AU students.
+                  Be the first to share an update or report a campus issue.
                 </p>
                 <button
                   className="primary-button"
@@ -2523,7 +2504,7 @@ export default function Home() {
                       className="secondary-button"
                       disabled={isLoadingMore}
                       onClick={handleLoadMoreFeed}
-                      style={{ fontSize: 13, minHeight: 42, paddingInline: 24, borderRadius: 24, margin: '0 auto' }}
+                      style={{ fontSize: 13, minHeight: 42, paddingInline: 24, borderRadius: 8, margin: '0 auto' }}
                     >
                       {isLoadingMore ? 'Loading older campus updates...' : 'Load older campus updates ↓'}
                     </button>
@@ -2557,11 +2538,11 @@ export default function Home() {
                 <div className="card" style={{ borderLeft: '4px solid #701d32', padding: '24px 20px', borderRadius: 14 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12 }}>
                     <div className={`service-icon service-icon-${activeApplication.icon}`} style={{ width: 48, height: 48, fontSize: 22, flexShrink: 0 }}>
-                      <ServiceIcon kind={activeApplication.icon} size={24} />
+                      <Glyph n={serviceGlyph[activeApplication.icon]} size={24} />
                     </div>
                     <div>
                       <div className="eyebrow" style={{ color: '#701d32', marginBottom: 2 }}>AU College of Engineering · Official Service</div>
-                      <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700 }}>{activeApplication.title}</h2>
+                      <h2 style={{ margin: 0, fontSize: 24, fontWeight: 700 }}>{activeApplication.title}</h2>
                     </div>
                   </div>
                   <p className="lead" style={{ margin: '0 0 18px 0', fontSize: 13.5 }}>{activeApplication.detail}</p>
@@ -2679,7 +2660,7 @@ export default function Home() {
                               <span style={{ fontSize: 18 }}><Glyph n="document" /></span>
                               <div>
                                 <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>{appDocumentName || 'Document attached'}</div>
-                                <div style={{ fontSize: 11, color: '#16a34a' }}>✓ Ready for administrative verification</div>
+                                <div style={{ fontSize: 11, color: '#16a34a', display: 'flex', alignItems: 'center', gap: 4 }}><Glyph n="check" size={12} /> Ready for administrative verification</div>
                               </div>
                             </div>
                             <button
@@ -3192,7 +3173,7 @@ export default function Home() {
                               </div>
                             ) : (
                               <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 6, lineHeight: 1.45 }}>
-                                Your application has been received by the Academic Section. After the Hachure Manager reviews your uploaded document, an official appointment date and time slot for signing will be scheduled here.
+                                Your application is with the Academic Section. After review, your signing appointment will appear here.
                               </div>
                             )}
                           </div>
@@ -3218,7 +3199,7 @@ export default function Home() {
                     <article className="card service-card" key={service.title} style={{ borderRadius: 12 }}>
                       <div className="service-heading">
                         <div className={`service-icon service-icon-${service.icon}`}>
-                          <ServiceIcon kind={service.icon} size={22} />
+                          <Glyph n={serviceGlyph[service.icon]} size={22} />
                         </div>
                         <h2>{service.title}</h2>
                       </div>
@@ -3286,7 +3267,7 @@ export default function Home() {
 
               <label className="field-label" htmlFor="create-loc">Location / Room Number</label>
               <div className="create-location-field">
-                <InstagramLocationIcon size={17} />
+                <Glyph n="pin" size={17} />
                 <input
                   id="create-loc"
                   className="search"
@@ -3313,7 +3294,7 @@ export default function Home() {
                 {createPreview ? (
                   <img className="create-image-preview" src={createPreview} alt="Preview" />
                 ) : (
-                  <span className="create-upload-mark"><BigPlusIcon size={24} /></span>
+                  <span className="create-upload-mark"><Glyph n="plus" size={24} /></span>
                 )}
                 <strong>{createFile ? createFile.name : (createKind === 'problem' ? 'Attach Photo Evidence (Optional)' : 'Attach Document or Banner Photo')}</strong>
                 <span className="lead">Images up to 12 MB</span>
@@ -3346,7 +3327,7 @@ export default function Home() {
             <div className="chatbot-header">
               <div className="eyebrow">AU Assistant</div>
               <h1>Ask AuPro</h1>
-              <p className="lead">Direct, verified answers for College of Engineering administration, exams, fees, and services.</p>
+              <p className="lead">Verified answers on administration, exams, fees, and services.</p>
             </div>
 
             {/* Quick Answer Prompt Chips */}
@@ -3406,7 +3387,7 @@ export default function Home() {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    <WhatsAppIcon size={18} />
+                    <Glyph n="chat" size={18} />
                     <span>Forward query to Department WhatsApp</span>
                   </a>
                 </div>
@@ -3606,7 +3587,7 @@ export default function Home() {
                   {/* Google Maps Search Bar Card */}
                   <div className="gmaps-search-card">
                     <div className="gmaps-search-icon">
-                      <GoogleMapsPinIcon size={20} />
+                      <Glyph n="pin" size={20} />
                     </div>
                     <input
                       className="gmaps-search-input"
@@ -3648,7 +3629,7 @@ export default function Home() {
                         }
                       }}
                     >
-                      <DirectionsDiamondIcon size={20} />
+                      <Glyph n="directions" size={20} />
                     </button>
 
                     {/* Search Auto-suggestions Dropdown */}
@@ -3665,7 +3646,7 @@ export default function Home() {
                               setShowSearchSuggestions(false);
                             }}
                           >
-                            <GoogleMapsPinIcon size={18} />
+                            <Glyph n="pin" size={18} />
                             <div className="gmaps-suggestion-info">
                               <strong>{loc.name}</strong>
                               <span>{loc.category} • {loc.code}</span>
@@ -3728,7 +3709,7 @@ export default function Home() {
                         className={`gmaps-transit-btn ${transportMode === 'w' ? 'active' : ''}`}
                         onClick={() => setTransportMode('w')}
                       >
-                        <WalkIcon size={16} />
+                        <Glyph n="walk" size={16} />
                         <span>Walk</span>
                       </button>
                       <button
@@ -3742,14 +3723,14 @@ export default function Home() {
                         className={`gmaps-transit-btn ${transportMode === 'd' ? 'active' : ''}`}
                         onClick={() => setTransportMode('d')}
                       >
-                        <CarIcon size={16} />
+                        <Glyph n="car" size={16} />
                         <span>Drive</span>
                       </button>
                       <button
                         className={`gmaps-transit-btn ${transportMode === 'r' ? 'active' : ''}`}
                         onClick={() => setTransportMode('r')}
                       >
-                        <TransitBusIcon size={16} />
+                        <Glyph n="bus" size={16} />
                         <span>Bus</span>
                       </button>
                     </div>
@@ -3784,7 +3765,7 @@ export default function Home() {
                         setDirectionsEnd(temp);
                       }}
                     >
-                      <SwapRouteIcon size={16} />
+                      <Glyph n="swap" size={16} />
                     </button>
                   </div>
 
@@ -3898,7 +3879,7 @@ export default function Home() {
                 title={mapLayer === 'm' ? 'Switch to Satellite View' : 'Switch to Street Map'}
                 onClick={() => setMapLayer((prev) => (prev === 'm' ? 'k' : 'm'))}
               >
-                <LayersIcon size={20} />
+                <Glyph n="layers" size={20} />
               </button>
               <button
                 className={`gmaps-fab-btn ${isGpsTracking ? 'gps-active' : ''}`}
@@ -3906,7 +3887,7 @@ export default function Home() {
                 onClick={handleLocateMe}
                 aria-label="My location"
               >
-                <CrosshairGpsIcon size={20} />
+                <Glyph n="locate" size={20} />
               </button>
               <button
                 className="gmaps-fab-btn"
@@ -3988,7 +3969,7 @@ export default function Home() {
                                 setShowDirections(true);
                               }}
                             >
-                              <DirectionsDiamondIcon size={14} />
+                              <Glyph n="directions" size={14} />
                               <span>Directions</span>
                             </button>
                             <button
@@ -4051,7 +4032,7 @@ export default function Home() {
                   <button
                     type="button"
                     className="secondary-button"
-                    style={{ fontSize: 13, padding: '7px 14px', borderRadius: 9999, display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                    style={{ fontSize: 13, padding: '7px 14px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 6 }}
                     onClick={() => setAboutSubTab('posts')}
                   >
                     <span>←</span>
@@ -4065,8 +4046,8 @@ export default function Home() {
                     href="https://andhrauniversity.edu.in"
                     target="_blank"
                     rel="noreferrer"
-                    className="secondary-button"
-                    style={{ fontSize: 12, padding: '7px 12px', textDecoration: 'none' }}
+                    className="text-button"
+                    style={{ fontSize: 12, padding: '7px 12px', textDecoration: 'none', marginTop: 0 }}
                   >
                     Official Portal ↗
                   </a>
@@ -4075,9 +4056,9 @@ export default function Home() {
                 <CampusPhoto slot="info" />
                 <div className="card au-info-hero-card">
                   <div className="eyebrow">ESTABLISHED 1926 • AUTONOMOUS SINCE 1946</div>
-                  <h1 style={{ margin: '6px 0 10px', fontSize: 22 }}>Andhra University College of Engineering (AUCoE)</h1>
+                  <h1 style={{ margin: '6px 0 10px', fontSize: 28 }}>Andhra University College of Engineering (AUCoE)</h1>
                   <p className="lead" style={{ margin: 0, fontSize: 13.5 }}>
-                    One of India's oldest and most prestigious engineering institutions, recognized as a Category-1 University by UGC with NAAC A++ Grade (3.74 / 4.0 CGPA).
+                    One of India's oldest engineering institutions. Category-1 University, NAAC A++ (3.74/4.0).
                   </p>
                 </div>
 
@@ -4104,7 +4085,7 @@ export default function Home() {
                 <div className="grid about-grid">
                   {aboutSections.map((item) => (
                     <article className="card about-card" key={item.title}>
-                      <div className="about-heading"><span className="about-icon"><ServiceIcon kind={item.icon} size={22} /></span><h2>{item.title}</h2></div>
+                      <div className="about-heading"><span className="about-icon"><Glyph n={serviceGlyph[item.icon]} size={22} /></span><h2>{item.title}</h2></div>
                       <p className="lead">{item.detail}</p>
                       <a className="about-link" href={item.link} target="_blank" rel="noreferrer">Visit official university site <span aria-hidden="true">↗</span></a>
                     </article>
@@ -4132,7 +4113,7 @@ export default function Home() {
                   <button
                     type="button"
                     className="secondary-button"
-                    style={{ fontSize: 13, padding: '7px 14px', borderRadius: 9999, display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                    style={{ fontSize: 13, padding: '7px 14px', borderRadius: 8, display: 'inline-flex', alignItems: 'center', gap: 6 }}
                     onClick={() => setAboutSubTab('posts')}
                   >
                     <span>←</span>
@@ -4145,7 +4126,7 @@ export default function Home() {
                   <button
                     type="button"
                     className="primary-button"
-                    style={{ fontSize: 12, padding: '7px 14px', borderRadius: 9999, whiteSpace: 'nowrap' }}
+                    style={{ fontSize: 12, padding: '7px 14px', borderRadius: 8, whiteSpace: 'nowrap' }}
                     onClick={() => setShowAddUserModal(true)}
                   >
                     + Add Student
@@ -4159,7 +4140,7 @@ export default function Home() {
                       <div className="head-admin-hero-avatar"><Glyph n="crown" /></div>
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--ink)' }}>Head Administrator</h1>
+                          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: 'var(--ink)' }}>Head Administrator</h1>
                           <span className="head-badge">Master ID</span>
                         </div>
                         <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2, wordBreak: 'break-all' }}>{HEAD_ACCOUNT_EMAIL}</div>
@@ -4176,8 +4157,8 @@ export default function Home() {
                       </button>
                       <button
                         type="button"
-                        className="danger-button"
-                        style={{ fontSize: 12, padding: '7px 14px' }}
+                        className="text-button"
+                        style={{ fontSize: 12, padding: '7px 14px', color: 'var(--error)', marginTop: 0 }}
                         onClick={handlePurgeAllAccounts}
                         title="Delete all accounts except the Head Account"
                       >
@@ -4334,7 +4315,7 @@ export default function Home() {
                       aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                       title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                     >
-                      {theme === 'dark' ? <SunIcon size={18} /> : <MoonIcon size={18} />}
+                      <Glyph n={theme === 'dark' ? 'sun' : 'moon'} size={18} />
                     </button>
                     <button
                       className={`icon-button ${isEditingProfile ? 'active' : ''}`}
@@ -4352,7 +4333,7 @@ export default function Home() {
                   <div className="insta-avatar-wrapper">
                     <div className="insta-avatar-ring">
                       <div className="insta-avatar-circle">
-                        {(authName.trim()[0] || authEmail.trim()[0] || 'A').toUpperCase()}
+                        {isHeadAccount(authEmail) ? <img src="/dhanunjay.jpg" alt="Dhanunjay" /> : (authName.trim()[0] || authEmail.trim()[0] || 'A').toUpperCase()}
                       </div>
                     </div>
                   </div>
@@ -4384,7 +4365,7 @@ export default function Home() {
                 {/* 3. BIO & DETAILS SECTION */}
                 <div className="insta-bio-section">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                    <h1 className="insta-bio-fullname" style={{ margin: 0, fontSize: 22, fontWeight: 700, lineHeight: 1.25 }}>{authName || 'AU Student'}</h1>
+                    <h1 className="insta-bio-fullname" style={{ margin: 0, fontSize: 26, fontWeight: 700, lineHeight: 1.25 }}>{authName || 'AU Student'}</h1>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, fontWeight: 600, color: 'var(--gold)', background: 'rgba(198, 155, 69, 0.12)', padding: '2px 6px', borderRadius: 4 }}>
                       <Glyph n="check" /> Verified
                     </span>
@@ -4403,7 +4384,7 @@ export default function Home() {
                     <span>{authPhone || '+91 9876543210'}</span>
                   </div>
                   <p className="insta-bio-text">
-                    {authBio || 'Engineering Student @ Andhra University. Passionate about technology, projects, and campus collaboration.'}
+                    {authBio || 'Engineering student @ Andhra University. Building projects on campus.'}
                   </p>
                   {isHeadAccount(authEmail) && (
                     <div className="head-admin-compact-strip">
@@ -4492,7 +4473,7 @@ export default function Home() {
                       <div className="profile-bio-card" style={{ padding: 0, border: 'none', background: 'transparent' }}>
                         <label className="field-label">About Yourself (Bio)</label>
                         <p className="lead" style={{ fontSize: 12, margin: '0 0 6px 0' }}>
-                          Add your academic interests, branch clubs, projects, or hostel details.
+                          Add your interests, clubs, projects, or hostel details.
                         </p>
                         <textarea
                           className="profile-bio-textarea"
@@ -4798,18 +4779,18 @@ export default function Home() {
         )}
       </section>
 
-      {/* Bottom Navigation: Exactly as requested */}
+      {/* Bottom Navigation: 6 items, kept as requested. All icons are Glyph. */}
       {/* 
         - Applications
         - Big Plus button: PROMINENTLY UNDERLINED with clear underline bar, no "Create" text!
-        - Feed: Instagram Home icon
+        - Feed: Home glyph
         - Chatbot: AI assistant
-        - Location: Instagram Map Pin
-        - About: Darkened icon
+        - Location: Map pin glyph
+        - About: Profile glyph
       */}
       <nav className={`bottom-nav ${!isNavVisible || (tab === 'location' && isMapControlsHidden) ? 'nav-hidden' : ''}`} aria-label="Primary navigation">
         <button className={`nav-button ${tab === 'applications' ? 'active' : ''}`} onClick={() => { setTab('applications'); setQuery(''); }} aria-label="Applications">
-          <ApplicationsIcon active={tab === 'applications'} size={24} />
+          <Glyph n="clipboard" size={24} />
           <span>Applications</span>
         </button>
 
@@ -4824,28 +4805,28 @@ export default function Home() {
           title="Add new post"
         >
           <div className="big-plus-bubble">
-            <BigPlusIcon size={20} />
+            <Glyph n="plus" size={20} />
           </div>
           <div className="plus-underline-bar" />
         </button>
 
         <button className={`nav-button ${tab === 'feed' ? 'active' : ''}`} onClick={() => setTab('feed')} aria-label="Feed">
-          <InstagramFeedIcon active={tab === 'feed'} size={24} />
+          <Glyph n="home" size={24} />
           <span>Feed</span>
         </button>
 
         <button className={`nav-button ${tab === 'chatbot' ? 'active' : ''}`} onClick={() => setTab('chatbot')} aria-label="Chatbot">
-          <ChatbotIcon active={tab === 'chatbot'} size={24} />
+          <Glyph n="chat" size={24} />
           <span>Chatbot</span>
         </button>
 
         <button className={`nav-button ${tab === 'location' ? 'active' : ''}`} onClick={() => setTab('location')} aria-label="Location">
-          <InstagramLocationIcon size={22} />
+          <Glyph n="pin" size={22} />
           <span>Location</span>
         </button>
 
         <button className={`nav-button ${tab === 'about' ? 'active' : ''}`} onClick={() => setTab('about')} aria-label="Profile">
-          <InstagramProfileIcon active={tab === 'about'} size={24} />
+          <Glyph n="user" size={24} />
           <span>Profile</span>
         </button>
       </nav>
@@ -4934,19 +4915,19 @@ export default function Home() {
                     )}
                     {app.status === 'approved' ? (
                       <div style={{ fontSize: 12, color: '#15803d', fontWeight: 600, marginTop: 6, background: 'rgba(34, 197, 94, 0.1)', padding: '6px 10px', borderRadius: 6 }}>
-                        ✓ Appointment Scheduled: <strong>{app.appointmentDate || 'Next working day'}</strong> ({app.appointmentTime || '11:30 AM'}) at {app.appointmentVenue || 'Hachure Manager Counter'}
+                        <Glyph n="check" size={12} /> Appointment Scheduled: <strong>{app.appointmentDate || 'Next working day'}</strong> ({app.appointmentTime || '11:30 AM'}) at {app.appointmentVenue || 'Hachure Manager Counter'}
                       </div>
                     ) : app.status === 'time_posted' ? (
                       <div style={{ fontSize: 12, color: '#15803d', fontWeight: 600, marginTop: 6, background: 'rgba(34, 197, 94, 0.1)', padding: '6px 10px', borderRadius: 6 }}>
-                        ✓ Signing Time Posted by HOD: <strong>{app.appointmentDate || 'Next working day'}</strong> ({app.appointmentTime || '11:30 AM'}) at {app.appointmentVenue || 'HOD Office'}
+                        <Glyph n="check" size={12} /> Signing Time Posted by HOD: <strong>{app.appointmentDate || 'Next working day'}</strong> ({app.appointmentTime || '11:30 AM'}) at {app.appointmentVenue || 'HOD Office'}
                       </div>
                     ) : app.status === 'signed' ? (
                       <div style={{ fontSize: 12, color: '#15803d', fontWeight: 600, marginTop: 6, background: 'rgba(34, 197, 94, 0.1)', padding: '6px 10px', borderRadius: 6 }}>
-                        ✓ Signed &amp; Collected: <strong>{app.appointmentDate || 'Next working day'}</strong> ({app.appointmentTime || '11:30 AM'}) at {app.appointmentVenue || 'HOD Office'}
+                        <Glyph n="check" size={12} /> Signed &amp; Collected: <strong>{app.appointmentDate || 'Next working day'}</strong> ({app.appointmentTime || '11:30 AM'}) at {app.appointmentVenue || 'HOD Office'}
                       </div>
                     ) : app.status === 'rejected' ? (
                       <div style={{ fontSize: 12, color: '#b91c1c', fontWeight: 600, marginTop: 6, background: 'rgba(220, 38, 38, 0.08)', padding: '6px 10px', borderRadius: 6 }}>
-                        ✕ Rejected by Head Administrator.
+                        <Glyph n="x" size={12} /> Rejected by Head Administrator.
                       </div>
                     ) : (
                       <div style={{ marginTop: 8 }}>

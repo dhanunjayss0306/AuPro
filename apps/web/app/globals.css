@@ -72,7 +72,7 @@ button { cursor: pointer; }
 .icon-button:hover { background: var(--hover-subtle); }
 
 /* Layout Content */
-.content { max-width: 600px; margin: 0 auto; padding: 18px 16px 30px; }
+.content { max-width: 600px; margin: 0 auto; padding: 24px 16px 40px; }
 .content.content-map {
   max-width: 100%;
   margin: 0;
@@ -90,8 +90,8 @@ button { cursor: pointer; }
 }
 .eyebrow { color: var(--secondary); font-size: 12px; font-weight: 600; line-height: 1.4; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; }
 h1, h2, h3, p { margin-top: 0; }
-h1 { margin-bottom: 8px; font-size: 22px; line-height: 1.25; letter-spacing: -0.02em; font-weight: 700; color: var(--ink); }
-h2 { font-size: 17px; font-weight: 600; line-height: 1.3; letter-spacing: -.02em; color: var(--ink); }
+h1 { margin-bottom: 8px; font-size: 28px; line-height: 1.25; letter-spacing: -0.02em; font-weight: 700; color: var(--ink); }
+h2 { font-size: 20px; font-weight: 600; line-height: 1.3; letter-spacing: -.02em; color: var(--ink); }
 .lead { color: var(--muted); line-height: 1.5; font-size: 15px; font-weight: 400; margin-bottom: 16px; }
 
 .stack { display: grid; gap: 12px; }
@@ -941,7 +941,7 @@ textarea, select { font: inherit; }
 .campus-map-drawing { display: block; width: 100%; height: 100%; }
 .campus-map-drawing text {
   fill: #6b604e;
-  font-family: Poppins, sans-serif;
+  font-family: var(--font-body);
   font-size: 16px;
   font-weight: 700;
   letter-spacing: .04em;
@@ -1083,7 +1083,6 @@ textarea, select { font: inherit; }
   border-radius: 50%;
   background: var(--c-gold, #c69b45);
   margin: 3px auto 0;
-  box-shadow: 0 0 4px rgba(198, 155, 69, 0.45);
   flex-shrink: 0;
 }
 
@@ -1105,7 +1104,17 @@ textarea, select { font: inherit; }
   cursor: pointer;
   transition: opacity 0.15s ease, transform 0.15s ease;
   flex-shrink: 0;
+  overflow: hidden;
+  padding: 0;
 }
+/* Real photo of the account owner (head admin) fills the avatar circle */
+.profile-avatar img, .profile-dropdown-avatar img, .insta-avatar-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.profile-dropdown-avatar, .insta-avatar-circle { overflow: hidden; }
 .profile-avatar:hover {
   opacity: 0.88;
   transform: scale(1.05);
@@ -1668,7 +1677,7 @@ textarea, select { font: inherit; }
 }
 
 .intro-sub-tag {
-  color: #9ca3af;
+  color: var(--muted);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.18em;
@@ -1763,7 +1772,7 @@ textarea, select { font: inherit; }
 }
 
 .threads-type-pill.active.announcement {
-  background: #1f3fd1;
+  background: var(--c-blue);
   color: #ffffff;
 }
 
@@ -1817,8 +1826,8 @@ textarea, select { font: inherit; }
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #f3f4f6;
-  color: #9ca3af;
+  background: var(--chip-bg);
+  color: var(--muted);
   font-size: 10px;
   font-weight: 700;
   display: flex;
@@ -2125,8 +2134,8 @@ textarea, select { font: inherit; }
   padding: 8px 22px;
   border-radius: 8px;
   border: none;
-  background: #e5e7eb;
-  color: #9ca3af;
+  background: var(--chip-bg);
+  color: var(--muted);
   font-size: 14px;
   font-weight: 700;
   cursor: not-allowed;
@@ -2169,7 +2178,7 @@ textarea, select { font: inherit; }
 }
 
 .threads-avatar.avatar-announcement {
-  background: #1f3fd1;
+  background: var(--c-blue);
 }
 
 .threads-permission-warning {
@@ -2303,7 +2312,7 @@ textarea, select { font: inherit; }
 }
 
 .threads-post-author-name {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  font-family: var(--font-body) !important;
   font-size: 14.5px;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -2370,7 +2379,7 @@ textarea, select { font: inherit; }
 }
 
 .threads-post-text {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  font-family: var(--font-body) !important;
   font-size: 15px;
   line-height: 1.48;
   letter-spacing: -0.012em;
@@ -3167,7 +3176,7 @@ textarea, select { font: inherit; }
   align-items: center;
   justify-content: center;
   border: none;
-  background: #1f3fd1;
+  background: var(--c-blue);
   color: #ffffff;
   cursor: pointer;
   transition: transform 0.15s ease, background 0.15s ease;
@@ -3175,7 +3184,7 @@ textarea, select { font: inherit; }
 }
 
 .gmaps-directions-btn:hover {
-  background: #1f3fd1;
+  background: var(--c-blue);
   transform: scale(1.05);
 }
 
@@ -3439,7 +3448,7 @@ textarea, select { font: inherit; }
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 2px solid #1f3fd1;
+  border: 2px solid var(--c-blue);
   background: #ffffff;
 }
 
@@ -3470,7 +3479,7 @@ textarea, select { font: inherit; }
 
 .gmaps-route-field:focus {
   background: #ffffff;
-  border-color: #1f3fd1;
+  border-color: var(--c-blue);
 }
 
 .gmaps-swap-btn {
@@ -3623,14 +3632,14 @@ textarea, select { font: inherit; }
 }
 
 .gmaps-action-pill.primary {
-  background: #1f3fd1;
+  background: var(--c-blue);
   color: #ffffff;
-  border-color: #1f3fd1;
+  border-color: var(--c-blue);
   box-shadow: 0 1px 3px rgba(26, 115, 232, 0.3);
 }
 
 .gmaps-action-pill.primary:hover {
-  background: #1f3fd1;
+  background: var(--c-blue);
 }
 
 .gmaps-action-pill:not(.primary):hover {
@@ -3710,7 +3719,7 @@ textarea, select { font: inherit; }
 }
 
 .gmaps-trip-start-btn:hover {
-  background: #1f3fd1;
+  background: var(--c-blue);
   transform: translateY(-1px);
 }
 
@@ -4232,7 +4241,7 @@ textarea, select { font: inherit; }
 
 [data-theme='dark'] .chat-user,
 .dark .chat-user {
-  background: #1f3fd1;
+  background: var(--c-blue);
   color: #ffffff;
 }
 
@@ -4672,8 +4681,8 @@ textarea, select { font: inherit; }
 
 [data-theme='dark'] .gmaps-action-pill.primary,
 .dark .gmaps-action-pill.primary {
-  background: #1f3fd1 !important;
-  border-color: #1f3fd1 !important;
+  background: var(--c-blue) !important;
+  border-color: var(--c-blue) !important;
   color: #ffffff !important;
 }
 
@@ -4701,7 +4710,7 @@ textarea, select { font: inherit; }
 
 [data-theme='dark'] .gmaps-transit-btn.active,
 .dark .gmaps-transit-btn.active {
-  background: #1f3fd1 !important;
+  background: var(--c-blue) !important;
   color: #60a5fa !important;
 }
 
@@ -4738,9 +4747,9 @@ textarea, select { font: inherit; }
 
 [data-theme='dark'] .gmaps-preset-pill.active,
 .dark .gmaps-preset-pill.active {
-  background: #1f3fd1 !important;
+  background: var(--c-blue) !important;
   color: #ffffff !important;
-  border-color: #1f3fd1 !important;
+  border-color: var(--c-blue) !important;
 }
 
 [data-theme='dark'] .gmaps-search-card,
@@ -4780,8 +4789,8 @@ textarea, select { font: inherit; }
 
 [data-theme='dark'] .gmaps-chip.active,
 .dark .gmaps-chip.active {
-  background: #1f3fd1 !important;
-  border-color: #1f3fd1 !important;
+  background: var(--c-blue) !important;
+  border-color: var(--c-blue) !important;
   color: #ffffff !important;
 }
 
@@ -4884,7 +4893,7 @@ textarea, select { font: inherit; }
 
 [data-theme='dark'] .threads-type-pill.active.announcement,
 .dark .threads-type-pill.active.announcement {
-  background: #1f3fd1 !important;
+  background: var(--c-blue) !important;
   color: #ffffff !important;
   font-weight: 700 !important;
 }
@@ -5148,7 +5157,7 @@ textarea, select { font: inherit; }
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: #1f3fd1;
+  background: var(--c-blue);
   color: #ffffff;
   border: 2px solid #ffffff;
   display: flex;
@@ -5248,6 +5257,7 @@ textarea, select { font: inherit; }
 
 .insta-action-button {
   flex: 1;
+  min-height: 48px;
   padding: 8px 12px;
   border-radius: 8px;
   font-size: 13px;
@@ -5356,7 +5366,7 @@ textarea, select { font: inherit; }
 [data-theme='dark'] .insta-avatar-circle,
 .dark .insta-avatar-circle {
   border-color: var(--surface) !important;
-  background: #1f3fd1 !important;
+  background: var(--c-blue) !important;
 }
 
 [data-theme='dark'] .insta-stat-number,
@@ -5451,7 +5461,7 @@ textarea, select { font: inherit; }
 .threads-post-text,
 .threads-post-location,
 .threads-textarea {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  font-family: var(--font-body) !important;
 }
 
 .threads-post-text {
@@ -5955,7 +5965,7 @@ textarea, select { font: inherit; }
   background: #dc2626;
   color: #ffffff;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.15s ease;

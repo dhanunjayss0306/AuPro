@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { InstagramLocationIcon } from './icons';
 import { validateTextContent, validateImageSafety, analyzePostTopic } from '../lib/content_moderation';
 import { compressImageFile } from '../lib/image_compressor';
 import { Glyph } from './Glyph';
@@ -217,7 +216,7 @@ export function ThreadsComposer({
 
               {/* Location indicator / editor */}
               <div className="threads-location-row">
-                <InstagramLocationIcon size={14} />
+                <Glyph n="pin" size={14} />
                 {showLocationInput ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: '100%' }}>
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -427,7 +426,7 @@ export function ThreadsComposer({
                   title="Add Location"
                   aria-label="Add Location"
                 >
-                  <InstagramLocationIcon size={19} />
+                  <Glyph n="pin" size={19} />
                 </button>
               </div>
 

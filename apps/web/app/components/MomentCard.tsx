@@ -1,16 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Trash2, Heart, MessageCircle, Repeat2, Bookmark, Share2 } from 'lucide-react';
-import {
-  InstagramLikeIcon,
-  InstagramCommentIcon,
-  InstagramShareIcon,
-  InstagramSaveIcon,
-  RepostIcon,
-  InstagramMoreIcon,
-  InstagramLocationIcon,
-} from './icons';
 import { compressImageFile } from '../lib/image_compressor';
 import { Glyph } from './Glyph';
 
@@ -502,7 +492,7 @@ export function MomentCard({
               </div>
               {post.location && (
                 <div className="threads-post-location" title={`Tagged at ${post.location}`}>
-                  <InstagramLocationIcon size={11} />
+                  <Glyph n="pin" size={11} />
                   <span>{post.location}</span>
                 </div>
               )}
@@ -526,7 +516,7 @@ export function MomentCard({
                 aria-label="More options"
                 onClick={() => setShowOptions(true)}
               >
-                <InstagramMoreIcon size={18} />
+                <Glyph n="more" size={18} />
               </button>
             </div>
           </div>
@@ -570,7 +560,7 @@ export function MomentCard({
                   {/* Popping Heart Animation on Double Tap */}
                   {showHeartAnim && (
                     <div className="insta-heart-overlay">
-                      <InstagramLikeIcon filled={true} size={72} />
+                      <Glyph n="heart" filled size={72} />
                     </div>
                   )}
                 </div>
@@ -587,7 +577,7 @@ export function MomentCard({
                 onClick={handleLikeToggle}
                 aria-label={liked ? 'Unlike' : 'Like'}
               >
-                <InstagramLikeIcon filled={liked} size={20} />
+                <Glyph n="heart" filled={liked} size={20} />
                 {likes > 0 && <span className="threads-count-num">{likes}</span>}
               </button>
 
@@ -597,7 +587,7 @@ export function MomentCard({
                 aria-label="Comment"
                 onClick={() => setCommentsOpen(!commentsOpen)}
               >
-                <InstagramCommentIcon size={20} />
+                <Glyph n="chat" size={20} />
                 {commentsCount > 0 && <span className="threads-count-num">{commentsCount}</span>}
               </button>
 
@@ -608,7 +598,7 @@ export function MomentCard({
                 aria-pressed={reposted}
                 onClick={handleRepost}
               >
-                <RepostIcon active={reposted} size={22} />
+                <Glyph n="repeat" size={22} />
                 {reposts > 0 && <span className="threads-count-num">{reposts}</span>}
               </button>
 
@@ -618,7 +608,7 @@ export function MomentCard({
                 aria-label="Share"
                 onClick={handleShare}
               >
-                <InstagramShareIcon size={20} />
+                <Glyph n="share" size={20} />
               </button>
             </div>
 
@@ -629,7 +619,7 @@ export function MomentCard({
               aria-label={isSaved ? 'Remove bookmark' : 'Bookmark post'}
               title={isSaved ? 'Remove from saved' : 'Save post'}
             >
-              <InstagramSaveIcon filled={isSaved} size={20} />
+              <Glyph n="bookmark" filled={isSaved} size={20} />
             </button>
           </div>
 
@@ -663,7 +653,7 @@ export function MomentCard({
               onClick={() => setCommentsOpen(false)}
               aria-label="Hide replies"
             >
-              Hide replies ✕
+              Hide replies <Glyph n="x" size={12} />
             </button>
           </div>
 
@@ -793,7 +783,7 @@ export function MomentCard({
             ) : null}
             <div className="insta-detail-caption">
               <strong>{post.username}</strong>{' '}{post.caption}
-              {post.location && <span className="insta-location"><InstagramLocationIcon size={13} />{post.location}</span>}
+              {post.location && <span className="insta-location"><Glyph n="pin" size={13} />{post.location}</span>}
               <button className="insta-comments-link" onClick={() => { setPostDetailsOpen(false); setCommentsOpen(true); }}>
                 View replies
               </button>

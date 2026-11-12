@@ -121,25 +121,27 @@ test('MomentCard has Instagram interactions and category badges', async () => {
   const cardContent = await readFile(new URL('../app/components/MomentCard.tsx', import.meta.url), 'utf8');
 
   assert.ok(cardContent.includes('post-category-tag'), 'Must have post category tags');
-  assert.ok(cardContent.includes('InstagramLikeIcon'), 'Must have Instagram like icon');
-  assert.ok(cardContent.includes('InstagramCommentIcon'), 'Must have Instagram comment icon');
-  assert.ok(cardContent.includes('InstagramShareIcon'), 'Must have Instagram share icon');
-  assert.ok(cardContent.includes('RepostIcon'), 'Must have Repost icon');
+  // One icon set: interactions use Glyph (heart/chat/share/repeat), not Instagram icons.
+  assert.ok(cardContent.includes('n="heart"'), 'Must have like icon (Glyph heart)');
+  assert.ok(cardContent.includes('n="chat"'), 'Must have comment icon (Glyph chat)');
+  assert.ok(cardContent.includes('n="share"'), 'Must have share icon (Glyph share)');
+  assert.ok(cardContent.includes('n="repeat"'), 'Must have Repost icon (Glyph repeat)');
   assert.ok(cardContent.includes('handleDoubleTap'), 'Must have double-tap like interaction');
 });
 
 test('Dark mode support and profile email wrapping', async () => {
   const pageContent = await readFile(new URL('../app/page.tsx', import.meta.url), 'utf8');
   const cssContent = await readFile(new URL('../app/globals.css', import.meta.url), 'utf8');
-  const iconsContent = await readFile(new URL('../app/components/icons.tsx', import.meta.url), 'utf8');
 
   // Dark mode in page
   assert.ok(pageContent.includes('toggleTheme'), 'Must have toggleTheme function');
   assert.ok(pageContent.includes('aupro_theme'), 'Must persist theme preference');
-  assert.ok(pageContent.includes('SunIcon') && pageContent.includes('MoonIcon'), 'Must use Sun and Moon icons');
+  // One icon set: the theme toggle uses Glyph sun/moon, not SunIcon/MoonIcon.
+  assert.ok(pageContent.includes("'sun'") && pageContent.includes("'moon'"), 'Must use sun and moon glyphs');
 
-  // Dark mode in icons
-  assert.ok(iconsContent.includes('SunIcon') && iconsContent.includes('MoonIcon'), 'Must export SunIcon and MoonIcon');
+  // Dark mode glyphs live in the one icon set (Glyph)
+  const glyphContent = await readFile(new URL('../app/components/Glyph.tsx', import.meta.url), 'utf8');
+  assert.ok(glyphContent.includes('sun:') && glyphContent.includes('moon:'), 'Glyph must provide sun and moon');
 
   // Email wrapping in profile menu
   assert.ok(pageContent.includes('profile-dropdown-email'), 'Must use profile-dropdown-email for wrapping');

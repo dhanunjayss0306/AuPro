@@ -1,7 +1,7 @@
 'use client';
 import { useRef, useState } from 'react';
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
-import { Camera } from 'lucide-react';
+import { Glyph } from './Glyph';
 import { CAMPUS_PHOTOS, CampusSlot } from '../lib/campus-photos';
 
 // A calm photo band: settles in once, drifts a few percent while scrolling, never carries text on top of it.
@@ -35,7 +35,7 @@ export function CampusPhoto({ slot }: { slot: CampusSlot }) {
       />
       {photo.credit && (
         <figcaption>
-          <Camera size={12} aria-hidden="true" /> {photo.credit}
+          <Glyph n="camera" size={12} /> {photo.credit}
           {photo.licence ? `, ${photo.licence}` : ''}
         </figcaption>
       )}

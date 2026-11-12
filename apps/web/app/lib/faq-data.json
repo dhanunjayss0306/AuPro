@@ -1,0 +1,1593 @@
+[
+ {
+  "id": "faq-001",
+  "category": "fee",
+  "question": "How do I get a fee certificate (fee structure / fee breakup certificate) from my college?",
+  "answer": "Go to the college office (admin/accounts section) and submit a written request letter addressed to the Principal stating the purpose (education loan, scholarship, or income-tax proof). Attach a copy of your college ID card and your fee payment receipts, or a printout of your fee details from the student portal/ERP. The office issues the fee certificate or fee breakup statement, usually by the next working day. It lists the tuition and other fees for the year, which banks and scholarship portals accept as the official cost of study.",
+  "documents_required": [
+   "Written request letter to the Principal stating the purpose",
+   "Copy of college ID card",
+   "Fee payment receipts OR fee details printout from the student portal/ERP"
+  ],
+  "sources": [
+   "https://kristujayanti.edu.in/issue-of-certificates/?trk=public_profile_see-credential",
+   "https://mssw.in/wp-content/uploads/2021/02/guidelines-for-obtaining-various-certificates-from-the-college-office.pdf"
+  ],
+  "verified": true,
+  "notes": "Kristu Jayanti lists this as 'Bonafide / Student Bank Loan / Fee Breakup & Fee Letter for Income Tax Purpose' needing only a request letter and college ID card; MSSW asks for a written request plus a fee printout from the student login.",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Registration / roll number",
+    "Course and semester/year",
+    "Purpose of the fee certificate (education loan / scholarship / income tax / other)",
+    "Academic year for which the fee breakup is needed"
+   ],
+   "documents_to_upload": [
+    "College ID card (copy)",
+    "Fee payment receipts OR fee details printout from the student portal/ERP"
+   ],
+   "after_submission": "The accounts/admin office verifies the fee records and issues the fee certificate (fee breakup statement), usually by the next working day. The student collects it from the office or downloads it from the portal if the college issues it online.",
+   "verified": true,
+   "notes": "Flow confirmed by Kristu Jayanti (request letter + ID card) and MSSW (written request + fee printout, issued next working day)."
+  }
+ },
+ {
+  "id": "faq-002",
+  "category": "fee",
+  "question": "I lost my fee receipt. How do I get a duplicate fee receipt?",
+  "answer": "If you paid online, first check your bank app, UPI app, or payment gateway for the transaction \u2014 the UTR/transaction ID and the payment confirmation work as proof, and most portals let you download the receipt again. If you paid by challan at a bank or post office, go back to that branch with the payment date and amount; they can issue a duplicate receipt or a statement. You can also ask the college accounts office to reissue the receipt from its records \u2014 carry your college ID card and, if you have them, the payment date, amount, and transaction reference.",
+  "documents_required": [
+   "College ID card",
+   "Payment date, amount, and transaction ID/UTR (if paid online)",
+   "Challan copy or bank statement showing the payment (if available)"
+  ],
+  "sources": [
+   "https://www.careers360.com/question-hii-have-paid-kcet-fee-through-online-is-there-necessity-of-fee-proof?copy_link_amp=true"
+  ],
+  "verified": true,
+  "notes": "Standard practice confirmed by student Q&A answers: keep the challan/UTR safe, and the place where you paid can reissue the receipt.",
+  "application": null
+ },
+ {
+  "id": "faq-003",
+  "category": "fee",
+  "question": "What is a fee structure, and where do I get it?",
+  "answer": "A fee structure is the official year-wise or semester-wise breakup of all fees (tuition, exam, library, lab, hostel, and other charges) issued by the college or university. Banks ask for it for education loans, and scholarship portals ask for it to calculate the scholarship amount. Get it from the college accounts office, or from the college website/prospectus \u2014 many colleges publish it online. If it is not published, submit a request letter with your college ID card at the accounts office.",
+  "documents_required": [
+   "Request letter (only if the fee structure is not published online)",
+   "Copy of college ID card"
+  ],
+  "sources": [
+   "https://studycapital.in/blog/education-loan-documents-checklist/",
+   "https://www.wemakescholars.com/education-loan/education-loan-documents",
+   "https://kristujayanti.edu.in/issue-of-certificates/?trk=public_profile_see-credential"
+  ],
+  "verified": true,
+  "notes": "",
+  "application": null
+ },
+ {
+  "id": "faq-004",
+  "category": "fee",
+  "question": "How do I pay my semester or annual college fee?",
+  "answer": "Most colleges take fees online through the student portal/ERP, SBI Collect, BillDesk, UPI, or net banking. Some also accept a challan paid at a bank. Steps: 1) Log in to the college fee portal. 2) Select the semester/year and fee type. 3) Pay online and save the receipt and transaction ID. 4) Submit a copy of the receipt at the college office if the college asks for it. Pay before the last date \u2014 a late fee is charged after the deadline, and the amount varies by college.",
+  "documents_required": [
+   "College ID card or registration number",
+   "Online payment receipt (keep a copy)"
+  ],
+  "sources": [
+   "https://www.vssut.ac.in/images/documents/docs_1785484599.pdf"
+  ],
+  "verified": true,
+  "notes": "Exact portal and late-fee amount vary by college; VSSUT's admission notice shows the typical pattern (online registration, BillDesk payment link, printed payment receipt to be submitted).",
+  "application": null
+ },
+ {
+  "id": "faq-005",
+  "category": "fee",
+  "question": "I paid the fee online but there is no receipt or the payment status is unclear. What do I do?",
+  "answer": "First check the payment status on the portal using your transaction ID/UTR, and check your bank account or UPI app to see if the money was debited. If the money was debited but the portal shows the payment as failed or pending, do NOT pay again immediately \u2014 take a screenshot of the debit and the UTR to the college accounts office; they will verify it with the bank and update your record. If the money was not debited, you can safely pay again. Keep the UTR number safe \u2014 it is the proof that resolves any dispute later.",
+  "documents_required": [
+   "Transaction ID/UTR",
+   "Screenshot of the bank debit",
+   "College ID card"
+  ],
+  "sources": [
+   "https://www.careers360.com/question-hii-have-paid-kcet-fee-through-online-is-there-necessity-of-fee-proof?copy_link_amp=true"
+  ],
+  "verified": true,
+  "notes": "",
+  "application": null
+ },
+ {
+  "id": "faq-006",
+  "category": "bonafide",
+  "question": "What is a bonafide certificate and what is it used for?",
+  "answer": "A bonafide certificate is an official letter from your college or university confirming that you are a genuine, currently enrolled student there \u2014 it states your name, course, and period of study. Students use it for: scholarship applications, education loans, visa applications, internships, opening a bank account, bus/train travel concession, and hostel or fee-waiver applications. It is usually valid for 6 months to 1 year from the date of issue, so get a fresh copy when you need it.",
+  "documents_required": [],
+  "sources": [
+   "https://www.bankbazaar.com/govt-utility/bonafide-certificate.html",
+   "https://www.shiksha.com/studyabroad/what-is-bonafide-certificate-guidepage-147873",
+   "https://www.buddy4study.com/article/types-of-bonafide-certificate"
+  ],
+  "verified": true,
+  "notes": "",
+  "application": null
+ },
+ {
+  "id": "faq-007",
+  "category": "bonafide",
+  "question": "How do I apply for a bonafide certificate in college? What documents are needed?",
+  "answer": "Steps: 1) Get the bonafide application form from the college office/admin department, or write a request letter to the Principal stating the purpose. 2) Get it signed by your class teacher/HOD if your college asks for it. 3) Pay the bonafide fee at the accounts office (usually Rs. 20 to Rs. 200, varies by college). 4) Submit the form with the documents below at the admin office. 5) Collect the certificate \u2014 most colleges issue it in 1 to 7 working days. Some colleges also take bonafide requests through the student portal/ERP.",
+  "documents_required": [
+   "Bonafide application form OR written request letter to the Principal stating the purpose",
+   "Copy of college ID card",
+   "Fee receipt of the current academic year",
+   "Previous semester mark sheets (sometimes asked)",
+   "Passport-size photograph (sometimes asked)"
+  ],
+  "sources": [
+   "https://mssw.in/wp-content/uploads/2021/02/guidelines-for-obtaining-various-certificates-from-the-college-office.pdf",
+   "https://iccs.ac.in/assets/pdf/ALL-CERTIFICATE-PROCEDURES.pdf",
+   "https://kristujayanti.edu.in/issue-of-certificates/?trk=public_profile_see-credential",
+   "https://www.shiksha.com/studyabroad/what-is-bonafide-certificate-guidepage-147873",
+   "https://www.citizennest.com/guide/bonafide-certificate-apply"
+  ],
+  "verified": true,
+  "notes": "Fee and time vary by college: MSSW issues it the next working day; ICCS collects it after 1 day; other guides report 1-7 days.",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Registration / roll number",
+    "Course, branch, and semester/year",
+    "Purpose of the bonafide certificate (scholarship / loan / visa / internship / concession / other)",
+    "Academic year"
+   ],
+   "documents_to_upload": [
+    "College ID card (copy)",
+    "Fee receipt of the current academic year",
+    "Previous semester mark sheets (if the college asks)",
+    "Passport-size photograph (if the college asks)"
+   ],
+   "after_submission": "The form goes to the admin office (with HOD/class-teacher signature where required). After the fee is paid, the office prepares the certificate, gets the Principal's signature, and the student collects it \u2014 typically in 1 to 7 working days.",
+   "verified": true,
+   "notes": "Flow confirmed by MSSW, ICCS, and Kristu Jayanti office guidelines. Fee (Rs. 20-200) and time vary by college."
+  }
+ },
+ {
+  "id": "faq-008",
+  "category": "bonafide",
+  "question": "What is a bonafide certificate with fee details, and how do I get one?",
+  "answer": "This is a bonafide certificate that also lists the fees you paid \u2014 students need it for income-tax proof (for parents claiming education expenses) and for some loan and scholarship verifications. Apply the same way as a normal bonafide certificate, but attach a printout of your fee details taken from the student portal/ERP login along with the written request to the Principal. The college office issues it, usually by the next working day.",
+  "documents_required": [
+   "Written request letter to the Principal",
+   "Fee details printout from the student portal/ERP login",
+   "Copy of college ID card"
+  ],
+  "sources": [
+   "https://mssw.in/wp-content/uploads/2021/02/guidelines-for-obtaining-various-certificates-from-the-college-office.pdf",
+   "https://kristujayanti.edu.in/issue-of-certificates/?trk=public_profile_see-credential"
+  ],
+  "verified": true,
+  "notes": "",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Registration / roll number",
+    "Course and semester/year",
+    "Purpose (income tax / loan / scholarship)"
+   ],
+   "documents_to_upload": [
+    "College ID card (copy)",
+    "Fee details printout from the student portal/ERP login"
+   ],
+   "after_submission": "Issued by the college office, usually by the next working day, with the fee details included on the certificate.",
+   "verified": true,
+   "notes": "Flow confirmed by MSSW guidelines."
+  }
+ },
+ {
+  "id": "faq-009",
+  "category": "bonafide",
+  "question": "What is the difference between a bonafide certificate and a study certificate?",
+  "answer": "A bonafide certificate proves you are CURRENTLY enrolled in the college \u2014 it is used for scholarships, loans, visas, and concessions. A study certificate proves you STUDIED at an institution during a stated period (for example, Class 1 to 10, or a specific course) \u2014 it is mainly used during counselling and admissions to prove local/non-local status or years of study. For example, KCET counselling asks for a study certificate signed by the concerned Block Education Officer or Deputy Director of Public Instruction. If an office asks for a study certificate, a bonafide certificate will not do \u2014 apply for the exact one named.",
+  "documents_required": [],
+  "sources": [
+   "https://www.careers360.com/question-what-will-the-process-after-getting-allotment-lettershould-we-have-to-pay-admission-fee-of-the-college-alloted-and-documents-what-to-submit",
+   "https://www.shiksha.com/studyabroad/what-is-bonafide-certificate-guidepage-147873"
+  ],
+  "verified": true,
+  "notes": "",
+  "application": null
+ },
+ {
+  "id": "faq-010",
+  "category": "income",
+  "question": "How do I get an income certificate in Andhra Pradesh (MeeSeva)? What documents are needed?",
+  "answer": "The income certificate is issued by the Revenue Department, Government of Andhra Pradesh, through MeeSeva. Steps: 1) Visit the nearest MeeSeva centre or the MeeSeva portal (ap.meeseva.gov.in) and fill the application form. 2) Submit the documents below. 3) Pay about Rs. 35 at the MeeSeva centre. 4) The application is verified by the VRO/MRI and approved by the MRO. It usually takes 7 to 21 days, and you can download the certificate once approved. The certificate is valid for one year.",
+  "documents_required": [
+   "Duly filled application form with Rs. 2 court fee stamp",
+   "Certificate from two different gazetted officers",
+   "Duly signed education records",
+   "Rs. 10 non-judicial stamp paper declaration (as per G.O. 1551) and Income Tax return if any, or payslip",
+   "Residential proof (voter ID, ration card, or electricity bill)",
+   "Aadhaar card",
+   "Ration card (if available)",
+   "Salary certificate from employer (if salaried) OR Pahani land records (if farmer)",
+   "Passport-size photograph"
+  ],
+  "sources": [
+   "https://www.indiafilings.com/learn/andhra-pradesh-income-certificate/",
+   "https://www.wikiprocedure.com/index.php?title=Andhra_Pradesh_-_Apply_for_Income_Certificate&printable=yes",
+   "https://www.citizennest.com/guide/andhra-pradesh-income-certificate-apply-online",
+   "https://www.esarkari.online/income-cert.html"
+  ],
+  "verified": true,
+  "notes": "All four sources agree on the core list. MeeSeva charges about Rs. 35; the application fee is listed as Rs. 10 in one source.",
+  "application": {
+   "form_fields": [
+    "Applicant name",
+    "Father/mother name",
+    "Aadhaar number",
+    "Address",
+    "Annual family income (all sources)",
+    "Occupation of parents",
+    "Purpose (scholarship / fee reimbursement / EWS / other)"
+   ],
+   "documents_to_upload": [
+    "Aadhaar card",
+    "Ration card (if available)",
+    "Residential proof (voter ID / electricity bill)",
+    "Income proof (salary certificate / payslip / IT return / Pahani land records for farmers)",
+    "Rs. 10 non-judicial stamp paper declaration (G.O. 1551)",
+    "Certificates from two different gazetted officers",
+    "Duly signed education records",
+    "Passport-size photograph"
+   ],
+   "after_submission": "Apply at a MeeSeva centre or the MeeSeva portal and pay about Rs. 35. The VRO/MRI verifies the details and the MRO approves it. It takes 7 to 21 days; the approved certificate can be downloaded. Valid for one year.",
+   "verified": true,
+   "notes": "Document list confirmed by IndiaFilings, WikiProcedure, CitizenNest, and eSarkari. The two-gazetted-officers requirement is AP-specific."
+  }
+ },
+ {
+  "id": "faq-011",
+  "category": "income",
+  "question": "Why do I need an income certificate, and how long is it valid?",
+  "answer": "An income certificate is the government's official proof of your family's total annual income from all sources. You need it for: AP post-matric scholarships and fee reimbursement, central scholarships on NSP, EWS quota benefits, hostel fee waivers, and education loans. In Andhra Pradesh it is valid for one year, so you must renew it every year \u2014 scholarship portals usually ask for a certificate issued in the current financial year. Keep the income figure below the scheme limit (for example, below Rs. 2.5 lakh per year for AP post-matric scholarships).",
+  "documents_required": [],
+  "sources": [
+   "https://www.indiafilings.com/learn/andhra-pradesh-income-certificate/",
+   "https://www.citizennest.com/guide/andhra-pradesh-income-certificate-apply-online",
+   "https://aimindia.in/ap-state-scholarship/"
+  ],
+  "verified": true,
+  "notes": "",
+  "application": null
+ },
+ {
+  "id": "faq-012",
+  "category": "certificates",
+  "question": "How do I get a Transfer Certificate (TC) from my college?",
+  "answer": "A TC is issued only when you have completed your course or when the Principal has approved your discontinuation \u2014 it is NOT issued to a currently enrolled student. Steps: 1) Get the TC application form from the admin office. 2) Get a no-dues clearance from the department, library, accounts, and hostel (if applicable). 3) Get signatures from the concerned departments and HOD. 4) Pay the TC fee at the accounts office. 5) Submit the form with the documents below. 6) Collect the TC \u2014 most colleges issue it in 1 to 5 working days. You must surrender your college ID card when you collect it.",
+  "documents_required": [
+   "TC application form OR request letter signed by the student (and parent/guardian at some colleges)",
+   "Copy of marks card / last mark sheet",
+   "No-dues certificate from library, lab, accounts, department, and hostel",
+   "College ID card (to be surrendered)",
+   "Prescribed TC fee payment receipt"
+  ],
+  "sources": [
+   "https://mssw.in/wp-content/uploads/2021/02/guidelines-for-obtaining-various-certificates-from-the-college-office.pdf",
+   "https://iccs.ac.in/assets/pdf/ALL-CERTIFICATE-PROCEDURES.pdf",
+   "https://kristujayanti.edu.in/issue-of-certificates/?trk=public_profile_see-credential",
+   "https://www.karvado.in/research/123-migration-transfer-certificate-tc-from-school-or-university"
+  ],
+  "verified": true,
+  "notes": "",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Registration / roll number",
+    "Course, branch, and year of completion",
+    "Reason for leaving (course completed / discontinuation / transfer)",
+    "Name of the institution being joined (if any)"
+   ],
+   "documents_to_upload": [
+    "Copy of marks card / last mark sheet",
+    "No-dues certificate from library, lab, accounts, department, and hostel",
+    "College ID card (to be surrendered)",
+    "TC fee payment receipt"
+   ],
+   "after_submission": "The office checks the no-dues clearances and fee payment, prepares the TC, and the student collects it in 1 to 5 working days after surrendering the ID card. A TC is only issued after course completion or approved discontinuation.",
+   "verified": true,
+   "notes": "Flow confirmed by MSSW, ICCS, and Kristu Jayanti office guidelines."
+  }
+ },
+ {
+  "id": "faq-013",
+  "category": "certificates",
+  "question": "How do I get a migration certificate from my university?",
+  "answer": "A migration certificate is issued by the UNIVERSITY (not your college) and certifies that the university has no objection to you joining another university. You need it when you join PG or further studies in a different university, apply to a foreign university, or for some government jobs. You do NOT need it if you continue in the same university. Steps: 1) Apply at your college exam section or directly at the university Controller of Examinations (CoE) office. 2) Fill the migration application form. 3) Attach the documents below and pay the fee (typically Rs. 100 to Rs. 1,000 depending on the university). 4) It usually takes 15 to 45 working days; some states have a 30-day Right to Service deadline.",
+  "documents_required": [
+   "Migration certificate application form (filled and signed)",
+   "Last semester / final year admit card",
+   "All semester mark sheets (photocopies; originals for verification)",
+   "Provisional certificate or degree certificate (if issued)",
+   "Photo ID proof (Aadhaar / PAN / passport)",
+   "2 passport-size photographs (some universities ask for 4)",
+   "Fee payment receipt",
+   "Admission letter of the new institution (if available)"
+  ],
+  "sources": [
+   "https://www.karvado.in/research/123-migration-transfer-certificate-tc-from-school-or-university",
+   "https://righttoinformation.wiki/get-college-migration-certificate-2026",
+   "https://iipe.ac.in/guidlines"
+  ],
+  "verified": true,
+  "notes": "IIPE's official fee table lists migration certificate at Rs. 250 in India; other universities charge Rs. 100 to Rs. 1,000.",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Registration / roll number",
+    "Course and year of passing",
+    "University and college name",
+    "Reason for migration / name of the new institution"
+   ],
+   "documents_to_upload": [
+    "Last semester / final year admit card",
+    "All semester mark sheets (photocopies)",
+    "Provisional certificate or degree certificate (if issued)",
+    "Photo ID proof (Aadhaar / PAN / passport)",
+    "Passport-size photographs (2-4)",
+    "Fee payment receipt"
+   ],
+   "after_submission": "The university (Controller of Examinations / Registrar) verifies academic standing and issues the migration certificate in 15 to 45 working days. It is collected from the university office or sent by post.",
+   "verified": true,
+   "notes": "Flow confirmed by Karvado and RightToInformation guides; IIPE's official fee table lists Rs. 250 for a migration certificate."
+  }
+ },
+ {
+  "id": "faq-014",
+  "category": "certificates",
+  "question": "How do I apply for transcripts from Andhra University?",
+  "answer": "Andhra University processes transcript requests through its online portal for transcripts, certificates, and genuineness verification (via the Controller of Examinations / Registrar office, Visakhapatnam). Steps: 1) Open the AU online services portal and choose Transcript/Certificate. 2) Fill in your name, university roll/enrolment number, course, year of passing, and number of sets. 3) Upload scanned copies of the documents below. 4) Pay the fee online (the fee depends on how long ago you completed the degree \u2014 a higher access fee applies beyond five years). 5) Submit and keep the acknowledgement/reference number for tracking. Typical turnaround reported is about 15 working days. Transcripts are issued in a sealed envelope with the university seal, and can be sent directly to WES/IQAS if you give the reference number.",
+  "documents_required": [
+   "Transcript request form (on the portal)",
+   "All semester mark sheets",
+   "Degree certificate or provisional certificate",
+   "Government-issued ID proof (Aadhaar / passport)",
+   "Fee payment receipt",
+   "WES / IQAS reference number (if applying for credential evaluation)",
+   "Authorisation letter (if someone else collects it for you)"
+  ],
+  "sources": [
+   "https://worlddocservices.com/university/south-university/andhra-university-visakhapatnam/",
+   "https://factstranscript.com/facts-university-list/get-transcript-from-andhra-university-ap-2/",
+   "https://bookmytranscript.com/online-transcript-from-andhra-university/"
+  ],
+  "verified": true,
+  "notes": "Document list is consistent across three transcript services. The exact AU fee is not published on a page we could retrieve \u2014 it is calculated on the portal. Timeline of about 15 working days is reported, not from an official AU page.",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "University roll / enrolment number",
+    "Course and year of passing",
+    "Number of transcript sets",
+    "Delivery address(es)",
+    "WES / IQAS reference number (if for credential evaluation)"
+   ],
+   "documents_to_upload": [
+    "All semester mark sheets (scanned)",
+    "Degree certificate or provisional certificate (scanned)",
+    "Government-issued ID proof (Aadhaar / passport)",
+    "Fee payment receipt",
+    "Authorisation letter (if someone else collects it)"
+   ],
+   "after_submission": "Apply on the AU online services portal, pay the fee online, and keep the acknowledgement/reference number. The university verifies the records and issues the transcripts (about 15 working days reported), in a sealed envelope, sent to the address given or directly to WES/IQAS.",
+   "verified": true,
+   "notes": "Document list confirmed by three transcript services. The exact AU fee is calculated on the portal and was not retrieved; the 15-working-day timeline is reported, not official."
+  }
+ },
+ {
+  "id": "faq-015",
+  "category": "certificates",
+  "question": "How do I get a provisional certificate from Andhra University?",
+  "answer": "UNVERIFIED \u2014 based on a student forum answer, not an official AU page. Andhra University offers an online certificate service at aucoe.info: go to the site, click 'apply for certificates', fill in your registration number and mobile number, fill the application form, select the purpose (provisional certificate, or duplicate provisional certificate), upload any evidence asked for, and pay the fee online. A tatkal (urgent) option for a duplicate provisional certificate is reported to exist. Note: once the convocation is over and the original degree is issued, the provisional certificate stops being valid \u2014 apply for the original degree instead. Confirm the current process and fees on aucoe.info before applying.",
+  "documents_required": [
+   "Registration number and mobile number",
+   "Mark sheets",
+   "Fee payment (online)",
+   "Evidence document if the portal asks for it (for duplicate requests)"
+  ],
+  "sources": [
+   "https://www.indiastudychannel.com/experts/ViewQuestionDetails.aspx?QuestionId=44878&AnswerId=150762&PageAction=deleteanswerattachment&Filename=44878-1-andhrauniv.jpg"
+  ],
+  "verified": false,
+  "notes": "UNVERIFIED: the aucoe.info portal and the tatkal option are described in a student forum answer, not confirmed from an official AU page. Treat the steps as a starting point and verify on the portal.",
+  "application": {
+   "form_fields": [
+    "Registration number",
+    "Mobile number",
+    "Course and year of passing",
+    "Purpose (provisional certificate / duplicate provisional certificate)"
+   ],
+   "documents_to_upload": [
+    "Mark sheets (if asked)",
+    "Evidence document if the portal asks for it (for duplicate requests)",
+    "Fee payment (online)"
+   ],
+   "after_submission": "UNVERIFIED: as reported on a student forum, the application is made on aucoe.info, the fee is paid online, and a tatkal (urgent) option is reported for duplicate provisional certificates. Confirm the current process, fees, and delivery mode on aucoe.info before applying.",
+   "verified": false,
+   "notes": "UNVERIFIED: flow rests on a student forum answer, not an official AU page."
+  }
+ },
+ {
+  "id": "faq-016",
+  "category": "certificates",
+  "question": "How do I apply for my original degree (convocation certificate) from Andhra University?",
+  "answer": "UNVERIFIED \u2014 AU-specific fee and process not confirmed from an official source. In general: after you finish your course, the original degree is issued at convocation. If you did not collect it then, or you need a duplicate because it was lost or damaged, apply through your college or directly at the university Registrar/Examination branch: get the application form for the original degree, fill it, attach the documents below, and pay the fee by demand draft or payment receipt. For a duplicate degree, an affidavit is also required. The certificate is usually sent by registered post to your address, or you can collect it in person from the Registrar's office.",
+  "documents_required": [
+   "Provisional degree certificate or passing certificate",
+   "Mark sheets of all semesters/years",
+   "Identity proof (Aadhaar / voter ID / passport)",
+   "Demand draft or payment receipt for the application fee",
+   "Affidavit (only for a duplicate degree)"
+  ],
+  "sources": [
+   "http://movillefrc.com/file/uHCPE73NSXWU/andhra_university_application_form_for_original"
+  ],
+  "verified": false,
+  "notes": "UNVERIFIED: the only source found is a low-quality content site, not an official AU page. The document list matches the standard list used by Indian universities, but the AU fee amount and whether the form is online or offline are not confirmed.",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Registration / roll number",
+    "Course and year of passing",
+    "Purpose (original degree / duplicate degree)"
+   ],
+   "documents_to_upload": [
+    "Provisional degree certificate",
+    "Mark sheets of all semesters/years",
+    "Identity proof (Aadhaar / voter ID / passport)",
+    "Demand draft or payment receipt for the application fee",
+    "Affidavit (only for a duplicate degree)"
+   ],
+   "after_submission": "UNVERIFIED: as per the general process, the application goes through the college or the Registrar/Examination branch, and the degree is sent by registered post or collected in person. AU-specific steps, fee, and timeline are not confirmed \u2014 verify with the college exam cell or the AU Registrar's office.",
+   "verified": false,
+   "notes": "UNVERIFIED: AU-specific process and fee not confirmed from an official source; the document list matches the standard Indian university list."
+  }
+ },
+ {
+  "id": "faq-017",
+  "category": "certificates",
+  "question": "I lost my marks memo / marksheet. How do I get a duplicate?",
+  "answer": "Apply to the Controller of Examinations of your university in the prescribed format. Steps: 1) File an FIR at the local police station about the loss (for a lost or stolen marksheet). 2) Make a notarised affidavit on stamp paper stating how the original was lost or destroyed. 3) Fill the duplicate marksheet application form and attach the documents below. 4) Pay the fee \u2014 it varies by university (for example, Rs. 100 per marksheet at NIT Raipur, Rs. 750 for a marksheet and Rs. 1,500 for a degree at Sankalchand Patel University). 5) The university issues the duplicate, usually within 30 to 90 days, marked 'DUPLICATE' on top. If the original is only damaged (not lost), you usually surrender the damaged copy with the application and fee \u2014 an FIR is not needed, but an affidavit is generally still asked for.",
+  "documents_required": [
+   "Duplicate marksheet application form (filled and signed)",
+   "FIR copy from the police station (for lost/stolen)",
+   "Notarised affidavit on stamp paper declaring the loss",
+   "Photocopy of the lost marksheet/degree (if available)",
+   "Government-issued ID proof",
+   "Passport-size photographs",
+   "Newspaper publication notice (required by some universities)",
+   "Fee payment receipt / demand draft"
+  ],
+  "sources": [
+   "https://spu.ac.in/wp-content/uploads/2021/07/Application-form-for-Obtaining-Duplicate-Marksheet-or-Degree-Certificate.pdf?x98597",
+   "https://nitrr.ac.in/downloads/forms/students/Procedure%20to%20Apply%20for%20Duplicate%20Marksheet_old.pdf",
+   "https://edvantagesolution.com/academic-records/duplicate-marksheet-degree-certificate/"
+  ],
+  "verified": true,
+  "notes": "SPU and NIT Raipur are official university sources and agree on FIR + affidavit + photocopy + fee.",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Registration / roll number",
+    "Course and year/semester of the lost marksheet",
+    "Reason (lost / stolen / damaged / destroyed)"
+   ],
+   "documents_to_upload": [
+    "FIR copy from the police station (for lost/stolen)",
+    "Notarised affidavit on stamp paper declaring the loss",
+    "Photocopy of the lost marksheet/degree (if available)",
+    "Government-issued ID proof",
+    "Passport-size photographs",
+    "Newspaper publication notice (if the university asks)",
+    "Fee payment receipt / demand draft"
+   ],
+   "after_submission": "The Controller of Examinations verifies the application and issues the duplicate marksheet, usually within 30 to 90 days, marked 'DUPLICATE' on top. If the original was only damaged, surrender the damaged copy instead of an FIR.",
+   "verified": true,
+   "notes": "Flow confirmed by official procedures of Sankalchand Patel University and NIT Raipur."
+  }
+ },
+ {
+  "id": "faq-018",
+  "category": "certificates",
+  "question": "How do I get a character / conduct certificate?",
+  "answer": "A character (conduct) certificate states that you behaved well during your course \u2014 it is asked for at admissions, jobs, and some scholarship applications. At many colleges it is applied for on the same common certificate form as the bonafide and transfer certificates. Steps: 1) Get the certificate application form from the admin office. 2) Tick 'Character certificate' and fill in your details and the purpose. 3) Attach the documents below and get the HOD's signature if asked. 4) Submit it at the admin office and collect it after the stated time (usually a few working days).",
+  "documents_required": [
+   "Certificate application form (character certificate option ticked)",
+   "Fee payment receipt (for example, SBI Collect receipt)",
+   "Final or provisional degree certificate OR last exam marksheet",
+   "College ID card"
+  ],
+  "sources": [
+   "https://gecv.ac.in/uploads/AFC.pdf"
+  ],
+  "verified": true,
+  "notes": "Based on the Government Engineering College, Vaishali certificate application form, which covers bonafide, transfer, character, and other special-purpose certificates on one form.",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Registration / roll number",
+    "Course, branch, and semester / pass-out year",
+    "Purpose of the character certificate"
+   ],
+   "documents_to_upload": [
+    "Fee payment receipt (for example, SBI Collect receipt)",
+    "Final or provisional degree certificate OR last exam marksheet",
+    "College ID card"
+   ],
+   "after_submission": "Submit the common certificate application form at the admin office (with HOD signature where required) and collect the character certificate after a few working days.",
+   "verified": true,
+   "notes": "Flow confirmed by the Government Engineering College, Vaishali certificate application form."
+  }
+ },
+ {
+  "id": "faq-019",
+  "category": "certificates",
+  "question": "What is a course completion certificate and how do I get one?",
+  "answer": "A course completion certificate is issued by the college to confirm that you have completed all the academic requirements of your course (classes, exams, and practicals), even if the university has not yet issued the degree. It is useful when you need to join a job or a higher course before the convocation. Steps: 1) Write a request letter addressed to the Principal stating the purpose. 2) Get it authenticated (signed) by your HOD. 3) Hand it over to the college office. The office prepares the certificate, gets the Principal's signature, and issues it \u2014 usually within a few working days.",
+  "documents_required": [
+   "Written request letter to the Principal, authenticated by the HOD",
+   "Copy of college ID card",
+   "Last semester mark sheet (if asked)"
+  ],
+  "sources": [
+   "https://mssw.in/wp-content/uploads/2021/02/guidelines-for-obtaining-various-certificates-from-the-college-office.pdf"
+  ],
+  "verified": true,
+  "notes": "",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Registration / roll number",
+    "Course and year of completion",
+    "Purpose of the course completion certificate"
+   ],
+   "documents_to_upload": [
+    "College ID card (copy)",
+    "Last semester mark sheet (if asked)"
+   ],
+   "after_submission": "The request letter, authenticated by the HOD, goes to the college office. The office prepares the certificate, gets the Principal's signature, and issues it within a few working days.",
+   "verified": true,
+   "notes": "Flow confirmed by MSSW office guidelines."
+  }
+ },
+ {
+  "id": "faq-020",
+  "category": "exams",
+  "question": "How do I download my AP EAPCET (EAMCET) hall ticket?",
+  "answer": "Go to the official AP EAPCET website, cets.apsche.ap.gov.in. Click 'Download Hall Ticket'. Enter your registration number or payment reference ID, your qualifying exam (Intermediate/10+2) hall ticket number, and your date of birth. Your hall ticket will appear \u2014 check your name, photo, exam centre, and timings carefully, then download and print it on A4 paper. Take at least two printouts. Without the hall ticket you will not be allowed into the exam hall. If any detail is wrong, contact the exam authorities immediately using the contact details on the portal.",
+  "documents_required": [
+   "Registration number or payment reference ID",
+   "Qualifying exam (10+2) hall ticket number",
+   "Date of birth (as registered)"
+  ],
+  "sources": [
+   "https://propelld.com/site/blog/admit-card-for-ap-eamcet",
+   "https://images.shiksha.com/mediadata/examGuides/examSectionGuide109_Overview_2026-10-31-03-33.pdf"
+  ],
+  "verified": true,
+  "notes": "",
+  "application": null
+ },
+ {
+  "id": "faq-021",
+  "category": "exams",
+  "question": "My semester hall ticket is not generated / not showing. What do I do?",
+  "answer": "UNVERIFIED \u2014 no official Andhra University page for semester hall ticket download was found, so this is the standard procedure across Indian universities. First check the three usual reasons: 1) Exam fee not paid or payment not confirmed \u2014 check the payment status with your transaction ID. 2) Attendance below 75% in a subject, or condonation not applied/approved \u2014 check with your department. 3) Pending dues (library, hostel, or college fee). If all three are fine, go to your college exam cell with your fee payment receipt and college ID card. The exam cell coordinates with the university Controller of Examinations to release the hall ticket. Do this at least 2 to 3 days before the exam.",
+  "documents_required": [
+   "Exam fee payment receipt / transaction ID",
+   "College ID card",
+   "Attendance details from the department (if asked)"
+  ],
+  "sources": [
+   "https://www.jntucek.ac.in/dashboard/uploads/Regulations/699be3f4d0c40_UCEK_R25 regulations for M.Tech.pdf"
+  ],
+  "verified": false,
+  "notes": "UNVERIFIED: the steps are standard practice across universities, but no AU-specific hall ticket page or notice was retrieved to confirm the exact portal or office.",
+  "application": null
+ },
+ {
+  "id": "faq-022",
+  "category": "exams",
+  "question": "How do I apply for revaluation at Andhra University? What is the fee?",
+  "answer": "Revaluation means your answer script is checked and graded again by a different examiner. At Andhra University: apply within 15 days of the result being published. The fee is Rs. 750 per theory paper for PG and professional courses (the revaluation form states this). For School of Distance Education courses it is Rs. 500 per paper. There is NO revaluation for practical exams, internal marks, project work, or viva \u2014 only theory papers. The fee once paid is not refunded. Get the fee payment challan from the Computer Centre or pay through the university portal, attach the payment proof, and submit the revaluation application form. Results are announced on exams.andhrauniversity.edu.in.",
+  "documents_required": [
+   "Revaluation application form (filled)",
+   "Fee payment challan / payment proof (Rs. 750 per theory paper; Rs. 500 per paper for distance education)",
+   "Hall ticket number and registration number",
+   "Specimen handwriting on a separate sheet (asked on the SDE form)"
+  ],
+  "sources": [
+   "https://exams.andhrauniversity.edu.in/filestorage/revaluation-application-form.pdf",
+   "https://www.andhrauniversity.edu.in/img/pdf/sde/sde-rv.pdf",
+   "https://articles.findmycollege.com/andhra-university-result/"
+  ],
+  "verified": true,
+  "notes": "Fee confirmed from AU's own revaluation forms: Rs. 750 per paper (PG/professional, old batch form) and Rs. 500 per paper (SDE). The 15-day window is reported by findmycollege.",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Registration / hall ticket number",
+    "Course and semester",
+    "Paper(s) for which revaluation is sought (paper code and title)"
+   ],
+   "documents_to_upload": [
+    "Revaluation application form (filled)",
+    "Fee payment challan / payment proof (Rs. 750 per theory paper; Rs. 500 per paper for distance education)",
+    "Specimen handwriting on a separate sheet (SDE form)"
+   ],
+   "after_submission": "Apply within 15 days of the result. The university gets the script re-graded by a different examiner and publishes revaluation results on exams.andhrauniversity.edu.in. The fee is not refunded. No revaluation for practicals or internal marks.",
+   "verified": true,
+   "notes": "Fee confirmed from AU's own revaluation forms. The 15-day window is reported by findmycollege."
+  }
+ },
+ {
+  "id": "faq-023",
+  "category": "exams",
+  "question": "What is the difference between recounting, photocopy of answer script, and challenge valuation (JNTU)?",
+  "answer": "These are three different post-result services. Recounting (Rs. 100) only checks that all answers were marked and the marks were added up correctly \u2014 the answers are NOT re-graded. Photocopy of answer script (Rs. 1,500) gives you a copy of your evaluated answer book so you can see how it was marked. Challenge valuation (Rs. 10,000) is a full re-evaluation of the script by a teacher, and you can apply for it even after a photocopy evaluation if you are still not satisfied \u2014 within 30 days of the result. There is no recounting for laboratory external exams. Apply through your college Principal along with the attested statement of marks; the Principal submits it online through the university portal (emsrms). Late applications are not accepted.",
+  "documents_required": [
+   "Requisition/application to the Principal",
+   "Attested statement of marks",
+   "Fee payment receipt (Rs. 100 recounting / Rs. 1,500 photocopy / Rs. 10,000 challenge valuation)",
+   "Evaluated photocopy of the answer script (for challenge valuation)"
+  ],
+  "sources": [
+   "https://drive.google.com/file/d/1N-iBGso6FdBVmsiw0J6CMJwSkAd8d1IK/view",
+   "https://forum.universityupdates.in/threads/jntua-rc-cv-pca-notification-for-b-tech-2-1-semester-r20-regular-supple-december-2023-exams.44711/?amp=1"
+  ],
+  "verified": true,
+  "notes": "Fees and procedure from official JNTUA Examinations Branch notifications (MCA Nov 2025 and B.Tech Dec 2023). Fees are per the notification for that exam \u2014 check the current notification for your semester.",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Registration / hall ticket number",
+    "Course and semester",
+    "Service requested (recounting / photocopy / challenge valuation)",
+    "Paper(s) concerned"
+   ],
+   "documents_to_upload": [
+    "Requisition/application to the Principal",
+    "Attested statement of marks",
+    "Fee payment receipt (Rs. 100 recounting / Rs. 1,500 photocopy / Rs. 10,000 challenge valuation)",
+    "Evaluated photocopy of the answer script (for challenge valuation)"
+   ],
+   "after_submission": "Submit to the Principal, who forwards it online through the university portal (emsrms). The university processes it per the notification deadlines; late applications are not accepted. Challenge valuation can be applied for within 30 days of the result, even after a photocopy evaluation.",
+   "verified": true,
+   "notes": "Flow and fees from official JNTUA Examinations Branch notifications. Fees are per the notification for that exam."
+  }
+ },
+ {
+  "id": "faq-024",
+  "category": "exams",
+  "question": "How do I apply for supplementary (backlog) exams at Andhra University?",
+  "answer": "UNVERIFIED \u2014 fee figures come from a secondary results site, not an official AU notification. In general: register for supplementary exams on the AU exams portal (exams.andhrauniversity.edu.in) before the last date. The fee is reported as starting at Rs. 600 for one paper and increasing for additional subjects, with a heavy late fee of about Rs. 2,000 if you register late. You need your registration number and hall ticket number. Check the official exam notification for your semester for the exact fee and last date, and do not miss the deadline \u2014 late applications are not accepted.",
+  "documents_required": [
+   "Registration number and hall ticket number",
+   "Exam fee payment (reported: from Rs. 600 for one paper)"
+  ],
+  "sources": [
+   "https://articles.findmycollege.com/andhra-university-result/"
+  ],
+  "verified": false,
+  "notes": "UNVERIFIED: fee and late-fee figures are from findmycollege, a secondary site. Confirm the exact fee and dates in the official AU exam notification for your semester.",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Registration / hall ticket number",
+    "Course and semester",
+    "Backlog subject(s) and paper codes"
+   ],
+   "documents_to_upload": [
+    "Exam fee payment (reported: from Rs. 600 for one paper)"
+   ],
+   "after_submission": "UNVERIFIED: as reported, register on the AU exams portal before the last date and pay per paper; a late fee of about Rs. 2,000 applies after the deadline. Confirm the exact fee and dates in the official AU exam notification for your semester.",
+   "verified": false,
+   "notes": "UNVERIFIED: fee and late-fee figures come from findmycollege, a secondary site, not an official AU notification."
+  }
+ },
+ {
+  "id": "faq-025",
+  "category": "exams",
+  "question": "How do I check my Andhra University result and download my marks memo?",
+  "answer": "Go to the AU results portal, results.andhrauniversity.edu.in. Enter your 12-digit university registration number and your hall ticket number, and complete the captcha if asked. Your scorecard/marks memo will appear \u2014 download and save it, and take a printout. Results stay on the portal for only 30 days from the release date, so download your marks memo within that time. If you find a mistake in your name, father's name, or marks, contact the Controller of Examinations immediately with a written application and a copy of your hall ticket. If you are not happy with the marks, you can apply for revaluation or recounting within the timeline the university announces (revaluation within 15 days of the result).",
+  "documents_required": [
+   "12-digit university registration number",
+   "Hall ticket number"
+  ],
+  "sources": [
+   "https://articles.findmycollege.com/andhra-university-result/",
+   "https://www.freejobnotification.com/andhra-university-b-tech-b-tech-m-tech-4th-semester-2-2-supplementary-result-2026-out"
+  ],
+  "verified": true,
+  "notes": "The 30-day hosting window and 15-day revaluation window are reported by findmycollege; the portal address and login fields are consistent across sources.",
+  "application": null
+ },
+ {
+  "id": "faq-026",
+  "category": "scholarships",
+  "question": "How do I apply for the AP post-matric scholarship / fee reimbursement (Jnanabhumi)?",
+  "answer": "Apply on the AP government portal, Jnanabhumi (jnanabhumi.ap.gov.in). Steps: 1) Register/apply online with your Aadhaar, course, and college details. 2) Take your Jnanabhumi application ID and Aadhaar number to a MeeSeva centre for biometric authentication. 3) The college verifies your application, and the government releases the money. The scholarship has two parts: RTF (Reimbursement of Tuition Fee \u2014 full tuition, special, and exam fee) and MTF (Maintenance Fee \u2014 Rs. 10,000 for ITI, Rs. 15,000 for Polytechnic, Rs. 20,000 for Degree and above, per year, for hostel and mess charges). Eligibility: family income below Rs. 2.5 lakh per year for post-matric (below Rs. 2 lakh for pre-matric), and no family member should be an income tax payer. Note: from the 2026-27 academic year, the amount is credited directly to the student's Aadhaar-linked bank account, and the student then pays the college fees \u2014 check the current process on the portal, because scheme names and payment modes have changed.",
+  "documents_required": [
+   "Aadhaar card of the student",
+   "Caste certificate (SC/ST/BC/EBC/Minority as applicable)",
+   "Income certificate issued after 1 January 2026 (for 2026-27)",
+   "Bonafide certificate from the current institution",
+   "Previous year mark sheet",
+   "Bank account details (Aadhaar-linked; mother's account for MTF in some schemes)",
+   "Passport-size photograph",
+   "Fee receipt from the college"
+  ],
+  "sources": [
+   "https://aimindia.in/ap-state-scholarship/",
+   "https://aimindia.in/andhra-pradesh-tribal-scholarship-hostel-support/",
+   "https://www.careers360.com/colleges/government-degree-college-porumamilla?icn=college_page&ici=clg_20764_college_listing_tuple"
+  ],
+  "verified": true,
+  "notes": "Document list and income limits are consistent across sources. The 2026-27 change (money goes directly to the student's Aadhaar-linked account instead of the college) is reported by aimindia \u2014 verify the current scheme name and payment mode on jnanabhumi.ap.gov.in, because the scheme was earlier called Jagananna Vidya Deevena.",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Aadhaar number",
+    "Course, college, and year of study",
+    "Caste/category",
+    "Annual family income",
+    "Bank account details (Aadhaar-linked)"
+   ],
+   "documents_to_upload": [
+    "Aadhaar card",
+    "Caste certificate",
+    "Income certificate (issued after 1 January 2026 for 2026-27)",
+    "Bonafide certificate from the current institution",
+    "Previous year mark sheet",
+    "Bank account details (Aadhaar-linked; mother's account for MTF in some schemes)",
+    "Passport-size photograph",
+    "Fee receipt from the college"
+   ],
+   "after_submission": "Apply on jnanabhumi.ap.gov.in, then complete biometric authentication at a MeeSeva centre with your application ID and Aadhaar number. The college verifies the application online and the government releases RTF (tuition fee) and MTF (maintenance) amounts. From 2026-27 the money is reported to go directly to the student's Aadhaar-linked bank account \u2014 verify the current payment mode on the portal.",
+   "verified": true,
+   "notes": "Document list confirmed by multiple sources. The 2026-27 payment-mode change is reported by aimindia; verify on jnanabhumi.ap.gov.in."
+  }
+ },
+ {
+  "id": "faq-027",
+  "category": "scholarships",
+  "question": "How do I apply for a scholarship on the National Scholarship Portal (NSP)?",
+  "answer": "Apply on the National Scholarship Portal, scholarships.gov.in. Steps: 1) Complete One Time Registration (OTR) with your Aadhaar card and an active mobile number, and get your OTR number. 2) Log in, fill in your education, caste, and family income details. 3) Select the scheme (central post-matric schemes for SC, ST, OBC/EBC/DNT, and disability students run on NSP). 4) Upload the documents below. 5) Submit and get your application ID; your institute verifies it online. The annual family income limit is Rs. 2.5 lakh for all four central post-matric schemes. Your bank account must be Aadhaar-seeded for Direct Benefit Transfer (DBT) \u2014 a merely KYC-linked account is not enough. Note: the central post-matric scholarship for minorities has not accepted fresh applications since 2022-23.",
+  "documents_required": [
+   "Aadhaar card and NSP OTR number",
+   "Caste certificate (SC/ST/OBC/EBC/DNT) issued by Tehsildar/SDM",
+   "Income certificate of the current financial year (issued by Tehsildar/SDM)",
+   "Bonafide / enrolment certificate from the current institution",
+   "Previous year mark sheet",
+   "Bank passbook first page or cancelled cheque (account in the student's name, Aadhaar-linked)",
+   "Fee receipt from the institution",
+   "Domicile certificate (if the scheme asks for it)",
+   "Passport-size photograph"
+  ],
+  "sources": [
+   "https://www.buddy4study.com/article/government-post-matric-scholarships",
+   "https://www.buddy4study.com/article/central-scholarships",
+   "https://www.karvado.in/research/108-pre-matric-and-post-matric-scholarship-application",
+   "https://www.citizennest.com/guide/scholarship-for-sc-st-obc"
+  ],
+  "verified": true,
+  "notes": "The minority post-matric scheme status (not running since 2022-23) is reported by buddy4study, citing a July 2026 Lok Sabha confirmation.",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Aadhaar number and mobile number",
+    "Course, institute, and year of study",
+    "Caste/category",
+    "Annual family income",
+    "Bank account details (Aadhaar-seeded for DBT)"
+   ],
+   "documents_to_upload": [
+    "Aadhaar card",
+    "Caste certificate (SC/ST/OBC/EBC/DNT)",
+    "Income certificate of the current financial year",
+    "Bonafide / enrolment certificate",
+    "Previous year mark sheet",
+    "Bank passbook first page or cancelled cheque",
+    "Fee receipt from the institution",
+    "Domicile certificate (if asked)",
+    "Passport-size photograph"
+   ],
+   "after_submission": "Register with One Time Registration (OTR) on scholarships.gov.in, fill the application, upload documents, and submit. The institute verifies the application online, then the state/central authority sanctions it and the amount is paid by Direct Benefit Transfer to the Aadhaar-seeded bank account.",
+   "verified": true,
+   "notes": "Flow confirmed by Buddy4Study, Karvado, and CitizenNest guides."
+  }
+ },
+ {
+  "id": "faq-028",
+  "category": "scholarships",
+  "question": "What documents are needed for an education loan?",
+  "answer": "Banks (and the Vidya Lakshmi portal) ask for three sets of documents. Student: KYC (Aadhaar, PAN, passport, address proof, photos), 10th and 12th mark sheets and certificates, any completed degree, admission/offer letter, and the fee structure or cost of study from the college. Co-applicant (usually a parent): KYC, income proof \u2014 salary slips and Form 16 if salaried, or Income Tax Returns for the last 2 years plus audited financials if self-employed \u2014 and bank statements for the last 6 months. Collateral (only for secured loans, usually above Rs. 7.5 lakh): property papers, including the encumbrance certificate. Collect originals plus two sets of self-attested photocopies before visiting the bank. SBI typically processes a complete application within 15 working days.",
+  "documents_required": [
+   "Student KYC: Aadhaar, PAN, passport, address proof, passport-size photos",
+   "10th mark sheet and certificate, 12th mark sheet and certificate, degree mark sheets if any",
+   "Admission / offer letter from the institution",
+   "Fee structure / cost of study document from the institution",
+   "Co-applicant KYC and income proof (salary slips + Form 16, or ITRs for 2 years + 6 months bank statements)",
+   "Collateral documents (only for loans above Rs. 7.5 lakh)",
+   "Scholarship award letter (if you have one)"
+  ],
+  "sources": [
+   "https://www.wemakescholars.com/education-loan/education-loan-documents",
+   "https://studycapital.in/blog/education-loan-documents-checklist/",
+   "https://www.fundmycampus.com/education-loan-documents-required",
+   "https://writeupcafe.com/documents-required-for-education-loan-in-india-2025-26-loans-vs-scholarships-explained"
+  ],
+  "verified": true,
+  "notes": "The college's part in this is the admission letter and the fee structure/cost-of-study document \u2014 see faq-001 and faq-003 for how to get those from the college office.",
+  "application": {
+   "form_fields": [
+    "Student name, Aadhaar, PAN",
+    "Course, college, and duration",
+    "Total cost of study (from the fee structure)",
+    "Co-applicant (parent/guardian) name, income, and employment details",
+    "Collateral details (only for secured loans above Rs. 7.5 lakh)"
+   ],
+   "documents_to_upload": [
+    "Student KYC (Aadhaar, PAN, passport, address proof, photos)",
+    "10th and 12th mark sheets and certificates",
+    "Admission / offer letter",
+    "Fee structure / cost of study document from the college",
+    "Co-applicant income proof (salary slips + Form 16, or ITRs for 2 years + 6 months bank statements)",
+    "Collateral documents (only for loans above Rs. 7.5 lakh)",
+    "Scholarship award letter (if any)"
+   ],
+   "after_submission": "Submit the application with documents at the bank or on the Vidya Lakshmi portal. The bank verifies documents, sanctions the loan (SBI typically within 15 working days for a complete application), and disburses the fee directly to the college against the fee demand letter.",
+   "verified": true,
+   "notes": "Flow confirmed by WeMakeScholars, StudyCapital, and FundMyCampus checklists. The college's part is the admission letter and fee structure \u2014 see faq-001 and faq-003."
+  }
+ },
+ {
+  "id": "faq-029",
+  "category": "scholarships",
+  "question": "Why was my scholarship application rejected or delayed?",
+  "answer": "The most common reasons: 1) Aadhaar-DBT mismatch \u2014 your bank account is KYC-linked but NOT seeded with NPCI for Direct Benefit Transfer. Check the Aadhaar mapping at your bank branch or on the UIDAI portal and get it seeded. 2) Expired income certificate \u2014 it must be from the current financial year. 3) Wrong or mismatched bank details, name spelling, or Aadhaar number. 4) Institute verification pending \u2014 your college has not verified the application on the portal yet; ask the college scholarship clerk. 5) Missing or unclear document uploads. Fix the issue, and if the portal allows, correct and resubmit before the deadline. Over 35% of scholarship applications face delays for Aadhaar-DBT mismatch or incomplete certificates, so check these first.",
+  "documents_required": [],
+  "sources": [
+   "https://www.freshershome.com/scholarship/",
+   "https://www.buddy4study.com/article/government-post-matric-scholarships"
+  ],
+  "verified": true,
+  "notes": "",
+  "application": null
+ },
+ {
+  "id": "faq-030",
+  "category": "campus",
+  "question": "I lost my college ID card. How do I get a duplicate?",
+  "answer": "Steps: 1) Report the loss in writing to the college office or the student helpdesk / Lost and Found Cell. 2) Write an application for a duplicate ID card and get it signed by your HOD. 3) Pay the duplicate card fee at the accounts office \u2014 the fee varies by college (for example, Rs. 100 at some colleges, Rs. 150 at others, and Rs. 500 for a lost card / Rs. 250 for a damaged card at others). 4) Submit the application with the fee receipt at the office. The duplicate card is usually issued within 1 to 2 weeks. Carry your college ID number and a government photo ID when you go. If your card is only damaged, some colleges replace it free or cheaper if you return the old card.",
+  "documents_required": [
+   "Written application for a duplicate ID card, signed by the HOD",
+   "Fee payment receipt",
+   "Government-issued photo ID (Aadhaar / PAN / passport)",
+   "Passport-size photograph (if asked)",
+   "Old/damaged card (if it is a damage replacement)"
+  ],
+  "sources": [
+   "https://www.cuchd.in/dsaa/attached_assets/Student%20Care%20FAQs.pdf",
+   "https://www.jvbi.ac.in/p/admission-procedure",
+   "https://salbaricollege.ac.in/upload/prospectus/1781764106.pdf"
+  ],
+  "verified": true,
+  "notes": "Process is consistent across the cited college sources; the fee varies widely by college, so the app should not state one fixed fee.",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Registration / roll number",
+    "Course and semester",
+    "Reason (lost / damaged)"
+   ],
+   "documents_to_upload": [
+    "Written application for a duplicate ID card, signed by the HOD",
+    "Fee payment receipt",
+    "Government-issued photo ID",
+    "Passport-size photograph (if asked)",
+    "Old/damaged card (for damage replacement)"
+   ],
+   "after_submission": "Report the loss at the student helpdesk / Lost and Found Cell, submit the HOD-signed application with the fee receipt, and collect the duplicate card in about 1 to 2 weeks. The fee varies by college (Rs. 100-500).",
+   "verified": true,
+   "notes": "Flow confirmed by Chandigarh University, JVBI, and Salbari College sources. Fee varies widely \u2014 do not hard-code one amount."
+  }
+ },
+ {
+  "id": "faq-031",
+  "category": "campus",
+  "question": "How does the college library card and book borrowing work?",
+  "answer": "At most colleges your student ID card IS your library card \u2014 show it at the library to borrow books. Borrowing limits vary by college: for example, undergraduate students may borrow up to 3 books for 21 days and postgraduate students up to 4 books. Always return books on time to avoid fines. Important: all library dues must be cleared and all borrowed books returned before the college issues a no-dues certificate, transfer certificate, or allows you to graduate. If you lose a library book, you must replace it with an identical copy or pay its current market value.",
+  "documents_required": [
+   "College ID card (acts as the library card at most colleges)"
+  ],
+  "sources": [
+   "https://www.cuchd.in/dsaa/attached_assets/Student%20Care%20FAQs.pdf",
+   "https://salbaricollege.ac.in/upload/prospectus/1781764106.pdf",
+   "https://www.jvbi.ac.in/p/admission-procedure"
+  ],
+  "verified": true,
+  "notes": "Borrow limits quoted are examples from Chandigarh University; each college sets its own limits.",
+  "application": null
+ },
+ {
+  "id": "faq-032",
+  "category": "campus",
+  "question": "How do I apply for hostel accommodation?",
+  "answer": "Steps: 1) After getting admission into the college, apply for the hostel on the separate hostel application form \u2014 contact the Chief Warden (or warden) of the institute for the form and formalities. 2) Hostel admission is often based on merit where seats are limited. 3) Selected students pay the hostel fee \u2014 usually the full fee for the academic year in advance. 4) Hostellers must follow hostel rules and wear the hostel identity card on campus. Hostel fees and facilities (mess, gym, study rooms, laundry, medical room) vary by college, so check the hostel notice board or the Chief Warden's office for the current fee and rules.",
+  "documents_required": [
+   "Hostel application form (separate form from the college admission form)",
+   "College admission proof / allotment letter",
+   "Passport-size photographs",
+   "Hostel fee payment (full year in advance at many colleges)",
+   "ID proof (Aadhaar)"
+  ],
+  "sources": [
+   "https://www.jvbi.ac.in/p/admission-procedure",
+   "https://salbaricollege.ac.in/upload/prospectus/1781764106.pdf",
+   "https://www.cuchd.in/dsaa/attached_assets/Student%20Care%20FAQs.pdf"
+  ],
+  "verified": true,
+  "notes": "General process from the cited colleges. Andhra University's own hostel admission form, fee, and deadlines were not retrieved \u2014 the app should link the AU hostel office/notice for exact details.",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Registration / roll number",
+    "Course and year",
+    "Hostel preference / room type (if asked)",
+    "Parent/guardian contact details"
+   ],
+   "documents_to_upload": [
+    "Hostel application form (separate form)",
+    "College admission proof / allotment letter",
+    "Passport-size photographs",
+    "ID proof (Aadhaar)",
+    "Hostel fee payment (full year in advance at many colleges)"
+   ],
+   "after_submission": "Apply to the Chief Warden / warden. Where seats are limited, allotment is merit-based. Selected students pay the hostel fee in advance and must follow hostel rules and carry the hostel identity card on campus.",
+   "verified": true,
+   "notes": "General flow from JVBI, Salbari, and Chandigarh University sources. Andhra University's own hostel form, fee, and deadlines were not retrieved."
+  }
+ },
+ {
+  "id": "faq-033",
+  "category": "campus",
+  "question": "What is a no-dues certificate and when do I need it?",
+  "answer": "A no-dues certificate (no-dues clearance) is proof that you owe nothing to any part of the college \u2014 no pending fees, no unreturned library books, no lab or hostel dues, and no fines. You need it when you: apply for a transfer certificate, finish your final semester, apply for a migration certificate, or need an NOC for graduation. To get it, take the no-dues form from the office and get it signed/stamped by each department in turn \u2014 your academic department, the library, the accounts office, the lab, and the hostel (if you stayed there). Then submit the completed form at the college office.",
+  "documents_required": [
+   "No-dues form from the college office",
+   "College ID card",
+   "Library books returned / library clearance",
+   "Fee receipts showing no pending dues"
+  ],
+  "sources": [
+   "https://mssw.in/wp-content/uploads/2021/02/guidelines-for-obtaining-various-certificates-from-the-college-office.pdf",
+   "https://kristujayanti.edu.in/issue-of-certificates/?trk=public_profile_see-credential",
+   "https://www.cuchd.in/dsaa/attached_assets/Student%20Care%20FAQs.pdf"
+  ],
+  "verified": true,
+  "notes": "",
+  "application": null
+ },
+ {
+  "id": "faq-034",
+  "category": "campus",
+  "question": "Can I apply for certificates online, or must I go to the college office?",
+  "answer": "Both, depending on the certificate. Many colleges now take certificate requests through the student portal/ERP, and universities run online certificate services \u2014 for example, Andhra University's certificate service portal (aucoe.info) handles transcript, provisional, and duplicate certificate applications online with online fee payment. But several certificates still need an in-person visit: the TC (you must surrender your ID card), and anything needing department signatures or original verification. College offices generally issue certificates between 10 am and 4 pm on working days. Check your college's student portal first \u2014 if the certificate is listed there, apply online; otherwise go to the admin office with the form and documents.",
+  "documents_required": [],
+  "sources": [
+   "https://mssw.in/wp-content/uploads/2021/02/guidelines-for-obtaining-various-certificates-from-the-college-office.pdf",
+   "https://www.indiastudychannel.com/experts/ViewQuestionDetails.aspx?QuestionId=44878&AnswerId=150762&PageAction=deleteanswerattachment&Filename=44878-1-andhrauniv.jpg"
+  ],
+  "verified": true,
+  "notes": "Office timing (10 am\u20134 pm) is from MSSW's guidelines; AU's aucoe.info portal is reported in a student forum answer \u2014 see faq-015.",
+  "application": null
+ },
+ {
+  "id": "faq-035",
+  "category": "attendance",
+  "question": "What is the 75% attendance rule?",
+  "answer": "UGC and AICTE require a minimum of 75% attendance in each course (theory and lab) in every semester. Attendance is calculated per course, and in some universities also in aggregate for the semester. If your attendance falls below 75% in a course, you are not permitted to appear for the semester-end examination in that course \u2014 you are marked as detained for shortage of attendance. Attendance between 65% and 75% can be condoned in genuine cases (see the condonation question). Below 65% it cannot be condoned at all.",
+  "documents_required": [],
+  "sources": [
+   "https://www.jntucek.ac.in/dashboard/uploads/Regulations/699be3f4d0c40_UCEK_R25 regulations for M.Tech.pdf",
+   "http://svuniversity.edu.in/wp-content/uploads/2025/09/B.Tech_.2025-26Regulations.pdf",
+   "https://www.legalang.org/tools/education/attendance-calculator-75-percent.html"
+  ],
+  "verified": true,
+  "notes": "Some universities (for example, SV University) also require 40% attendance in each individual course plus 75% in aggregate. The exact rule depends on the university's academic regulations.",
+  "application": null
+ },
+ {
+  "id": "faq-036",
+  "category": "attendance",
+  "question": "My attendance is between 65% and 75%. How do I apply for condonation of attendance shortage?",
+  "answer": "Condonation is allowed only for shortage up to 10% \u2014 that is, attendance between 65% and 75% \u2014 and only on genuine grounds such as medical reasons, sports/games, or NSS activities. Steps: 1) Write a representation letter to the Principal (through your HOD) stating the total classes held, classes attended, the shortfall, and the reason. 2) Attach proof: for medical reasons, you must have been admitted as an in-patient \u2014 attach the doctor's prescription, medical bills signed by the doctor/hospital, diagnosis reports, and the discharge summary, submitted within one or two weeks of discharge. For sports/NSS, attach the invitation letter from the organising institute and the participation certificate. 3) Get your parent/guardian's counter-signature where the college asks for it. 4) Pay the condonation fee per course after approval by the College Academic Committee \u2014 the fee varies (for example, Rs. 2,000 per course at some colleges, Rs. 500 per subject at VTU). Start at least 2 to 3 weeks before the exams. Condonation is not a right \u2014 the committee can reject it if the reason is not genuine.",
+  "documents_required": [
+   "Condonation application / representation letter to the Principal through the HOD",
+   "Medical proof (for illness): doctor's prescription, medical bills, diagnosis reports, discharge summary",
+   "Sports/NSS proof: invitation letter and participation certificate",
+   "Parent/guardian counter-signature (where asked)",
+   "Condonation fee payment receipt"
+  ],
+  "sources": [
+   "https://www.jntucek.ac.in/dashboard/uploads/Regulations/699be3f4d0c40_UCEK_R25 regulations for M.Tech.pdf",
+   "https://mvsrec.edu.in/images/SYLLABUS/R25/CSE_AIML_Syllabus.pdf",
+   "http://svuniversity.edu.in/wp-content/uploads/2025/09/B.Tech_.2025-26Regulations.pdf"
+  ],
+  "verified": true,
+  "notes": "Rules from JNTUK R25 academic regulations (official). The condonation fee varies by university/college \u2014 do not hard-code one amount.",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Registration / roll number",
+    "Course and semester",
+    "Subject(s) with shortage",
+    "Total classes held, classes attended, and shortfall",
+    "Reason (medical / sports / NSS)"
+   ],
+   "documents_to_upload": [
+    "Condonation application / representation letter to the Principal through the HOD",
+    "Medical proof: doctor's prescription, medical bills, diagnosis reports, discharge summary (for illness)",
+    "Sports/NSS proof: invitation letter and participation certificate",
+    "Parent/guardian counter-signature (where asked)",
+    "Condonation fee payment receipt"
+   ],
+   "after_submission": "The College Academic Committee reviews the application and documents. If approved, the condonation fee is paid per course and the student is allowed to write the semester-end exams. Apply at least 2 to 3 weeks before the exams. Condonation is discretionary \u2014 it can be rejected if the reason is not genuine.",
+   "verified": true,
+   "notes": "Flow confirmed by JNTUK R25 academic regulations (official). Fee varies by university \u2014 do not hard-code one amount."
+  }
+ },
+ {
+  "id": "faq-037",
+  "category": "attendance",
+  "question": "What happens if my attendance is below 65%?",
+  "answer": "Shortage of attendance below 65% shall in no case be condoned \u2014 this is stated in the academic regulations of JNTU, SV University, and most other Indian universities. You will be detained for that semester, which means you cannot write the semester-end examinations for the affected courses. You will have to repeat or re-register for those courses as per your university's regulations, and you may lose a semester. If you are falling behind, talk to your HOD and mentor early \u2014 once attendance drops below 65%, there is no condonation or medical certificate that can fix it.",
+  "documents_required": [],
+  "sources": [
+   "https://www.jntucek.ac.in/dashboard/uploads/Regulations/699be3f4d0c40_UCEK_R25 regulations for M.Tech.pdf",
+   "https://mvsrec.edu.in/images/SYLLABUS/R25/CSE_AIML_Syllabus.pdf",
+   "http://svuniversity.edu.in/wp-content/uploads/2025/09/B.Tech_.2025-26Regulations.pdf"
+  ],
+  "verified": true,
+  "notes": "",
+  "application": null
+ },
+ {
+  "id": "faq-038",
+  "category": "corrections",
+  "question": "My name is spelled wrong in university records. How do I correct it?",
+  "answer": "For a small spelling mistake in college/university records: apply to your college exam cell or the university Controller of Examinations with a written application, your 10th class certificate (which shows the correct spelling), your Aadhaar card, and an affidavit if the office asks for one. The office corrects it and issues a corrected provisional certificate or marks memo \u2014 for example, JNTUK asks students with a name mistake to compare their SSC certificate with the provisional certificate, get the provisional certificate corrected, and upload the corrected copy. For a full legal name change (not just a spelling fix): you must first change the name legally \u2014 notarised affidavit on stamp paper, newspaper advertisement in one English and one regional-language daily, and publication in the Government Gazette \u2014 then submit the Gazette copy to the university to update its records.",
+  "documents_required": [
+   "Written application to the college exam cell / Controller of Examinations",
+   "10th class certificate (shows the correct name spelling)",
+   "Aadhaar card",
+   "Affidavit (if the office asks for it)",
+   "For a full legal name change: notarised affidavit + newspaper advertisements + Gazette notification copy"
+  ],
+  "sources": [
+   "https://jntuksdc.co.in/pending.php",
+   "https://docupro.in/bangalore/personal/affidavit/gazette-notification",
+   "https://gazettegov.com/blogs/difference-between-date-of-birth-correction-and-name-change-in-gazette"
+  ],
+  "verified": true,
+  "notes": "The internal university correction steps vary by university; the Gazette process for a legal name change is consistent across sources.",
+  "application": {
+   "form_fields": [
+    "Full name (as in records)",
+    "Correct name spelling",
+    "Registration / roll number",
+    "Course and semester"
+   ],
+   "documents_to_upload": [
+    "Written application to the college exam cell / Controller of Examinations",
+    "10th class certificate (shows the correct spelling)",
+    "Aadhaar card",
+    "Affidavit (if the office asks)",
+    "For a full legal name change: notarised affidavit + newspaper advertisements + Gazette notification copy"
+   ],
+   "after_submission": "The exam cell verifies the documents against the SSC certificate and issues a corrected provisional certificate or marks memo. A full legal name change must first be done through affidavit + newspaper ads + Gazette publication, and the Gazette copy is then submitted to the university.",
+   "verified": true,
+   "notes": "Internal correction steps vary by university; the Gazette process for a legal name change is consistent across sources."
+  }
+ },
+ {
+  "id": "faq-039",
+  "category": "corrections",
+  "question": "My date of birth is wrong in my records. How do I correct it?",
+  "answer": "Date of birth correction is treated as a rectification of an error, and it needs stronger proof than a name correction, because age affects exam and job eligibility. Steps: 1) Collect proof of the correct date of birth \u2014 your birth certificate issued by the municipal authority is the main document, plus your school leaving certificate or marksheet. 2) Make a notarised affidavit stating the incorrect and correct dates of birth. 3) For a Gazette notification, publish the correction and submit the application with your ID proof. 4) Submit the affidavit, Gazette copy, and supporting documents to your college exam cell / university Controller of Examinations to update the records. Approval can take 30 to 60 days or more, and applications go through strict checking. In some cases a court order is also asked for.",
+  "documents_required": [
+   "Birth certificate issued by the municipal authority",
+   "Affidavit for date of birth correction (notarised)",
+   "School leaving certificate or marksheet",
+   "ID proof showing the incorrect date of birth",
+   "Gazette notification copy (where required)",
+   "Court order (in some cases)"
+  ],
+  "sources": [
+   "https://gazettegov.com/blogs/difference-between-date-of-birth-correction-and-name-change-in-gazette",
+   "https://docupro.in/bangalore/personal/affidavit/gazette-notification",
+   "http://mahapublicservicesdata.blogspot.com/2026/07/gazette-name-date-of-birth-religion.html"
+  ],
+  "verified": true,
+  "notes": "",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Registration / roll number",
+    "Date of birth as in records",
+    "Correct date of birth",
+    "Reason for correction"
+   ],
+   "documents_to_upload": [
+    "Birth certificate issued by the municipal authority",
+    "Notarised affidavit for date of birth correction",
+    "School leaving certificate or marksheet",
+    "ID proof showing the incorrect date of birth",
+    "Gazette notification copy (where required)",
+    "Court order (in some cases)"
+   ],
+   "after_submission": "Submit the affidavit and proof to the college exam cell / university Controller of Examinations. Applications go through strict checking and approval can take 30 to 60 days or more.",
+   "verified": true,
+   "notes": ""
+  }
+ },
+ {
+  "id": "faq-040",
+  "category": "corrections",
+  "question": "There is a mistake in my marks memo / hall ticket (name, father's name, or marks). What do I do?",
+  "answer": "Act immediately \u2014 do not wait until the exams or counselling. For Andhra University: contact the Controller of Examinations (COE) with a formal written application and a copy of your hall ticket, stating exactly what is wrong and what the correct detail is. For JNTUK's online degree (OD) applications, the same kinds of mistakes are fixed by uploading corrected documents: a photo problem needs a clear scanned photo; a name or father's name mistake needs the corrected provisional certificate (compare your SSC certificate with the provisional certificate); a memos problem needs clear scanned copies of all memos. Keep copies of everything you submit, and follow up with the exam branch until the corrected memo is issued.",
+  "documents_required": [
+   "Written application to the Controller of Examinations",
+   "Copy of hall ticket",
+   "10th class (SSC) certificate (for name / father's name mistakes)",
+   "Corrected provisional certificate (where asked)",
+   "Clear scanned copies of all memos (for memo problems)",
+   "Clear scanned photograph (for photo problems)"
+  ],
+  "sources": [
+   "https://articles.findmycollege.com/andhra-university-result/",
+   "https://jntuksdc.co.in/pending.php"
+  ],
+  "verified": true,
+  "notes": "",
+  "application": null
+ },
+ {
+  "id": "faq-041",
+  "category": "education-loan",
+  "question": "How do I apply for an education loan through the PM Vidya Lakshmi portal?",
+  "answer": "Go to pmvidyalaxmi.co.in (earlier vidyalakshmi.co.in) and register with your email ID and Aadhaar-linked mobile number. Fill the Common Education Loan Application Form (CELAF) once \u2014 it is a single form for all banks. Upload your documents (each file as PDF, PNG or JPEG, under 200 KB), compare the loan schemes of the 48 banks on the portal, and apply to up to three banks at the same time. The portal only takes your application \u2014 the bank gives the loan. The bank will contact you, verify your documents, and then sanction the loan. The portal is free; never pay anyone or scan a QR code for loan approval.",
+  "documents_required": [
+   "Class 10 marksheet",
+   "Class 12 or last exam marksheet",
+   "Admission letter from the college",
+   "Fee structure from the college",
+   "Income proof of parent/guardian",
+   "Passport-size photographs of student and parent",
+   "Aadhaar and PAN of student and co-applicant"
+  ],
+  "sources": [
+   "https://www.upgrad.com/study-abroad/articles/vidya-lakshmi-portal/",
+   "https://www.shiksha.com/studyabroad/vidya-lakshmi-portal-education-loan-application-process-eligibility-and-more-articlepage-157645",
+   "https://www.finmandi.com/vidya-lakshmi-portal-education-loan-guide-2026.html",
+   "https://www.indiagovschemes.com/en/blog/education-loan-vidya-lakshmi-portal-how-to-apply/"
+  ],
+  "verified": true,
+  "notes": "The portal moved to pmvidyalaxmi.co.in in February 2025 under the PM-Vidyalaxmi scheme; the old vidyalakshmi.co.in address still redirects. Skill loans are no longer on this portal \u2014 they moved to the JanSamarth portal.",
+  "application": {
+   "form_fields": [
+    "Full name",
+    "Date of birth",
+    "Mobile number (Aadhaar-linked) and email ID",
+    "Course and college/institution",
+    "Loan amount required",
+    "Co-applicant (parent/guardian) details",
+    "Up to three banks to apply to"
+   ],
+   "documents_to_upload": [
+    "Class 10 marksheet",
+    "Class 12 or last exam marksheet",
+    "Admission letter",
+    "Fee structure from the college",
+    "Income proof of parent/guardian",
+    "Photographs of student and parent",
+    "Aadhaar and PAN of student and co-applicant"
+   ],
+   "after_submission": "The application goes to the banks you selected. The bank contacts you, verifies the documents, and sanctions the loan if you are eligible. Track the status on the portal; if one bank rejects it, the other banks you applied to can still sanction it.",
+   "verified": true,
+   "notes": "Portal flow and document list confirmed by Shiksha, upGrad and FinMandi guides; each upload must be under 200 KB."
+  }
+ },
+ {
+  "id": "faq-042",
+  "category": "education-loan",
+  "question": "What documents are needed for an education loan from a bank?",
+  "answer": "Keep three sets ready. Student: passport-size photographs, Aadhaar card, PAN card, passport (mandatory for studies abroad), Class 10 and 12 marksheets and certificates, admission letter with the fee structure, and entrance exam scorecard if you have one. Co-applicant (parent or guardian): Aadhaar, PAN, photographs, address proof, salary slips of the last 3 months and Form 16 / ITR of the last 2 years if salaried, or ITR of the last 3 years with balance sheet and profit-and-loss account if self-employed, and bank statements of the last 6 months. Collateral (only if the loan is above \u20b97.5 lakh): property papers, valuation report, and related title documents. Banks also ask for a gap certificate if there is a gap in your studies.",
+  "documents_required": [
+   "Student: photographs, Aadhaar, PAN, passport (for studies abroad)",
+   "Student: Class 10 and 12 marksheets and certificates",
+   "Student: admission letter with fee structure",
+   "Student: entrance exam scorecard (if any)",
+   "Co-applicant: Aadhaar, PAN, photographs, address proof",
+   "Co-applicant: salary slips (last 3 months) and Form 16 / ITR (last 2 years) if salaried; ITR (last 3 years) with balance sheet if self-employed",
+   "Co-applicant: bank statements (last 6 months)",
+   "Collateral documents \u2014 property papers and valuation report (only if loan above \u20b97.5 lakh)",
+   "Gap certificate (if there is a gap in studies)"
+  ],
+  "sources": [
+   "https://www.shiksha.com/studyabroad/vidya-lakshmi-portal-education-loan-application-process-eligibility-and-more-articlepage-157645",
+   "https://www.finmandi.com/how-to-get-education-loan-after-12th-india-2026.html",
+   "https://www.nomadcredit.com/blog/vidya-lakshmi-portal-education-loan",
+   "https://propelld.com/site/blog/credila-vs-sbi-education-loan"
+  ],
+  "verified": true,
+  "notes": "Exact document lists vary slightly by bank; the bank gives its own checklist after you apply. For studies abroad, add passport, visa, and IELTS/TOEFL/GRE/GMAT scorecards.",
+  "application": {
+   "form_fields": [
+    "Student personal details",
+    "Course and institution",
+    "Loan amount required",
+    "Co-applicant details and income",
+    "Collateral details (if loan above \u20b97.5 lakh)"
+   ],
+   "documents_to_upload": [
+    "Student KYC (Aadhaar, PAN, photographs)",
+    "Class 10 and 12 marksheets and certificates",
+    "Admission letter and fee structure",
+    "Entrance exam scorecard (if any)",
+    "Co-applicant income proof (salary slips / ITR / Form 16)",
+    "Co-applicant bank statements (last 6 months)",
+    "Collateral documents (if applicable)"
+   ],
+   "after_submission": "The bank verifies every document, checks the co-applicant's credit history, and issues a sanction letter \u2014 SBI reports up to 15 working days after all documents are received. The loan is then disbursed to the college, usually in instalments per semester or year.",
+   "verified": true,
+   "notes": "Document list confirmed by Shiksha, FinMandi and Nomad Credit guides; the 15-working-day sanction timeline is from the SBI process described by Propelld."
+  }
+ },
+ {
+  "id": "faq-043",
+  "category": "education-loan",
+  "question": "Who can get an education loan, and which courses does it cover?",
+  "answer": "Any Indian student who has secured admission to a recognised course and institution in India or abroad can apply \u2014 undergraduate, postgraduate and diploma courses, including professional and technical courses such as engineering, medicine, management (MBA), MCA and job-oriented courses. A parent or guardian must join as co-applicant on every education loan. The bank will not process the loan without a confirmed admission letter from the college. Under the PM-Vidyalaxmi scheme, the collateral-free loan needs merit-based admission to a designated Quality Higher Education Institution (QHEI); management-quota seats do not count for that scheme.",
+  "documents_required": [
+   "Admission letter from a recognised college/institution",
+   "Co-applicant (parent/guardian) details"
+  ],
+  "sources": [
+   "https://gradright.com/how-to-avail-iba-model-education-loan-scheme/",
+   "https://www.finmandi.com/how-to-get-education-loan-after-12th-india-2026.html",
+   "https://www.upgrad.com/study-abroad/articles/vidya-lakshmi-portal/"
+  ],
+  "verified": true,
+  "notes": "The IBA Model Education Loan Scheme (last amended 23 June 2025) is the standard framework all scheduled commercial banks follow; individual banks may add their own conditions.",
+  "application": null
+ },
+ {
+  "id": "faq-044",
+  "category": "education-loan",
+  "question": "How much education loan can I get, and when is collateral needed?",
+  "answer": "Under the IBA Model Education Loan Scheme followed by all scheduled commercial banks: up to \u20b94 lakh \u2014 no collateral and no margin, parents join as borrowers; \u20b94 lakh to \u20b97.5 lakh \u2014 no collateral, a third-party guarantee is taken and the loan is covered by the Credit Guarantee Fund (CGFSEL); above \u20b97.5 lakh \u2014 tangible collateral is needed, such as property, fixed deposits, LIC policies or government securities. Margin (your own contribution): nil up to \u20b94 lakh, 5% of the cost for studies in India and 15% for studies abroad above \u20b94 lakh. The RBI has told banks they must not mandatorily take collateral for education loans up to \u20b94 lakh. SBI lends more under its own schemes \u2014 unsecured up to \u20b950 lakh under Global Ed-Vantage for premier institutions, and secured loans up to \u20b93 crore.",
+  "documents_required": [
+   "Collateral documents \u2014 property papers and valuation report (only if the loan is above \u20b97.5 lakh)"
+  ],
+  "sources": [
+   "https://sansad.in/getFile/loksabhaquestions/annex/187/AS439_0oa8K8.pdf?source=pqals",
+   "https://gradright.com/how-to-avail-iba-model-education-loan-scheme/",
+   "https://propelld.com/site/blog/sbi-bank-vs-bob-bank-education-loan"
+  ],
+  "verified": true,
+  "notes": "Limits and margins are from the IBA model scheme (2022, last amended 23 June 2025) as stated in the government's Lok Sabha reply of 23 March 2026. Individual banks can differ \u2014 SBI's scheme limits are higher than the IBA floor.",
+  "application": null
+ },
+ {
+  "id": "faq-045",
+  "category": "education-loan",
+  "question": "What is the PM-Vidyalaxmi scheme and the CSIS interest subsidy? How much interest will the government pay?",
+  "answer": "PM-Vidyalaxmi (approved by the Union Cabinet on 6 November 2024) gives collateral-free and guarantor-free education loans to students who get merit-based admission to a designated Quality Higher Education Institution (QHEI) in India. The government gives a 75% credit guarantee on loans up to \u20b97.5 lakh. On interest: if your family income is up to \u20b98 lakh a year, you get a 3% interest subvention during the moratorium (course period plus one year) on loans up to \u20b910 lakh \u2014 only 1 lakh fresh students a year get this. If your family income is up to \u20b94.5 lakh and you are in a technical or professional course, the CSIS (PM-USP Central Sector Interest Subsidy) pays 100% of the interest during the moratorium on loans up to \u20b910 lakh, so you pay no interest while studying. There is no income limit for the loan itself \u2014 income only decides the subsidy. Interest rates are capped at the bank's EBLR plus 0.5%, and repayment can go up to 15 years after the moratorium. The benefit is once only, for one UG, PG or integrated course, and you cannot take it with another government scholarship or subsidy.",
+  "documents_required": [
+   "Income certificate from an authorised public authority (for the interest subsidy)",
+   "Proof of merit-based admission to a QHEI"
+  ],
+  "sources": [
+   "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2290972&reg=48&lang=2",
+   "https://gradright.com/vidya-lakshmi-education-loan-scheme-a-complete-guide-for-indian-students/",
+   "https://www.upgrad.com/study-abroad/articles/vidya-lakshmi-portal/",
+   "https://dharmakshethra.com/pm-vidyalaxmi-scheme-making-quality-higher-education-financially-accessible-to-indias-meritorious-students/"
+  ],
+  "verified": true,
+  "notes": "The number of designated QHEIs differs by source \u2014 860 at launch as per the PIB release; some guides list 1,425 as the list grew. The live list on pmvidyalaxmi.co.in is the authority. Apply through the PM Vidya Lakshmi portal \u2014 see faq-041.",
+  "application": null
+ },
+ {
+  "id": "faq-046",
+  "category": "education-loan",
+  "question": "How does education loan repayment work \u2014 moratorium, EMI, and interest while studying?",
+  "answer": "You pay no EMI while studying. The moratorium (repayment holiday) is your course duration plus one year. During the moratorium, simple interest keeps adding to the loan \u2014 unless the CSIS or PM-Vidyalaxmi subsidy covers it, in which case the government pays that interest. After the moratorium ends, your EMI starts, and repayment can go up to 15 years. There is no penalty for repaying early. The interest you pay on an education loan is fully tax-deductible under Section 80E of the Income Tax Act for up to 8 years.",
+  "documents_required": [],
+  "sources": [
+   "https://gradright.com/how-to-avail-iba-model-education-loan-scheme/",
+   "https://sansad.in/getFile/loksabhaquestions/annex/187/AS439_0oa8K8.pdf?source=pqals",
+   "https://www.nomadcredit.com/blog/vidya-lakshmi-portal-education-loan",
+   "https://www.liv2trade.com/academy/loans/india/100/education-loans"
+  ],
+  "verified": true,
+  "notes": "Some banks allow extending the moratorium by 6\u201312 months more in special cases \u2014 ask your bank.",
+  "application": null
+ },
+ {
+  "id": "faq-047",
+  "category": "education-loan",
+  "question": "Should I take an education loan from a bank or an NBFC?",
+  "answer": "Public-sector banks (SBI, Bank of Baroda, Union Bank) charge the lowest interest (about 8\u201310.5% a year) and give you government subsidies such as CSIS and PM-Vidyalaxmi, but they take 4\u20136 weeks, ask for more documents, and need collateral above \u20b97.5 lakh. NBFCs (HDFC Credila, Avanse, Auxilo) are faster (7\u201314 days), give higher unsecured loans (up to \u20b950\u201375 lakh without collateral), and are more flexible on eligibility \u2014 but charge more (about 10\u201316% a year) and a processing fee of 1\u20132%. Rule of thumb: if you have time, collateral, and subsidy eligibility, take a bank loan; if you need the money fast or have no collateral, use an NBFC. Compare at least three lenders before signing.",
+  "documents_required": [],
+  "sources": [
+   "https://www.a-wayconsultancy.com/blog/education-loan-for-abroad-studies-comparison",
+   "https://www.nomadcredit.com/blog/nbfc-education-loan",
+   "https://www.jagranjosh.com/articles/study-abroad-on-a-budget-domestic-student-loans-top-banks-interest-rates-and-eligibility-explained-1800015334-1"
+  ],
+  "verified": true,
+  "notes": "Rates are indicative for 2025-26 and change with the RBI repo rate. NBFCs are regulated by the RBI but are not banks.",
+  "application": null
+ },
+ {
+  "id": "faq-048",
+  "category": "education-loan",
+  "question": "What expenses does an education loan cover \u2014 only the tuition fee?",
+  "answer": "No \u2014 it covers the full cost of study: tuition and exam/library/laboratory fees, hostel and mess charges, books, equipment and instruments, a laptop or computer, travel (for studies abroad), study tours, and the insurance premium. SBI also covers a two-wheeler up to \u20b950,000 when collateral is given. The bank usually pays the money directly to the college in instalments for each semester or year, not into your account.",
+  "documents_required": [],
+  "sources": [
+   "https://propelld.com/site/blog/credila-vs-sbi-education-loan",
+   "https://tmw.bankbazaar.com/sbi-education-loan.html",
+   "https://gradright.com/how-to-avail-iba-model-education-loan-scheme/"
+  ],
+  "verified": true,
+  "notes": "What is covered can differ slightly by bank and scheme \u2014 the sanction letter lists exactly what your loan covers.",
+  "application": null
+ },
+ {
+  "id": "faq-049",
+  "category": "defence-scholarship",
+  "question": "What is the PM Scholarship Scheme (PMSS) for wards of ex-servicemen, and how do I apply?",
+  "answer": "The Prime Minister's Scholarship Scheme (PMSS) is run by the Kendriya Sainik Board (KSB) under the Ministry of Defence and paid from the National Defence Fund. It started in 2006-07. Every year it gives 5,500 fresh scholarships (2,750 boys and 2,750 girls). Girls get \u20b93,000 a month (\u20b936,000 a year) and boys get \u20b92,500 a month (\u20b930,000 a year), paid by direct bank transfer (DBT). Who can apply: dependent wards and widows of ex-servicemen (Army, Navy, Air Force, below officer rank) and ex-Coast Guard personnel, who have taken admission in the first year of a professional or technical degree course (engineering, medicine, dental, MBA, MCA, B.Ed and other approved courses) at an institution recognised by AICTE, UGC or MCI, with at least 60% marks in the minimum entry qualification (Class 12, diploma or graduation). Master's degrees are generally not eligible, except MBA and MCA. General degrees such as BA, B.Sc and B.Com are not eligible. Wards of civilians and paramilitary personnel are NOT eligible under this KSB route \u2014 they apply under the MHA route instead. Apply online on ksb.gov.in. Your application is verified by your college, then the Zila Sainik Board, then the Rajya Sainik Board, and finally approved by KSB. For 2026-27 the last date is reported as 31 December 2026 \u2014 confirm it on ksb.gov.in.",
+  "documents_required": [
+   "Annexure-1 \u2014 Ex-Serviceman / Ex-Coast Guard Certificate, signed by the Zila Sainik Board",
+   "Annexure-2 \u2014 Bonafide Certificate, signed by the Principal/Dean/Registrar of the college",
+   "Annexure-3 \u2014 Bank certificate confirming Aadhaar is linked to the student's bank account",
+   "Matriculation (Class 10) certificate for date of birth",
+   "MEQ marksheet \u2014 Class 12 / diploma / graduation (all years/semesters)",
+   "Bank passbook first page (name, account number, IFSC)",
+   "Aadhaar card of the student",
+   "PPO or Ex-Serviceman Identity Card (Category 6) OR Part II Order / POR / General Form (Categories 1\u20134) OR award certificate + gazette notification (Category 5)"
+  ],
+  "sources": [
+   "https://aimindia.in/ksb-scholarship-2026/",
+   "https://newjobnotifications.com/prime-minister-scholarship-scheme-2026/",
+   "https://theveteranspost.com/article/prime-ministers-scholarship-scheme-pmss",
+   "https://www.sahayakapps.in/scholarships/all-india/pm-scholarship-defence-wards"
+  ],
+  "verified": true,
+  "notes": "If even one document is missing, the application is rejected. The 31 December 2026 last date is reported by one guide \u2014 confirm on ksb.gov.in, as dates change every year.",
+  "application": {
+   "form_fields": [
+    "Student name, date of birth, Aadhaar number",
+    "Course, college/institution, year of admission",
+    "Ex-serviceman details (Part-1 and Part-2): service number, rank, force, PPO number",
+    "Bank account details (Aadhaar-linked)"
+   ],
+   "documents_to_upload": [
+    "Annexure-1 (ESM certificate)",
+    "Annexure-2 (bonafide certificate)",
+    "Annexure-3 (bank certificate)",
+    "Matriculation certificate",
+    "MEQ marksheet",
+    "Bank passbook first page",
+    "Aadhaar card",
+    "PPO / ESM Identity Card or category documents"
+   ],
+   "after_submission": "The college verifies the application online, then the Zila Sainik Board and Rajya Sainik Board verify the service details, and KSB gives the final approval. The scholarship is paid by DBT into the student's Aadhaar-linked bank account.",
+   "verified": true,
+   "notes": "Flow confirmed by KSB guides (newjobnotifications, AimIndia): apply on ksb.gov.in, download Annexures 1\u20133, fill Part-1 and Part-2 with ESM details, submit online."
+  }
+ },
+ {
+  "id": "faq-050",
+  "category": "defence-scholarship",
+  "question": "What is the PM Scholarship Scheme (PMSS) for CAPF, Assam Rifles and State police wards?",
+  "answer": "This is the same Prime Minister's Scholarship Scheme, but for the families of Central Armed Police Forces and police personnel. It is run by the Welfare and Rehabilitation Board (WARB) under the Ministry of Home Affairs, and you apply on the National Scholarship Portal (NSP) at scholarships.gov.in. Every year it gives 2,000 fresh scholarships for CAPF and Assam Rifles wards (1,000 boys and 1,000 girls) and 500 for State/UT police wards (250 boys and 250 girls). Girls get \u20b93,000 a month (\u20b936,000 a year) and boys get \u20b92,500 a month (\u20b930,000 a year), for up to 5 years, paid by DBT. Who can apply: wards and widows of CAPF and Assam Rifles personnel killed in action or who died due to service causes; wards of disabled personnel; wards of gallantry award recipients; wards of retired and serving CAPF and Assam Rifles personnel (below officer rank); and wards of State/UT police personnel martyred in terror or Naxal attacks. You need at least 60% marks in the minimum entry qualification (Class 12, diploma or graduation), and admission to the first year of a professional degree course (BE, B.Tech, MBBS, BDS, BBA, BCA, B.Pharma, B.Sc Nursing and similar) recognised by AICTE, UGC or MCI. Renewal needs 50% marks in each year. Only two children per family can get it, and you cannot hold any other scholarship at the same time. There is no family income limit in the official guidelines. Selection is by category preference, then MEQ marks, then age (older preferred), then parent's rank (lower rank preferred). For 2026-27 the NSP window was 1 June to 31 October 2026.",
+  "documents_required": [
+   "Service certificate (Annexure-A) for serving personnel",
+   "PPO / Discharge / Death / Disability / Gallantry award certificate (as applicable)",
+   "Bonafide certificate from the institution",
+   "Self-attested MEQ marksheet",
+   "Certificate confirming martyrdom in a terror/Naxal attack issued by the State Government (for State/UT police wards)",
+   "Aadhaar card of the student",
+   "Aadhaar-seeded bank account details"
+  ],
+  "sources": [
+   "https://scholarships.gov.in/public/FAQ/FAQonPMSSS.pdf",
+   "https://www.buddy4study.com/article/pmms-for-wards-and-widows-of-capfs-and-assam-rifles",
+   "https://scholarshipsx.com/pmss-scholarship-for-capf-and-assam-rifles-wards/",
+   "https://www.indiascholarships.in/scholarships/pmss-capf-assam-rifles"
+  ],
+  "verified": true,
+  "notes": "All facts in this entry are from the official NSP PMSS FAQ except the 2026-27 dates, which are from Buddy4Study. One guide claims a \u20b96 lakh income limit, but the official FAQ lists no income criterion and other guides say there is none \u2014 the dataset states there is no income limit.",
+  "application": {
+   "form_fields": [
+    "Student name, date of birth, Aadhaar number, mobile number",
+    "Parent's force (BSF/CRPF/ITBP/CISF/SSB/NSG/Assam Rifles/State Police), service status (serving/retired/deceased/disabled)",
+    "Course, college/institution, year of admission",
+    "MEQ marks (Class 12 / diploma / graduation)",
+    "Bank account details (Aadhaar-seeded)"
+   ],
+   "documents_to_upload": [
+    "Service certificate (Annexure-A) or PPO/Discharge certificate",
+    "Death/Disability/Gallantry certificate (if applicable)",
+    "Martyrdom certificate from the State Government (State police wards)",
+    "Bonafide certificate from the institution",
+    "Self-attested MEQ marksheet",
+    "Aadhaar card"
+   ],
+   "after_submission": "The college verifies the application and documents online, then the Force Nodal Officer verifies it. After merit selection, the amount is credited by DBT into the Aadhaar-seeded bank account through PFMS. If the application is marked defective, correct and resubmit it before the verification deadline.",
+   "verified": true,
+   "notes": "NSP flow confirmed by the official NSP PMSS FAQ and Buddy4Study; documents must be uploaded as PDF or JPG up to 200 KB."
+  }
+ },
+ {
+  "id": "faq-051",
+  "category": "defence-scholarship",
+  "question": "Is there a PM Scholarship for wards of RPF/RPSF (railway protection force) personnel?",
+  "answer": "Yes \u2014 the PMSS has a separate RPF/RPSF route on the National Scholarship Portal (NSP). It is for wards and widows of ex-RPF/RPSF personnel who lost their lives in the line of duty \u2014 in encounters with terrorists or criminals, while safeguarding railway property or passenger areas, or during election duty. The amount is the same: girls \u20b93,000 a month (\u20b936,000 a year) and boys \u20b92,500 a month (\u20b930,000 a year). You need 60% marks in the minimum entry qualification and admission to a first professional degree course. For 2026-27 the window is reported as 1 June to 31 December 2026 \u2014 confirm it on NSP, as dates change every year.",
+  "documents_required": [
+   "Service / death certificate of the RPF/RPSF personnel",
+   "Bonafide certificate from the institution",
+   "Self-attested MEQ marksheet",
+   "Aadhaar card of the student",
+   "Aadhaar-seeded bank account details"
+  ],
+  "sources": [
+   "https://www.buddy4study.com/article/pmss",
+   "https://www.shiksha.com/college/articles/pm-scholarship-scheme-2026-27-eligibility-amount-last-date-courses-and-how-to-apply-blogId-243445"
+  ],
+  "verified": true,
+  "notes": "The route, amounts and portal are confirmed by two guides; the 31 December 2026 last date is reported by one guide \u2014 confirm on NSP. Apply on NSP \u2014 same application flow as the CAPF/Assam Rifles route (faq-050).",
+  "application": null
+ },
+ {
+  "id": "faq-052",
+  "category": "defence-scholarship",
+  "question": "How do I renew my PM Scholarship every year?",
+  "answer": "Apply for renewal on the same portal you applied on \u2014 ksb.gov.in for the ex-servicemen route, or the National Scholarship Portal for the CAPF/police routes. You must pass each academic year with at least 50% marks. For the KSB route, upload the Annexure-2 certificate/undertaking from the student and the ex-serviceman along with your latest marksheets. If your renewal is delayed, a grace period of one year is allowed. If your marks fall below 50%, the renewal is not granted and the scholarship stops.",
+  "documents_required": [
+   "Latest year marksheet (50% or more)",
+   "Annexure-2 certificate/undertaking (KSB route)",
+   "Bonafide certificate from the institution (if asked)"
+  ],
+  "sources": [
+   "https://scholarships.gov.in/public/FAQ/FAQonPMSSS.pdf",
+   "https://newjobnotifications.com/prime-minister-scholarship-scheme-2026/"
+  ],
+  "verified": true,
+  "notes": "The 50% renewal rule and the one-year grace period are from the official NSP PMSS FAQ; the Annexure-2 renewal document is from the KSB guides.",
+  "application": {
+   "form_fields": [
+    "Student name and registration/application ID",
+    "Course and current year of study",
+    "Marks obtained in the previous academic year"
+   ],
+   "documents_to_upload": [
+    "Latest year marksheet",
+    "Annexure-2 certificate/undertaking (KSB route)",
+    "Bonafide certificate (if asked)"
+   ],
+   "after_submission": "The institute verifies the renewal, and the scholarship continues by DBT at the same monthly rate. If marks are below 50%, the renewal is rejected.",
+   "verified": true,
+   "notes": "Renewal flow confirmed by the official NSP FAQ and KSB guides."
+  }
+ },
+ {
+  "id": "faq-053",
+  "category": "defence-scholarship",
+  "question": "Who counts as a 'ward' for the PM Scholarship \u2014 and who is NOT eligible?",
+  "answer": "'Ward' means the dependent child of the personnel, and widows of deceased personnel can also apply. For the KSB (ex-servicemen) route: only wards and widows of ex-servicemen below officer rank and ex-Coast Guard personnel. Wards of serving personnel are generally NOT eligible under KSB, except in high-priority categories such as personnel killed or disabled in action and gallantry award recipients. NOT eligible under KSB: wards of civilians, and wards of paramilitary personnel (CRPF, BSF, CISF and others) \u2014 they must apply under the MHA route instead. Wards of civilian employees of CAPF and Assam Rifles are not eligible under any PMSS route. Also not eligible: general degree courses such as BA, B.Sc and B.Com (only first professional/technical degrees count), students studying abroad, and students in colleges not recognised by UGC, AICTE or MCI.",
+  "documents_required": [],
+  "sources": [
+   "https://scholarships.gov.in/public/FAQ/FAQonPMSSS.pdf",
+   "https://theveteranspost.com/article/prime-ministers-scholarship-scheme-pmss",
+   "https://aimindia.in/ksb-scholarship-2026/",
+   "https://wiseindia.in/prime-ministers-scholarship-scheme-2026/"
+  ],
+  "verified": true,
+  "notes": "Eligibility boundaries are from the official NSP FAQ (MHA route) and KSB guides (defence route).",
+  "application": null
+ },
+ {
+  "id": "faq-054",
+  "category": "defence-scholarship",
+  "question": "What is the SBI Shaurya education loan for wards of defence and CAPF personnel?",
+  "answer": "SBI Shaurya is a special education loan only for wards and spouses of Defence (Army, Navy, Air Force), Indian Coast Guard and Central Armed Police Force personnel. You can borrow up to \u20b940 lakh for studies in India and up to \u20b91.5 crore for studies abroad. The co-borrower (parent) must hold a Diamond or Platinum Defence Salary Package (DSP) or Indian Coast Guard Salary Package (ICGSP) account with SBI, and that salary/pension account must stay with SBI for the whole loan period. Interest (effective 09 June 2026, as published by SBI): 8.65% a year for studies in India and abroad above \u20b97.5 lakh, 8.15% with security at select institutions abroad, with a 0.50% concession for girl students. No collateral is needed up to \u20b97.5 lakh. Moratorium is the course period plus 1 year, or 6 months after getting a job, whichever is earlier; repayment up to 15 years. It covers tuition, hostel, books, laptop, travel, insurance, and a two-wheeler up to \u20b950,000 when collateral is given. Note: some guides quote 10.15\u201311.75% \u2014 rates differ by loan category and change often, so confirm the current rate on sbi.co.in or at the branch before applying.",
+  "documents_required": [
+   "Admission letter and fee structure",
+   "Class 10 and 12 marksheets",
+   "Aadhaar and PAN of student and co-applicant",
+   "Proof that the co-applicant holds a DSP/ICGSP Diamond or Platinum account with SBI",
+   "Co-applicant income proof",
+   "Collateral documents (if the loan is above \u20b97.5 lakh)"
+  ],
+  "sources": [
+   "https://tmw.bankbazaar.com/sbi-education-loan.html",
+   "https://propelld.com/site/blog/shaurya-education-loan",
+   "https://www.shiksha.com/studyabroad/sbi-education-loan-for-international-students-applycontent61521",
+   "https://leapscholar.com/blog/state-bank-of-india-abroad-education-loan/"
+  ],
+  "verified": true,
+  "notes": "Eligibility, loan limits and the DSP/ICGSP co-borrower rule are confirmed by five independent guides. The 8.65% rate is the SBI-published rate effective 09 June 2026 (via BankBazaar); Propelld quotes 10.15\u201311.75% for other categories \u2014 confirm the rate for your category at the branch.",
+  "application": {
+   "form_fields": [
+    "Student name, date of birth, Aadhaar number",
+    "Course and institution (India/abroad)",
+    "Loan amount required",
+    "Co-applicant details and DSP/ICGSP account number",
+    "Collateral details (if applicable)"
+   ],
+   "documents_to_upload": [
+    "Admission letter and fee structure",
+    "Class 10 and 12 marksheets",
+    "Aadhaar and PAN of student and co-applicant",
+    "DSP/ICGSP account proof of the co-applicant",
+    "Co-applicant income proof",
+    "Collateral documents (if applicable)"
+   ],
+   "after_submission": "The SBI branch verifies the documents and the DSP/ICGSP account, sanctions the loan, and disburses it to the institution. Apply at the SBI branch holding the salary/pension account, or through the SBI education loan portal.",
+   "verified": true,
+   "notes": "Flow is the standard SBI education loan process; Shaurya applications go through the branch holding the DSP/ICGSP account."
+  }
+ },
+ {
+  "id": "faq-055",
+  "category": "defence-scholarship",
+  "question": "Does the Andhra Pradesh Police give scholarships to children of police personnel?",
+  "answer": "UNVERIFIED \u2014 the fund exists, but the exact application process could not be confirmed from an official page. The Andhra Pradesh Police Education Fund, run under the AP State Police Welfare Society (Inspector General of Police, Welfare), gives merit-based education grants of \u20b91,000 to \u20b96,000 to children of police personnel who score good marks, and loans for higher studies. It also runs three Police Boys Hostels \u2014 at Amberpet (Hyderabad), Guntur and Nellore \u2014 giving free boarding, lodging and schooling to orphan children of deceased non-gazetted police personnel aged 8 to 18. In the 2023-24 academic year, \u20b93.20 crore was given as scholarships to 1,733 children of police personnel. To apply, ask at your unit or district police welfare office \u2014 the exact form, current amounts and deadlines are not confirmed here.",
+  "documents_required": [
+   "Child's marksheet (merit proof)",
+   "Proof that the parent is AP police personnel (service ID)",
+   "College admission proof (for higher-study loans)"
+  ],
+  "sources": [
+   "http://andhrapradeshpolice.blogspot.com/",
+   "https://www.deccanchronicle.com/southern-states/andhra-pradesh/ap-police-commemoration-day-to-feature-memorial-parade-1831226",
+   "https://www.thehindu.com/news/national/andhra-pradesh/cm-to-pay-tributes-to-police-martyrs-today/article32903855.ece"
+  ],
+  "verified": false,
+  "notes": "UNVERIFIED: the fund, the \u20b91,000\u2013\u20b96,000 grant range, the three hostels and the 2023-24 disbursement (\u20b93.20 crore to 1,733 children) are confirmed by AP Police and news sources, but the application form, current grant amounts and deadlines were not found on an official page. Do not present the application steps as confirmed \u2014 the student should ask the unit welfare office. AuPro apply flow cannot be built yet for this one.",
+  "application": null
+ },
+ {
+  "id": "faq-056",
+  "category": "defence-scholarship",
+  "question": "I missed the PM Scholarship deadline, or I am in 2nd year \u2014 can I still apply? Can I take PMSS with another scholarship?",
+  "answer": "You can apply again next year only if you are still in your first year and meet all the other conditions. Second-year students can apply only if they entered the 2nd year directly through lateral entry (for example, after a diploma in engineering); regular 2nd-year students progressing normally cannot apply. You cannot take PMSS together with any other scholarship or stipend \u2014 if you get another scholarship, you are not eligible for PMSS. If your application is marked defective, correct it and resubmit before the verification deadline; you can also withdraw and re-apply before the Level-2 (Force Nodal Officer) verification. Changing your course or college after selection cancels the scholarship automatically.",
+  "documents_required": [],
+  "sources": [
+   "https://scholarships.gov.in/public/FAQ/FAQonPMSSS.pdf"
+  ],
+  "verified": true,
+  "notes": "All answers are from the official NSP PMSS FAQ (questions 14, 16, 19, 20, 21 and 25).",
+  "application": null
+ }
+]

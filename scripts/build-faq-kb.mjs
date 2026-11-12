@@ -21,8 +21,8 @@ import * as path from 'path';
 import { fileURLToPath } from 'url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const jsonPath = path.join(root, 'apps', 'web', 'app', 'faq-data.json');
-const tsPath = path.join(root, 'apps', 'web', 'app', 'faq-data.ts');
+const jsonPath = path.join(root, 'apps', 'web', 'app', 'lib', 'faq-data.json');
+const tsPath = path.join(root, 'apps', 'web', 'app', 'lib', 'faq-data.ts');
 
 const STOPWORDS = new Set(
   'a an the and or of to in for on with by is are was were be been do does did how what when where which who whom whose can could should would will shall may might i me my we our you your he she it its they them their this that these those there here from as at not no yes if then than so such into about after before between under over out up down off all any each few more most other some no nor only own same s get got apply application certificate certificates document documents required need needs'.split(

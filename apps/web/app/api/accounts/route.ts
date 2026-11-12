@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import {
   getAllAccounts,
+  findAccount,
   registerAccount,
   removeAccount,
   purgeAllAccountsExceptHead,
@@ -13,7 +14,10 @@ import {
   sanitizeEmail,
   sanitizeText,
   isRequestAuthorizedAsAdmin,
+  isHeadAdmin,
+  isHod,
 } from '../auth/security';
+import { NOT_IN_CSE_LIST_MESSAGE, lookupCseStudentByEmail } from '../../lib/cse-students';
 
 /**
  * GET /api/accounts
@@ -70,6 +74,13 @@ export async function POST(req: Request) {
       );
     }
 
+    // Only second-year CSE students may be registered. The Head
+    // Administrator and HODs are exempt; everyone else must be in the
+    // directory (the registerAccount call refuses them too).
+    if (!isHeadAdmin(cleanEmail) && !isHod(cleanEmail) && !lookupCseStudentByEmail(cleanEmail)) {
+      return NextResponse.json({ error: NOT_IN_CSE_LIST_MESSAGE }, { status: 403 });
+    }
+
     const success = registerAccount(cleanEmail, {
       name: sanitizeText(name, 120),
       rollNo: sanitizeText(rollNo, 50),
@@ -80,10 +91,11 @@ export async function POST(req: Request) {
     });
 
     if (success) {
+      const stored = findAccount(cleanEmail);
       logServerActivity(
         'Account Registered',
         cleanEmail,
-        `Student profile registered for ${name || 'AU Student'} (${rollNo || 'ID pending'}, ${department || 'AU Eng'})`
+        `Student profile registered for ${stored?.name || name || 'AU Student'} (${stored?.rollNo || rollNo || 'ID pending'}, ${stored?.department || department || 'AU Eng'})`
       );
       const accounts = getAllAccounts();
       return NextResponse.json({

@@ -58,6 +58,11 @@ import {
   StudentProfile,
 } from './lib/auth';
 import { auVectorDB } from './lib/vector_search';
+import {
+  getRollNoFromEmail,
+  lookupCseStudentByEmail,
+  NOT_IN_CSE_LIST_MESSAGE,
+} from './lib/cse-students';
 import { validateTextContent, validateImageSafety } from './lib/content_moderation';
 import { compressImageFile } from './lib/image_compressor';
 
@@ -600,7 +605,8 @@ export default function Home() {
   const [authUsername, setAuthUsername] = useState('');
   const [authRollNo, setAuthRollNo] = useState('');
   const [authDept, setAuthDept] = useState('Computer Science & Systems Engineering');
-  const [authYear, setAuthYear] = useState('3rd Year');
+  const [authYear, setAuthYear] = useState('2nd Year');
+  const [authSection, setAuthSection] = useState('');
   const [authPhone, setAuthPhone] = useState('');
   const [authBio, setAuthBio] = useState('Student at Andhra University College of Engineering. Passionate about technology, projects, and campus collaboration.');
   const [authPassword, setAuthPassword] = useState('');
@@ -1286,12 +1292,25 @@ export default function Home() {
       if (saved) {
         const user = JSON.parse(saved);
         if (user && user.email) {
+          // A session for a removed account (not head admin, not HOD, not
+          // in the second-year CSE directory) is dropped, not restored.
+          const cleanSessionEmail = String(user.email).toLowerCase().trim();
+          if (
+            !isHeadAccount(cleanSessionEmail) &&
+            !isHodAccount(cleanSessionEmail) &&
+            !lookupCseStudentByEmail(cleanSessionEmail)
+          ) {
+            localStorage.removeItem('aupro_session');
+            return;
+          }
           setAuthEmail(user.email);
           setAuthName(user.name || 'AU Student');
           setAuthUsername(user.username || 'au.student');
           if (user.rollNo) setAuthRollNo(user.rollNo);
           if (user.dept) setAuthDept(user.dept);
+          if (user.department) setAuthDept(user.department);
           if (user.year) setAuthYear(user.year);
+          if (user.section) setAuthSection(user.section);
           if (user.phone) setAuthPhone(user.phone);
           if (user.bio) setAuthBio(user.bio);
           setSignedIn(true);
@@ -1539,7 +1558,15 @@ export default function Home() {
       setAddUserError('Registration is restricted to official @andhrauniversity.edu.in addresses.');
       return;
     }
-    if (!newUserName.trim()) {
+    // Details come from the second-year CSE directory, never from typed
+    // input. The Head Administrator and HOD accounts are exempt.
+    const directoryStudent = lookupCseStudentByEmail(cleanEmail);
+    const isExempt = isHeadAccount(cleanEmail) || isHodAccount(cleanEmail);
+    if (!directoryStudent && !isExempt) {
+      setAddUserError(NOT_IN_CSE_LIST_MESSAGE);
+      return;
+    }
+    if (!directoryStudent && !newUserName.trim()) {
       setAddUserError('Student full name is required.');
       return;
     }
@@ -1553,29 +1580,31 @@ export default function Home() {
       return;
     }
 
+    const displayName = directoryStudent ? directoryStudent.name : newUserName.trim();
     const studentProfile: StudentProfile = {
       email: cleanEmail,
-      name: newUserName.trim(),
-      username: newUserName.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, ''),
-      rollNo: newUserRoll.trim() || '32550640' + Math.floor(1000 + Math.random() * 9000),
-      department: newUserDept,
-      year: newUserYear,
+      name: displayName,
+      username: displayName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, ''),
+      rollNo: directoryStudent ? directoryStudent.rollNo : (newUserRoll.trim() || '32550640' + Math.floor(1000 + Math.random() * 9000)),
+      department: directoryStudent ? 'Computer Science & Engineering' : newUserDept,
+      year: directoryStudent ? '2nd Year' : newUserYear,
+      section: directoryStudent ? directoryStudent.section : undefined,
       phone: '',
-      bio: `AU Student @ ${newUserDept}. Verified by Head Administrator.`,
+      bio: `AU Student @ ${directoryStudent ? 'Computer Science & Engineering' : newUserDept}. Verified by Head Administrator.`,
       password: newUserPassword,
       isVerified: true,
       verifiedAt: new Date().toISOString(),
     };
 
     saveRegisteredUser(studentProfile);
-    logPlatformActivity('Account Created (Admin)', authEmail, `Created account for ${newUserName} (${cleanEmail})`);
+    logPlatformActivity('Account Created (Admin)', authEmail, `Created account for ${studentProfile.name} (${cleanEmail})`);
     refreshAdminData();
     setShowAddUserModal(false);
     setNewUserName('');
     setNewUserEmail('');
     setNewUserRoll('');
     setNewUserPassword('');
-    setToast(`Account created for ${newUserName.trim()} successfully.`);
+    setToast(`Account created for ${studentProfile.name} successfully.`);
   };
 
   const handleDeleteUserAccount = (targetEmail: string, targetName: string) => {
@@ -2054,7 +2083,10 @@ export default function Home() {
 
                 setIsOtpLoading(true);
                 try {
-                  const data = await sendUniversityOtp(clean, authName, authRollNo, true);
+                  // Name, roll number, department and year are NOT asked
+                  // here: the server resolves them from the second-year CSE
+                  // directory by the email's roll number after OTP.
+                  const data = await sendUniversityOtp(clean, true);
                   setAuthOtpToken(data.token || '');
                   setAuthOtpDevCode(data.devCode || '');
                   setAuthOtpProviderStatus(data.providerStatus || 'delivered');
@@ -2074,11 +2106,6 @@ export default function Home() {
                 }
               }} className="stack" style={{ gap: 12 }}>
                 <div>
-                  <label className="field-label" style={{ fontSize: 12 }}>Full Name *</label>
-                  <input className="search" type="text" placeholder="e.g. Dhanunjay Rao" value={authName} onChange={(e) => setAuthName(e.target.value)} required />
-                </div>
-
-                <div>
                   <label className="field-label" style={{ fontSize: 12 }}>Choose Username *</label>
                   <input className="search" type="text" placeholder="e.g. dhanunjay_au" value={authUsername} onChange={(e) => setAuthUsername(e.target.value.toLowerCase().replace(/\s+/g, '_'))} required />
                 </div>
@@ -2088,40 +2115,9 @@ export default function Home() {
                   <input className="search" type="email" placeholder="student@andhrauniversity.edu.in" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                  <div>
-                    <label className="field-label" style={{ fontSize: 12 }}>Roll / Reg Number *</label>
-                    <input className="search" type="text" placeholder="e.g. 321101234" value={authRollNo} onChange={(e) => setAuthRollNo(e.target.value)} required />
-                  </div>
-                  <div>
-                    <label className="field-label" style={{ fontSize: 12 }}>Phone Number *</label>
-                    <input className="search" type="tel" placeholder="+91 9876543210" value={authPhone} onChange={(e) => setAuthPhone(e.target.value)} required />
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                  <div>
-                    <label className="field-label" style={{ fontSize: 12 }}>Department</label>
-                    <select className="search" value={authDept} onChange={(e) => setAuthDept(e.target.value)} style={{ padding: '8px 10px', fontSize: 13 }}>
-                      <option value="Computer Science & Systems Engineering">CS&SE (CSE)</option>
-                      <option value="Electronics & Communication Engineering">ECE</option>
-                      <option value="Mechanical Engineering">Mechanical</option>
-                      <option value="Civil Engineering">Civil</option>
-                      <option value="Electrical & Electronics Engineering">EEE</option>
-                      <option value="Chemical Engineering">Chemical</option>
-                      <option value="Marine Engineering">Marine</option>
-                      <option value="Information Technology">IT</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="field-label" style={{ fontSize: 12 }}>Year</label>
-                    <select className="search" value={authYear} onChange={(e) => setAuthYear(e.target.value)} style={{ padding: '8px 10px', fontSize: 13 }}>
-                      <option value="1st Year">1st Year</option>
-                      <option value="2nd Year">2nd Year</option>
-                      <option value="3rd Year">3rd Year</option>
-                      <option value="4th Year">4th Year</option>
-                    </select>
-                  </div>
+                <div>
+                  <label className="field-label" style={{ fontSize: 12 }}>Phone Number *</label>
+                  <input className="search" type="tel" placeholder="+91 9876543210" value={authPhone} onChange={(e) => setAuthPhone(e.target.value)} required />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -2134,6 +2130,10 @@ export default function Home() {
                     <input className="search" type="password" placeholder="Repeat password" value={authConfirmPassword} onChange={(e) => setAuthConfirmPassword(e.target.value)} required />
                   </div>
                 </div>
+
+                <p className="lead" style={{ fontSize: 12, margin: 0, color: 'var(--muted)' }}>
+                  Your name, roll number, section and year are attached automatically from the second-year CSE list using your college email — you do not need to enter them.
+                </p>
 
                 <button className="primary-button" type="submit" style={{ marginTop: 6 }} disabled={isOtpLoading}>
                   {isOtpLoading ? 'Sending Verification Code...' : 'Verify Email & Create Account →'}
@@ -2154,16 +2154,31 @@ export default function Home() {
                 }
                 setIsOtpLoading(true);
                 try {
-                  await verifyUniversityOtp(authEmail, authOtp.trim(), authOtpToken);
+                  const verified = await verifyUniversityOtp(authEmail, authOtp.trim(), authOtpToken);
 
-                  // Registration officially verified!
+                  // Registration officially verified! Details come from the
+                  // resolved profile the server attached from the second-year
+                  // CSE directory — never from typed input.
+                  const resolved = verified?.profile || {};
+                  const resolvedName = resolved.name || authName || 'AU Student';
+                  const resolvedRollNo = resolved.rollNo || authRollNo || getRollNoFromEmail(authEmail);
+                  const resolvedDept = resolved.department || authDept;
+                  const resolvedYear = resolved.year || authYear;
+                  const resolvedSection = resolved.section || '';
+                  setAuthName(resolvedName);
+                  setAuthRollNo(resolvedRollNo);
+                  setAuthDept(resolvedDept);
+                  setAuthYear(resolvedYear);
+                  setAuthSection(resolvedSection);
+
                   const studentProfile = {
                     email: authEmail.toLowerCase().trim(),
-                    name: authName,
+                    name: resolvedName,
                     username: authUsername,
-                    rollNo: authRollNo,
-                    department: authDept,
-                    year: authYear,
+                    rollNo: resolvedRollNo,
+                    department: resolvedDept,
+                    year: resolvedYear,
+                    section: resolvedSection,
                     phone: authPhone,
                     bio: authBio,
                     password: authPassword,
@@ -2178,20 +2193,20 @@ export default function Home() {
                     await supabaseSignUp({
                       email: authEmail,
                       password: authPassword,
-                      fullName: authName,
+                      fullName: resolvedName,
                       username: authUsername,
-                      rollNo: authRollNo,
-                      department: authDept,
-                      year: authYear,
+                      rollNo: resolvedRollNo,
+                      department: resolvedDept,
+                      year: resolvedYear,
                       phone: authPhone,
                     });
                   } catch {}
 
                   setSignedIn(true);
                   setShowIntro(false);
-                  logPlatformActivity('Account Registered', authEmail, `Verified identity for ${authName} (${authRollNo}, ${authDept})`);
+                  logPlatformActivity('Account Registered', authEmail, `Verified identity for ${resolvedName} (${resolvedRollNo}, ${resolvedDept})`);
                   refreshAdminData();
-                  setToast(`Welcome to AuPro, ${authName || 'Student'}! Official email verified successfully.`);
+                  setToast(`Welcome to AuPro, ${resolvedName}! Your account is attached to Roll No. ${resolvedRollNo}${resolvedSection ? ` • ${resolvedSection}` : ''} • ${resolvedYear}. Official email verified successfully.`);
                 } catch (err: any) {
                   setAuthError(err?.message || 'Invalid or expired verification code. Please request a new code.');
                 } finally {
@@ -2207,7 +2222,7 @@ export default function Home() {
                     A 6-digit security code was dispatched to:
                   </p>
                   <div className="otp-target-pill">
-                    {authEmail} • Roll No: {authRollNo || '—'}
+                    {authEmail} • Roll No: {getRollNoFromEmail(authEmail) || '—'}
                   </div>
                 </div>
 
@@ -2317,7 +2332,7 @@ export default function Home() {
                       setAuthError('');
                       setIsOtpLoading(true);
                       try {
-                        const data = await sendUniversityOtp(authEmail, authName, authRollNo);
+                        const data = await sendUniversityOtp(authEmail);
                         setAuthOtpToken(data.token || '');
                         setAuthOtpDevCode(data.devCode || '');
                         setAuthOtpProviderError(data.providerError || '');
@@ -5252,7 +5267,7 @@ export default function Home() {
                   <input
                     type="text"
                     className="search"
-                    placeholder="e.g. 325506402375"
+                    placeholder="e.g. 325506402001"
                     value={newUserRoll}
                     onChange={(e) => setNewUserRoll(e.target.value)}
                   />

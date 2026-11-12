@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
-import { registerAccount, logServerActivity } from '../account-registry';
+import { registerAccount, findAccount, logServerActivity } from '../account-registry';
 import { signSessionToken, isHeadAdmin, isHod } from '../security';
+import {
+  CSE_DEPARTMENT,
+  CSE_YEAR,
+  NOT_IN_CSE_LIST_MESSAGE,
+  lookupCseStudentByEmail,
+} from '../../../lib/cse-students';
 
 const COLLEGE_DOMAIN = '@andhrauniversity.edu.in';
 const AUTH_SECRET = process.env.AUTH_SECRET || 'aupro-andhra-university-otp-signing-secret-2026';
@@ -116,15 +122,59 @@ export async function POST(req: Request) {
     // Verified! Clear any previous failed attempts
     clearFailures(lockKey);
 
-    // Register account in registry to prevent duplicate accounts and sync across all devices
-    const profileData = body.profile || {
-      name: body.fullName || body.name,
-      rollNo: body.rollNo,
-      department: body.department,
-      year: body.year,
-      phone: body.phone,
-    };
-    registerAccount(cleanEmail, profileData);
+    // Resolve the profile from the second-year CSE directory: the email's
+    // local part IS the roll number, so name, roll number, department,
+    // year and section attach automatically. The Head Administrator and
+    // HOD accounts are exempt and keep the supplied/existing profile.
+    const isExempt = isHeadAdmin(cleanEmail) || isHod(cleanEmail);
+    let directoryProfile: { name: string; rollNo: string; department: string; year: string; section: string } | null = null;
+    if (!isExempt) {
+      const student = lookupCseStudentByEmail(cleanEmail);
+      if (!student) {
+        return NextResponse.json({ error: NOT_IN_CSE_LIST_MESSAGE }, { status: 403 });
+      }
+      directoryProfile = {
+        name: student.name,
+        rollNo: student.rollNo,
+        department: CSE_DEPARTMENT,
+        year: CSE_YEAR,
+        section: student.section,
+      };
+    }
+
+    // Register account in registry to prevent duplicate accounts and sync across all devices.
+    // For directory students the profile comes ONLY from the directory —
+    // client-supplied name / roll number / department / year are ignored.
+    const profileData = isExempt
+      ? body.profile || {
+          name: body.fullName || body.name,
+          rollNo: body.rollNo,
+          department: body.department,
+          year: body.year,
+          phone: body.phone,
+        }
+      : {
+          ...directoryProfile,
+          username: body.profile?.username || body.username,
+          phone: body.profile?.phone || body.phone,
+        };
+    const registered = registerAccount(cleanEmail, profileData);
+    if (!registered) {
+      return NextResponse.json({ error: NOT_IN_CSE_LIST_MESSAGE }, { status: 403 });
+    }
+    // The resolved profile goes back to the client so it can show the
+    // attached details (name, roll number, year, section) — never typed.
+    const stored = findAccount(cleanEmail);
+    const responseProfile = stored
+      ? {
+          name: stored.name,
+          rollNo: stored.rollNo,
+          department: stored.department,
+          year: stored.year,
+          section: stored.section,
+          email: stored.email,
+        }
+      : directoryProfile;
     logServerActivity(
       'Account Verified & Activated',
       cleanEmail,
@@ -140,6 +190,7 @@ export async function POST(req: Request) {
       verified: true,
       email: cleanEmail,
       role,
+      profile: responseProfile,
       sessionToken,
       verifiedAt: new Date().toISOString(),
       message: 'Student email verified successfully. Account activated.',

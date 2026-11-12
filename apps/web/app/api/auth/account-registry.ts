@@ -47,6 +47,7 @@ export interface ServerStudentProfile {
   rollNo?: string;
   department?: string;
   year?: string;
+  section?: string;
   phone?: string;
   bio?: string;
   password?: string;
@@ -130,57 +131,10 @@ const INITIAL_HEAD_ACCOUNT: ServerStudentProfile = {
   verifiedAt: '2026-11-06T10:00:00.000Z',
 };
 
-const INITIAL_STUDENT_ACCOUNTS: ServerStudentProfile[] = [
-  INITIAL_HEAD_ACCOUNT,
-  {
-    email: '325506402372@andhrauniversity.edu.in',
-    name: 'A Sreenivas Rao',
-    username: 'sreenivas_rao',
-    rollNo: '325506402372',
-    department: 'Mechanical Engineering',
-    year: '4th Year',
-    phone: '+91 9848022334',
-    bio: 'Mechanical final year student. CAD & Thermal lab projects.',
-    isVerified: true,
-    verifiedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
-  },
-  {
-    email: '325506402375@andhrauniversity.edu.in',
-    name: 'K Divya Sri',
-    username: 'k_divya_sri',
-    rollNo: '325506402375',
-    department: 'Electronics & Communication Engineering',
-    year: '3rd Year',
-    phone: '+91 9989011223',
-    bio: 'ECE 3rd year. VLSI and Embedded systems researcher.',
-    isVerified: true,
-    verifiedAt: new Date(Date.now() - 3600000 * 8).toISOString(),
-  },
-  {
-    email: '325506402380@andhrauniversity.edu.in',
-    name: 'M Sai Teja',
-    username: 'sai_teja_au',
-    rollNo: '325506402380',
-    department: 'Civil Engineering',
-    year: '2nd Year',
-    phone: '+91 9701044556',
-    bio: 'Civil engineering sophomore. Surveying and structural designs.',
-    isVerified: true,
-    verifiedAt: new Date(Date.now() - 3600000 * 12).toISOString(),
-  },
-  {
-    email: '325506402391@andhrauniversity.edu.in',
-    name: 'P Harsha Vardhan',
-    username: 'harsha_vardhan',
-    rollNo: '325506402391',
-    department: 'Computer Science & Systems Engineering',
-    year: '4th Year',
-    phone: '+91 9866077889',
-    bio: 'AU CSE senior. Full-stack development & AI research.',
-    isVerified: true,
-    verifiedAt: new Date(Date.now() - 3600000 * 24).toISOString(),
-  },
-];
+// Only the Head Administrator is seeded. Every other account must come
+// from the second-year CSE directory (app/lib/cse-students.json) via OTP
+// verification — the demo students were removed 2026-11-12.
+const INITIAL_STUDENT_ACCOUNTS: ServerStudentProfile[] = [INITIAL_HEAD_ACCOUNT];
 
 const INITIAL_ACTIVITIES: ServerPlatformActivity[] = [
   {
@@ -190,42 +144,102 @@ const INITIAL_ACTIVITIES: ServerPlatformActivity[] = [
     details: 'Head Administrator authenticated into AuPro portal',
     timestamp: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
   },
-  {
-    id: 'act_init_2',
-    action: 'Account Registered',
-    actor: '325506402372@andhrauniversity.edu.in',
-    details: 'Student A Sreenivas Rao verified identity via 6-digit OTP',
-    timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-  },
-  {
-    id: 'act_init_3',
-    action: 'Campus Problem Reported',
-    actor: '325506402375@andhrauniversity.edu.in',
-    details: 'Water purifier filter replacement needed in ECE block 2nd floor',
-    timestamp: new Date(Date.now() - 1000 * 60 * 95).toISOString(),
-  },
-  {
-    id: 'act_init_4',
-    action: 'Feed Post Published',
-    actor: '325506402380@andhrauniversity.edu.in',
-    details: 'Civil department survey lab timing updated for 2nd years',
-    timestamp: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
-  },
-  {
-    id: 'act_init_5',
-    action: 'Applied for Certificate',
-    actor: '325506402391@andhrauniversity.edu.in',
-    details: 'Bonafide Certificate (Ref ID: AU-582910)',
-    timestamp: new Date(Date.now() - 1000 * 60 * 300).toISOString(),
-  },
 ];
 
 const INITIAL_POSTS: ServerFeedPost[] = [];
+
+// ============================================================================
+// Second-year CSE student directory (app/lib/cse-students.json, written by
+// scripts/build-student-directory.py alongside cse-students.ts).
+//
+// This registry reads the JSON with fs instead of importing the .ts module:
+// an extensionless import cannot resolve under node --test, and a .ts
+// extension breaks tsc (TS5097). The Head Administrator and HOD helpers
+// below are likewise mirrored from app/api/auth/security.ts for the same
+// reason (same pattern as normalizeDepartmentKey / getHodEmailForDepartment).
+// ============================================================================
+
+interface CseDirectory {
+  department: string;
+  year: string;
+  students: Record<string, { name: string; section: string }>;
+}
+
+let cseDirectoryCache: CseDirectory | null = null;
+
+function loadCseDirectory(): CseDirectory {
+  if (cseDirectoryCache) return cseDirectoryCache;
+  const empty: CseDirectory = { department: 'Computer Science & Engineering', year: '2nd Year', students: {} };
+  const candidates = [
+    path.resolve('app', 'lib', 'cse-students.json'),
+    path.resolve('apps', 'web', 'app', 'lib', 'cse-students.json'),
+  ];
+  for (const candidate of candidates) {
+    try {
+      if (fs.existsSync(candidate)) {
+        const parsed = JSON.parse(fs.readFileSync(candidate, 'utf8'));
+        if (parsed && parsed.students) {
+          cseDirectoryCache = parsed as CseDirectory;
+          return cseDirectoryCache;
+        }
+      }
+    } catch {}
+  }
+  console.error('AuPro CSE directory not found (expected app/lib/cse-students.json). Student registration is closed until it is generated.');
+  cseDirectoryCache = empty;
+  return cseDirectoryCache;
+}
+
+function getRollNoFromEmail(email: string | null | undefined): string {
+  if (!email) return '';
+  return email.toLowerCase().trim().split('@')[0];
+}
+
+function lookupCseStudent(rollNo: string | null | undefined): { name: string; section: string } | null {
+  if (!rollNo) return null;
+  return loadCseDirectory().students[String(rollNo).trim()] || null;
+}
+
+function isHeadAdminAccount(email: string | null | undefined): boolean {
+  if (!email) return false;
+  const clean = email.toLowerCase().trim();
+  return clean === MAIN_ADMIN_EMAIL || clean.startsWith('325506402371');
+}
+
+function isHodAccountLocal(email: string | null | undefined): boolean {
+  if (!email) return false;
+  const clean = email.toLowerCase().trim();
+  return clean.startsWith('hod') && clean.endsWith('@andhrauniversity.edu.in');
+}
+
+function getHodDepartmentLocal(email: string | null | undefined): string {
+  if (!email || !isHodAccountLocal(email)) return 'other';
+  const local = email.toLowerCase().trim().split('@')[0];
+  if (!local.startsWith('hod.')) return 'other';
+  return local.slice(4).split('.')[0] || 'other';
+}
+
+// Drops every account that is neither the Head Administrator, nor an HOD,
+// nor a student in the second-year CSE directory. Runs on every loadStore
+// so a store written before the directory rule self-cleans on next start.
+function pruneAccounts(store: ServerDataStore): boolean {
+  const accounts = store.accounts || {};
+  let changed = false;
+  for (const email of Object.keys(accounts)) {
+    const clean = email.toLowerCase().trim();
+    if (isHeadAdminAccount(clean) || isHodAccountLocal(clean)) continue;
+    if (lookupCseStudent(getRollNoFromEmail(clean))) continue;
+    delete accounts[clean];
+    changed = true;
+  }
+  return changed;
+}
 
 function loadStore(): ServerDataStore {
   // Global memory cache first
   const globalStore = (globalThis as any).__AUPRO_GLOBAL_STORE__;
   if (globalStore && globalStore.accounts) {
+    if (pruneAccounts(globalStore)) saveStoreToFile(globalStore);
     return globalStore;
   }
 
@@ -244,6 +258,9 @@ function loadStore(): ServerDataStore {
           (p: any) => p && !p.id?.startsWith('post_init_') && (Boolean(p.caption?.trim()) || Boolean(p.imageUrl))
         );
         parsed.applications = parsed.applications || [];
+        // Drop accounts that are not the Head Administrator, an HOD, or a
+        // student in the second-year CSE directory.
+        pruneAccounts(parsed);
         (globalThis as any).__AUPRO_GLOBAL_STORE__ = parsed;
         return parsed;
       }
@@ -313,15 +330,60 @@ export function registerAccount(email: string, profile?: Partial<ServerStudentPr
   const store = loadStore();
 
   const existing = store.accounts[clean];
+
+  // Head Administrator: the seeded profile is never overwritten (it says
+  // '4th Year' — the head account is exempt from the directory).
+  if (isHeadAdminAccount(clean)) {
+    if (existing) {
+      existing.isVerified = true;
+      existing.verifiedAt = existing.verifiedAt || new Date().toISOString();
+    } else {
+      store.accounts[clean] = { ...INITIAL_HEAD_ACCOUNT, isVerified: true, verifiedAt: new Date().toISOString() };
+    }
+    saveStoreToFile(store);
+    return true;
+  }
+
+  // HOD accounts are exempt from the directory check; keep the supplied
+  // profile (or the existing one). A roll number is never invented for
+  // them — the mailbox itself is the identifier.
+  if (isHodAccountLocal(clean)) {
+    const updated: ServerStudentProfile = {
+      email: clean,
+      name: profile?.name || existing?.name || 'HOD ' + getHodDepartmentLocal(clean).toUpperCase(),
+      username: profile?.username || existing?.username || clean.split('@')[0].replace(/[^a-z0-9_]/g, '_'),
+      rollNo: profile?.rollNo || existing?.rollNo || clean.split('@')[0],
+      department: profile?.department || existing?.department || 'AU College of Engineering',
+      year: profile?.year || existing?.year || '4th Year',
+      phone: profile?.phone || existing?.phone || '',
+      bio: profile?.bio || existing?.bio || 'Head of Department @ AU College of Engineering.',
+      password: profile?.password || existing?.password || '',
+      isVerified: true,
+      verifiedAt: existing?.verifiedAt || new Date().toISOString(),
+    };
+    store.accounts[clean] = updated;
+    saveStoreToFile(store);
+    return true;
+  }
+
+  // Everyone else must be in the second-year CSE directory. Name, roll
+  // number, department, year and section come from the directory only —
+  // client-supplied values are ignored. Refuse (create nothing) otherwise.
+  const directory = loadCseDirectory();
+  const rollNo = getRollNoFromEmail(clean);
+  const student = lookupCseStudent(rollNo);
+  if (!student) return false;
+
   const updated: ServerStudentProfile = {
     email: clean,
-    name: profile?.name || existing?.name || 'AU Student',
+    name: student.name,
     username: profile?.username || existing?.username || clean.split('@')[0].replace(/[^a-z0-9_]/g, '_'),
-    rollNo: profile?.rollNo || existing?.rollNo || clean.replace(/[^0-9]/g, '') || '32550640' + Math.floor(1000 + Math.random() * 9000),
-    department: profile?.department || existing?.department || 'AU College of Engineering',
-    year: profile?.year || existing?.year || '4th Year',
+    rollNo,
+    department: directory.department,
+    year: directory.year,
+    section: student.section,
     phone: profile?.phone || existing?.phone || '',
-    bio: profile?.bio || existing?.bio || `Student @ AU College of Engineering (${profile?.department || 'Engineering'})`,
+    bio: profile?.bio || existing?.bio || `Student @ ${directory.department} (${student.section}).`,
     password: profile?.password || existing?.password || '',
     isVerified: true,
     verifiedAt: existing?.verifiedAt || new Date().toISOString(),

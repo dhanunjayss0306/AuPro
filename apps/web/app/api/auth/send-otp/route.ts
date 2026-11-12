@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
-import { isAccountRegistered, MAIN_ADMIN_EMAIL } from '../account-registry';
+import { isAccountRegistered, getAllAccounts, MAIN_ADMIN_EMAIL } from '../account-registry';
+import { isHeadAdmin, isHod } from '../security';
+import { NOT_IN_CSE_LIST_MESSAGE, lookupCseStudentByEmail } from '../../../lib/cse-students';
 
 // College domain enforcement
 const COLLEGE_DOMAIN = '@andhrauniversity.edu.in';
@@ -194,6 +196,21 @@ export async function POST(req: Request) {
       );
     }
 
+    // Only second-year CSE students may register. The email's local part
+    // IS the roll number — look it up in the directory before any OTP is
+    // generated or sent. The Head Administrator and HODs are exempt.
+    const directoryStudent = lookupCseStudentByEmail(cleanEmail);
+    if (!isHeadAdmin(cleanEmail) && !isHod(cleanEmail) && !directoryStudent) {
+      return NextResponse.json({ error: NOT_IN_CSE_LIST_MESSAGE }, { status: 403 });
+    }
+
+    // Greeting details come from the directory (never from typed input).
+    // Prefer an already-registered account's name (e.g. the Head
+    // Administrator's seeded profile) over the directory spelling.
+    const existingName = getAllAccounts()[cleanEmail]?.name;
+    const greetingName = existingName || directoryStudent?.name || fullName;
+    const greetingRoll = directoryStudent?.rollNo || rollNo;
+
     // Strict One-Account-Per-Student Enforcement (Main Admin email is exempt)
     const { isSignup = false } = body;
     if (isSignup && cleanEmail !== MAIN_ADMIN_EMAIL && isAccountRegistered(cleanEmail)) {
@@ -226,7 +243,7 @@ export async function POST(req: Request) {
 
     // 1. Attempt sending via Resend if configured
     if (process.env.RESEND_API_KEY) {
-      const resendResult = await sendViaResend(cleanEmail, fullName, otp, rollNo);
+      const resendResult = await sendViaResend(cleanEmail, greetingName, otp, greetingRoll);
       if (resendResult.success) {
         delivered = true;
       } else {
@@ -237,7 +254,7 @@ export async function POST(req: Request) {
     // 2. Attempt sending via Brevo if configured and not yet delivered
     if (!delivered && process.env.BREVO_API_KEY) {
       try {
-        delivered = await sendViaBrevo(cleanEmail, fullName, otp, rollNo);
+        delivered = await sendViaBrevo(cleanEmail, greetingName, otp, greetingRoll);
       } catch (e) {
         console.warn('Brevo dispatch failed:', e);
       }

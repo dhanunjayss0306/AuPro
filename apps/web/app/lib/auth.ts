@@ -1,3 +1,5 @@
+import { lookupCseStudentByEmail } from './cse-students';
+
 /**
  * AuPro Authentication & Cloudflare Integration Service
  * 
@@ -73,6 +75,7 @@ export interface StudentProfile {
   rollNo: string;
   department: string;
   year: string;
+  section?: string;
   phone: string;
   bio?: string;
   isVerified?: boolean;
@@ -88,8 +91,10 @@ export function getGoogleOAuthUrl(redirectTo?: string): string {
 
 /**
  * Request a 6-digit cryptographic OTP code to verify official college email.
+ * Name, roll number, department and year are NOT sent: the server resolves
+ * them from the second-year CSE directory by the email's roll number.
  */
-export async function sendUniversityOtp(email: string, fullName: string, rollNo: string, isSignup = false) {
+export async function sendUniversityOtp(email: string, isSignup = false) {
   const cleanEmail = email.toLowerCase().trim();
   if (!isValidCollegeEmail(cleanEmail)) {
     throw new Error('Only official @andhrauniversity.edu.in emails are permitted.');
@@ -98,7 +103,7 @@ export async function sendUniversityOtp(email: string, fullName: string, rollNo:
   const res = await fetch('/api/auth/send-otp', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: cleanEmail, fullName, rollNo, isSignup }),
+    body: JSON.stringify({ email: cleanEmail, isSignup }),
   });
 
   const data = await res.json();
@@ -173,6 +178,9 @@ export const HOD_DEPARTMENT_NAMES: Record<string, string> = {
   other: 'Andhra University College of Engineering',
 };
 
+// Only the Head Administrator is seeded here. Every other account must
+// come from the second-year CSE directory via OTP verification — the demo
+// students were removed 2026-11-12.
 export const DEFAULT_INITIAL_ACCOUNTS: Record<string, StudentProfile> = {
   [HEAD_ACCOUNT_EMAIL]: {
     email: HEAD_ACCOUNT_EMAIL,
@@ -186,54 +194,6 @@ export const DEFAULT_INITIAL_ACCOUNTS: Record<string, StudentProfile> = {
     isVerified: true,
     verifiedAt: '2026-11-06T10:00:00.000Z',
   },
-  '325506402372@andhrauniversity.edu.in': {
-    email: '325506402372@andhrauniversity.edu.in',
-    name: 'A Sreenivas Rao',
-    username: 'sreenivas_rao',
-    rollNo: '325506402372',
-    department: 'Mechanical Engineering',
-    year: '4th Year',
-    phone: '+91 9848022334',
-    bio: 'Mechanical final year student. CAD & Thermal lab projects.',
-    isVerified: true,
-    verifiedAt: '2026-11-07T08:00:00.000Z',
-  },
-  '325506402375@andhrauniversity.edu.in': {
-    email: '325506402375@andhrauniversity.edu.in',
-    name: 'K Divya Sri',
-    username: 'k_divya_sri',
-    rollNo: '325506402375',
-    department: 'Electronics & Communication Engineering',
-    year: '3rd Year',
-    phone: '+91 9989011223',
-    bio: 'ECE 3rd year. VLSI and Embedded systems researcher.',
-    isVerified: true,
-    verifiedAt: '2026-11-07T09:30:00.000Z',
-  },
-  '325506402380@andhrauniversity.edu.in': {
-    email: '325506402380@andhrauniversity.edu.in',
-    name: 'M Sai Teja',
-    username: 'sai_teja_au',
-    rollNo: '325506402380',
-    department: 'Civil Engineering',
-    year: '2nd Year',
-    phone: '+91 9701044556',
-    bio: 'Civil engineering sophomore. Surveying and structural designs.',
-    isVerified: true,
-    verifiedAt: '2026-11-07T11:00:00.000Z',
-  },
-  '325506402391@andhrauniversity.edu.in': {
-    email: '325506402391@andhrauniversity.edu.in',
-    name: 'P Harsha Vardhan',
-    username: 'harsha_vardhan',
-    rollNo: '325506402391',
-    department: 'Computer Science & Systems Engineering',
-    year: '4th Year',
-    phone: '+91 9866077889',
-    bio: 'AU CSE senior. Full-stack development & AI research.',
-    isVerified: true,
-    verifiedAt: '2026-11-07T12:00:00.000Z',
-  },
 };
 
 export const DEFAULT_INITIAL_ACTIVITIES: PlatformActivity[] = [
@@ -243,34 +203,6 @@ export const DEFAULT_INITIAL_ACTIVITIES: PlatformActivity[] = [
     actor: HEAD_ACCOUNT_EMAIL,
     details: 'Head Administrator authenticated into AuPro portal',
     timestamp: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
-  },
-  {
-    id: 'act_init_2',
-    action: 'Account Registered',
-    actor: '325506402372@andhrauniversity.edu.in',
-    details: 'Student A Sreenivas Rao verified identity via 6-digit OTP',
-    timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-  },
-  {
-    id: 'act_init_3',
-    action: 'Campus Problem Reported',
-    actor: '325506402375@andhrauniversity.edu.in',
-    details: 'Water purifier filter replacement needed in ECE block 2nd floor',
-    timestamp: new Date(Date.now() - 1000 * 60 * 95).toISOString(),
-  },
-  {
-    id: 'act_init_4',
-    action: 'Feed Post Published',
-    actor: '325506402380@andhrauniversity.edu.in',
-    details: 'Civil department survey lab timing updated for 2nd years',
-    timestamp: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
-  },
-  {
-    id: 'act_init_5',
-    action: 'Applied for Certificate',
-    actor: '325506402391@andhrauniversity.edu.in',
-    details: 'Bonafide Certificate (Ref ID: AU-582910)',
-    timestamp: new Date(Date.now() - 1000 * 60 * 300).toISOString(),
   },
 ];
 
@@ -283,7 +215,7 @@ export function getRegisteredUsers(): Record<string, StudentProfile> {
     const raw = localStorage.getItem('aupro_registered_users');
     let users: Record<string, StudentProfile> = raw ? JSON.parse(raw) : {};
 
-    // If local registry has less than 2 accounts, seed with default initial student accounts
+    // If local registry has less than 2 accounts, seed with default initial accounts
     if (Object.keys(users).length < 2) {
       users = { ...DEFAULT_INITIAL_ACCOUNTS, ...users };
       localStorage.setItem('aupro_registered_users', JSON.stringify(users));
@@ -292,6 +224,21 @@ export function getRegisteredUsers(): Record<string, StudentProfile> {
     // Ensure the Head Account always exists in registry
     if (!users[HEAD_ACCOUNT_EMAIL]) {
       users[HEAD_ACCOUNT_EMAIL] = DEFAULT_INITIAL_ACCOUNTS[HEAD_ACCOUNT_EMAIL];
+      localStorage.setItem('aupro_registered_users', JSON.stringify(users));
+    }
+
+    // Drop any account that is neither the Head Administrator, nor an
+    // HOD, nor a student in the second-year CSE directory (self-cleans
+    // local registries written before the directory rule).
+    let pruned = false;
+    for (const email of Object.keys(users)) {
+      const clean = email.toLowerCase().trim();
+      if (isHeadAccount(clean) || isHodAccount(clean)) continue;
+      if (lookupCseStudentByEmail(clean)) continue;
+      delete users[clean];
+      pruned = true;
+    }
+    if (pruned) {
       localStorage.setItem('aupro_registered_users', JSON.stringify(users));
     }
     return users;

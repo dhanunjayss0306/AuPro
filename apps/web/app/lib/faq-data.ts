@@ -647,7 +647,7 @@ export const faqKnowledgeBase: QAEntry[] = [
     "id": "faq-034",
     "category": "campus",
     "question": "Can I apply for certificates online, or must I go to the college office?",
-    "answer": "Both, depending on the certificate. Many colleges now take certificate requests through the student portal/ERP, and universities run online certificate services — for example, Andhra University's certificate service portal (aucoe.info) handles transcript, provisional, and duplicate certificate applications online with online fee payment. But several certificates still need an in-person visit: the TC (you must surrender your ID card), and anything needing department signatures or original verification. College offices generally issue certificates between 10 am and 4 pm on working days. Check your college's student portal first — if the certificate is listed there, apply online; otherwise go to the admin office with the form and documents.",
+    "answer": "Both, depending on the certificate. Many colleges now take certificate requests through the student portal/ERP, and many universities run online certificate services through their official exam portals. But several certificates still need an in-person visit: the TC (you must surrender your ID card), and anything needing department signatures or original verification. College offices generally issue certificates between 10 am and 4 pm on working days. Check your college's student portal first — if the certificate is listed there, apply online; otherwise go to the admin office with the form and documents.",
     "keywords": [
       "campus",
       "online",

@@ -971,14 +971,14 @@
     "id": "faq-034",
     "category": "campus",
     "question": "Can I apply for certificates online, or must I go to the college office?",
-    "answer": "Both, depending on the certificate. Many colleges now take certificate requests through the student portal/ERP, and universities run online certificate services — for example, Andhra University's certificate service portal (aucoe.info) handles transcript, provisional, and duplicate certificate applications online with online fee payment. But several certificates still need an in-person visit: the TC (you must surrender your ID card), and anything needing department signatures or original verification. College offices generally issue certificates between 10 am and 4 pm on working days. Check your college's student portal first — if the certificate is listed there, apply online; otherwise go to the admin office with the form and documents.",
+    "answer": "Both, depending on the certificate. Many colleges now take certificate requests through the student portal/ERP, and many universities run online certificate services through their official exam portals. But several certificates still need an in-person visit: the TC (you must surrender your ID card), and anything needing department signatures or original verification. College offices generally issue certificates between 10 am and 4 pm on working days. Check your college's student portal first — if the certificate is listed there, apply online; otherwise go to the admin office with the form and documents.",
     "documents_required": [],
     "sources": [
       "https://mssw.in/wp-content/uploads/2021/02/guidelines-for-obtaining-various-certificates-from-the-college-office.pdf",
       "https://www.indiastudychannel.com/experts/ViewQuestionDetails.aspx?QuestionId=44878&AnswerId=150762&PageAction=deleteanswerattachment&Filename=44878-1-andhrauniv.jpg"
     ],
     "verified": true,
-    "notes": "Office timing (10 am–4 pm) is from MSSW's guidelines; AU's aucoe.info portal is reported in a student forum answer — see faq-015.",
+    "notes": "CORRECTED 2026-11-12: removed the aucoe.info reference — that domain is no longer Andhra University's portal (it now serves unrelated content) and must never be linked. Office timing (10 am–4 pm) is from MSSW's guidelines.",
     "application": null
   },
   {

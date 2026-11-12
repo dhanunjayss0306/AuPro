@@ -27,9 +27,10 @@
         "College ID card (copy)",
         "Fee payment receipts OR fee details printout from the student portal/ERP"
       ],
-      "after_submission": "The accounts/admin office verifies the fee records and issues the fee certificate (fee breakup statement), usually by the next working day. The student collects it from the office or downloads it from the portal if the college issues it online.",
+      "after_submission": "Step 1: you upload the documents listed above in the app. Step 2: a head administrator verifies your documents. Step 3: if everything is present and correct, the HOD is notified; if more than 10 students are waiting for the HOD's signature, the HOD or the head administrator account is notified. Step 4: the HOD posts a time for signing. Step 5: you come to the office in person at that time and collect the signed fee certificate. Fee certificates are usually issued by the next working day.",
       "verified": true,
-      "notes": "Flow confirmed by Kristu Jayanti (request letter + ID card) and MSSW (written request + fee printout, issued next working day)."
+      "notes": "Flow confirmed by Kristu Jayanti (request letter + ID card) and MSSW (written request + fee printout, issued next working day). Application reshaped 2026-11-12 to the 5-step HOD-signing process.",
+      "letter_format": "To: The Principal\nThrough: The Head of the Department, [Department name]\nSubject: Request for fee certificate / fee breakup statement\nRespected Sir/Madam,\nI, [Full name], [Course, semester/year], Registration No. [Registration number], request a fee certificate (fee breakup statement) for the academic year [Academic year] for the purpose of [education loan / scholarship / income tax]. I have attached a copy of my college ID card and my fee payment receipts (or fee details printout from the student portal). Kindly issue the same.\nThanking you,\nYours faithfully,\n[Full name]\n[Registration number] | [Course, semester/year] | Date: [Date]"
     }
   },
   {
@@ -150,9 +151,10 @@
         "Previous semester mark sheets (if the college asks)",
         "Passport-size photograph (if the college asks)"
       ],
-      "after_submission": "The form goes to the admin office (with HOD/class-teacher signature where required). After the fee is paid, the office prepares the certificate, gets the Principal's signature, and the student collects it — typically in 1 to 7 working days.",
+      "after_submission": "Step 1: you upload the documents listed above in the app. Step 2: a head administrator verifies your documents. Step 3: if everything is present and correct, the HOD is notified; if more than 10 students are waiting for the HOD's signature, the HOD or the head administrator account is notified. Step 4: the HOD posts a time for signing. Step 5: you come to the office in person at that time and collect the signed bonafide certificate. Bonafide certificates are typically issued in 1 to 7 working days.",
       "verified": true,
-      "notes": "Flow confirmed by MSSW, ICCS, and Kristu Jayanti office guidelines. Fee (Rs. 20-200) and time vary by college."
+      "notes": "Flow confirmed by MSSW, ICCS, and Kristu Jayanti office guidelines. Fee (Rs. 20-200) and time vary by college. Application reshaped 2026-11-12 to the 5-step HOD-signing process.",
+      "letter_format": "To: The Principal\nThrough: The Head of the Department, [Department name]\nSubject: Request for bonafide certificate\nRespected Sir/Madam,\nI, [Full name], [Course, branch, semester/year], Registration No. [Registration number], request a bonafide certificate for the purpose of [scholarship / loan / visa / internship / concession]. I have attached a copy of my college ID card and the fee receipt of the current academic year. Kindly issue the same.\nThanking you,\nYours faithfully,\n[Full name]\n[Registration number] | [Course, semester/year] | Date: [Date]"
     }
   },
   {
@@ -182,9 +184,10 @@
         "College ID card (copy)",
         "Fee details printout from the student portal/ERP login"
       ],
-      "after_submission": "Issued by the college office, usually by the next working day, with the fee details included on the certificate.",
+      "after_submission": "Step 1: you upload the documents listed above in the app. Step 2: a head administrator verifies your documents. Step 3: if everything is present and correct, the HOD is notified; if more than 10 students are waiting for the HOD's signature, the HOD or the head administrator account is notified. Step 4: the HOD posts a time for signing. Step 5: you come to the office in person at that time and collect the signed bonafide certificate with fee details. Bonafide certificates with fee details are usually issued by the next working day.",
       "verified": true,
-      "notes": "Flow confirmed by MSSW guidelines."
+      "notes": "Flow confirmed by MSSW guidelines. Application reshaped 2026-11-12 to the 5-step HOD-signing process.",
+      "letter_format": "To: The Principal\nThrough: The Head of the Department, [Department name]\nSubject: Request for bonafide certificate with fee details\nRespected Sir/Madam,\nI, [Full name], [Course, semester/year], Registration No. [Registration number], request a bonafide certificate with fee details for the purpose of [income tax / loan / scholarship]. I have attached a copy of my college ID card and a fee details printout from the student portal. Kindly issue the same.\nThanking you,\nYours faithfully,\n[Full name]\n[Registration number] | [Course, semester/year] | Date: [Date]"
     }
   },
   {
@@ -224,31 +227,7 @@
       "https://www.esarkari.online/income-cert.html"
     ],
     "verified": true,
-    "notes": "All four sources agree on the core list. MeeSeva charges about Rs. 35; the application fee is listed as Rs. 10 in one source.",
-    "application": {
-      "form_fields": [
-        "Applicant name",
-        "Father/mother name",
-        "Aadhaar number",
-        "Address",
-        "Annual family income (all sources)",
-        "Occupation of parents",
-        "Purpose (scholarship / fee reimbursement / EWS / other)"
-      ],
-      "documents_to_upload": [
-        "Aadhaar card",
-        "Ration card (if available)",
-        "Residential proof (voter ID / electricity bill)",
-        "Income proof (salary certificate / payslip / IT return / Pahani land records for farmers)",
-        "Rs. 10 non-judicial stamp paper declaration (G.O. 1551)",
-        "Certificates from two different gazetted officers",
-        "Duly signed education records",
-        "Passport-size photograph"
-      ],
-      "after_submission": "Apply at a MeeSeva centre or the MeeSeva portal and pay about Rs. 35. The VRO/MRI verifies the details and the MRO approves it. It takes 7 to 21 days; the approved certificate can be downloaded. Valid for one year.",
-      "verified": true,
-      "notes": "Document list confirmed by IndiaFilings, WikiProcedure, CitizenNest, and eSarkari. The two-gazetted-officers requirement is AP-specific."
-    }
+    "notes": "All four sources agree on the core list. MeeSeva charges about Rs. 35; the application fee is listed as Rs. 10 in one source. FAQ only per the app rule — online portal (MeeSeva, Revenue Department); no in-app application flow."
   },
   {
     "id": "faq-011",
@@ -299,9 +278,10 @@
         "College ID card (to be surrendered)",
         "TC fee payment receipt"
       ],
-      "after_submission": "The office checks the no-dues clearances and fee payment, prepares the TC, and the student collects it in 1 to 5 working days after surrendering the ID card. A TC is only issued after course completion or approved discontinuation.",
+      "after_submission": "Step 1: you upload the documents listed above in the app. Step 2: a head administrator verifies your documents. Step 3: if everything is present and correct, the HOD is notified; if more than 10 students are waiting for the HOD's signature, the HOD or the head administrator account is notified. Step 4: the HOD posts a time for signing. Step 5: you come to the office in person at that time and collect the signed Transfer Certificate. Transfer Certificates are issued in 1 to 5 working days after the ID card is surrendered and dues are cleared.",
       "verified": true,
-      "notes": "Flow confirmed by MSSW, ICCS, and Kristu Jayanti office guidelines."
+      "notes": "Flow confirmed by MSSW, ICCS, and Kristu Jayanti office guidelines. Application reshaped 2026-11-12 to the 5-step HOD-signing process.",
+      "letter_format": "To: The Principal\nThrough: The Head of the Department, [Department name]\nSubject: Request for Transfer Certificate\nRespected Sir/Madam,\nI, [Full name], [Course, branch], Registration No. [Registration number], have completed my course in [Year of completion] (reason for leaving: [course completed / discontinuation / transfer]) and request a Transfer Certificate. I am joining [Name of institution being joined, if any]. I have cleared all dues and surrender my college ID card with this application. Kindly issue the same.\nThanking you,\nYours faithfully,\n[Full name]\n[Registration number] | [Course, semester/year] | Date: [Date]"
     }
   },
   {
@@ -325,27 +305,7 @@
       "https://iipe.ac.in/guidlines"
     ],
     "verified": true,
-    "notes": "IIPE's official fee table lists migration certificate at Rs. 250 in India; other universities charge Rs. 100 to Rs. 1,000.",
-    "application": {
-      "form_fields": [
-        "Full name",
-        "Registration / roll number",
-        "Course and year of passing",
-        "University and college name",
-        "Reason for migration / name of the new institution"
-      ],
-      "documents_to_upload": [
-        "Last semester / final year admit card",
-        "All semester mark sheets (photocopies)",
-        "Provisional certificate or degree certificate (if issued)",
-        "Photo ID proof (Aadhaar / PAN / passport)",
-        "Passport-size photographs (2-4)",
-        "Fee payment receipt"
-      ],
-      "after_submission": "The university (Controller of Examinations / Registrar) verifies academic standing and issues the migration certificate in 15 to 45 working days. It is collected from the university office or sent by post.",
-      "verified": true,
-      "notes": "Flow confirmed by Karvado and RightToInformation guides; IIPE's official fee table lists Rs. 250 for a migration certificate."
-    }
+    "notes": "IIPE's official fee table lists migration certificate at Rs. 250 in India; other universities charge Rs. 100 to Rs. 1,000. FAQ only per the app rule — issued by the university, applied for through the university; no in-app application flow."
   },
   {
     "id": "faq-014",
@@ -367,27 +327,7 @@
       "https://bookmytranscript.com/online-transcript-from-andhra-university/"
     ],
     "verified": true,
-    "notes": "Document list is consistent across three transcript services. The exact AU fee is not published on a page we could retrieve — it is calculated on the portal. Timeline of about 15 working days is reported, not from an official AU page.",
-    "application": {
-      "form_fields": [
-        "Full name",
-        "University roll / enrolment number",
-        "Course and year of passing",
-        "Number of transcript sets",
-        "Delivery address(es)",
-        "WES / IQAS reference number (if for credential evaluation)"
-      ],
-      "documents_to_upload": [
-        "All semester mark sheets (scanned)",
-        "Degree certificate or provisional certificate (scanned)",
-        "Government-issued ID proof (Aadhaar / passport)",
-        "Fee payment receipt",
-        "Authorisation letter (if someone else collects it)"
-      ],
-      "after_submission": "Apply on the AU online services portal, pay the fee online, and keep the acknowledgement/reference number. The university verifies the records and issues the transcripts (about 15 working days reported), in a sealed envelope, sent to the address given or directly to WES/IQAS.",
-      "verified": true,
-      "notes": "Document list confirmed by three transcript services. The exact AU fee is calculated on the portal and was not retrieved; the 15-working-day timeline is reported, not official."
-    }
+    "notes": "Document list is consistent across three transcript services. The exact AU fee is not published on a page we could retrieve — it is calculated on the portal. Timeline of about 15 working days is reported, not from an official AU page. FAQ only per the app rule — online portal (AU certificate services); no in-app application flow."
   },
   {
     "id": "faq-015",
@@ -408,25 +348,7 @@
       "https://www.indiastudychannel.com/experts/ViewQuestionDetails.aspx?QuestionId=44878&AnswerId=150762&PageAction=deleteanswerattachment&Filename=44878-1-andhrauniv.jpg"
     ],
     "verified": true,
-    "notes": "Core procedure confirmed from the official AU certificate portal services.andhrauniversity.edu.in (homepage: candidates apply for Provisional Certificates by paying the prescribed fees online, for UG/PG/Professional courses). NOT confirmed: the current fee amount (Rs. 200 was reported by a B.Tech student in 2021 — confirm on the portal); whether a tatkal option exists on the current portal (it existed on the old portal, which is now dead and must never be linked); the exact processing time for a provisional certificate (10-15 days is the published figure for original degrees); the exact form fields and upload list (shown on the portal at application time).",
-    "application": {
-      "form_fields": [
-        "Full name",
-        "B.Tech registration (hall ticket) number",
-        "Course (B.Tech) and branch",
-        "College name",
-        "Batch / year of passing",
-        "Certificate type: Provisional Certificate",
-        "Postal address for delivery"
-      ],
-      "documents_to_upload": [
-        "Scanned copies of any documents the portal asks for during the application",
-        "Fee payment (online)"
-      ],
-      "after_submission": "The certificate is sent by courier/post to the postal address given on the application. The university generally issues original degree certificates in about 10-15 days; no separate timeline is published for provisional certificates. The fee, once paid, cannot be exchanged, cancelled or refunded. If the certificate does not arrive, visit the corresponding section at the University with your application reference number.",
-      "verified": true,
-      "notes": "Flow confirmed from the official AU certificate portal and its published flow (Apply For Certificate, fill details, pay online). Exact form fields and upload list are as shown on the portal at application time; the current fee and any tatkal option are not confirmed — see entry notes."
-    }
+    "notes": "Core procedure confirmed from the official AU certificate portal services.andhrauniversity.edu.in (homepage: candidates apply for Provisional Certificates by paying the prescribed fees online, for UG/PG/Professional courses). NOT confirmed: the current fee amount (Rs. 200 was reported by a B.Tech student in 2021 — confirm on the portal); whether a tatkal option exists on the current portal (it existed on the old portal, which is now dead and must never be linked); the exact processing time for a provisional certificate (10-15 days is the published figure for original degrees); the exact form fields and upload list (shown on the portal at application time). FAQ only per the app rule — online portal (services.andhrauniversity.edu.in) and courier delivery; no in-app application flow."
   },
   {
     "id": "faq-016",
@@ -444,25 +366,7 @@
       "http://movillefrc.com/file/uHCPE73NSXWU/andhra_university_application_form_for_original"
     ],
     "verified": false,
-    "notes": "UNVERIFIED: the only source found is a low-quality content site, not an official AU page. The document list matches the standard list used by Indian universities, but the AU fee amount and whether the form is online or offline are not confirmed.",
-    "application": {
-      "form_fields": [
-        "Full name",
-        "Registration / roll number",
-        "Course and year of passing",
-        "Purpose (original degree / duplicate degree)"
-      ],
-      "documents_to_upload": [
-        "Provisional degree certificate",
-        "Mark sheets of all semesters/years",
-        "Identity proof (Aadhaar / voter ID / passport)",
-        "Demand draft or payment receipt for the application fee",
-        "Affidavit (only for a duplicate degree)"
-      ],
-      "after_submission": "UNVERIFIED: as per the general process, the application goes through the college or the Registrar/Examination branch, and the degree is sent by registered post or collected in person. AU-specific steps, fee, and timeline are not confirmed — verify with the college exam cell or the AU Registrar's office.",
-      "verified": false,
-      "notes": "UNVERIFIED: AU-specific process and fee not confirmed from an official source; the document list matches the standard Indian university list."
-    }
+    "notes": "UNVERIFIED: the only source found is a low-quality content site, not an official AU page. The document list matches the standard list used by Indian universities, but the AU fee amount and whether the form is online or offline are not confirmed. FAQ only per the app rule — issued by the university at/after convocation, applied for through the university; no in-app application flow."
   },
   {
     "id": "faq-017",
@@ -485,27 +389,7 @@
       "https://edvantagesolution.com/academic-records/duplicate-marksheet-degree-certificate/"
     ],
     "verified": true,
-    "notes": "SPU and NIT Raipur are official university sources and agree on FIR + affidavit + photocopy + fee.",
-    "application": {
-      "form_fields": [
-        "Full name",
-        "Registration / roll number",
-        "Course and year/semester of the lost marksheet",
-        "Reason (lost / stolen / damaged / destroyed)"
-      ],
-      "documents_to_upload": [
-        "FIR copy from the police station (for lost/stolen)",
-        "Notarised affidavit on stamp paper declaring the loss",
-        "Photocopy of the lost marksheet/degree (if available)",
-        "Government-issued ID proof",
-        "Passport-size photographs",
-        "Newspaper publication notice (if the university asks)",
-        "Fee payment receipt / demand draft"
-      ],
-      "after_submission": "The Controller of Examinations verifies the application and issues the duplicate marksheet, usually within 30 to 90 days, marked 'DUPLICATE' on top. If the original was only damaged, surrender the damaged copy instead of an FIR.",
-      "verified": true,
-      "notes": "Flow confirmed by official procedures of Sankalchand Patel University and NIT Raipur."
-    }
+    "notes": "SPU and NIT Raipur are official university sources and agree on FIR + affidavit + photocopy + fee. FAQ only per the app rule — issued by the university Controller of Examinations; no in-app application flow."
   },
   {
     "id": "faq-018",
@@ -535,9 +419,10 @@
         "Final or provisional degree certificate OR last exam marksheet",
         "College ID card"
       ],
-      "after_submission": "Submit the common certificate application form at the admin office (with HOD signature where required) and collect the character certificate after a few working days.",
+      "after_submission": "Step 1: you upload the documents listed above in the app. Step 2: a head administrator verifies your documents. Step 3: if everything is present and correct, the HOD is notified; if more than 10 students are waiting for the HOD's signature, the HOD or the head administrator account is notified. Step 4: the HOD posts a time for signing. Step 5: you come to the office in person at that time and collect the signed character certificate. Character certificates are collected after a few working days.",
       "verified": true,
-      "notes": "Flow confirmed by the Government Engineering College, Vaishali certificate application form."
+      "notes": "Flow confirmed by the Government Engineering College, Vaishali certificate application form. Application reshaped 2026-11-12 to the 5-step HOD-signing process.",
+      "letter_format": "To: The Principal\nThrough: The Head of the Department, [Department name]\nSubject: Request for character / conduct certificate\nRespected Sir/Madam,\nI, [Full name], [Course, branch, semester / pass-out year], Registration No. [Registration number], request a character (conduct) certificate for the purpose of [purpose]. I have attached the fee payment receipt and my final / provisional degree certificate (or last exam marksheet). Kindly issue the same.\nThanking you,\nYours faithfully,\n[Full name]\n[Registration number] | [Course, semester/year] | Date: [Date]"
     }
   },
   {
@@ -566,9 +451,10 @@
         "College ID card (copy)",
         "Last semester mark sheet (if asked)"
       ],
-      "after_submission": "The request letter, authenticated by the HOD, goes to the college office. The office prepares the certificate, gets the Principal's signature, and issues it within a few working days.",
+      "after_submission": "Step 1: you upload the documents listed above in the app. Step 2: a head administrator verifies your documents. Step 3: if everything is present and correct, the HOD is notified; if more than 10 students are waiting for the HOD's signature, the HOD or the head administrator account is notified. Step 4: the HOD posts a time for signing. Step 5: you come to the office in person at that time and collect the signed course completion certificate. Course completion certificates are issued within a few working days.",
       "verified": true,
-      "notes": "Flow confirmed by MSSW office guidelines."
+      "notes": "Flow confirmed by MSSW office guidelines. Application reshaped 2026-11-12 to the 5-step HOD-signing process.",
+      "letter_format": "To: The Principal\nThrough: The Head of the Department, [Department name]\nSubject: Request for course completion certificate\nRespected Sir/Madam,\nI, [Full name], [Course], Registration No. [Registration number], have completed all the academic requirements of my course in [Year of completion] and request a course completion certificate for the purpose of [purpose]. I have attached a copy of my college ID card and my last semester mark sheet. Kindly issue the same.\nThanking you,\nYours faithfully,\n[Full name]\n[Registration number] | [Course, semester/year] | Date: [Date]"
     }
   },
   {
@@ -606,23 +492,7 @@
       "https://articles.findmycollege.com/andhra-university-result/"
     ],
     "verified": true,
-    "notes": "Fee confirmed from AU's own revaluation forms: Rs. 750 per paper (PG/professional, old batch form) and Rs. 500 per paper (SDE). The 15-day window is reported by findmycollege.",
-    "application": {
-      "form_fields": [
-        "Full name",
-        "Registration / hall ticket number",
-        "Course and semester",
-        "Paper(s) for which revaluation is sought (paper code and title)"
-      ],
-      "documents_to_upload": [
-        "Revaluation application form (filled)",
-        "Fee payment challan / payment proof (Rs. 750 per theory paper; Rs. 500 per paper for distance education)",
-        "Specimen handwriting on a separate sheet (SDE form)"
-      ],
-      "after_submission": "Apply within 15 days of the result. The university gets the script re-graded by a different examiner and publishes revaluation results on exams.andhrauniversity.edu.in. The fee is not refunded. No revaluation for practicals or internal marks.",
-      "verified": true,
-      "notes": "Fee confirmed from AU's own revaluation forms. The 15-day window is reported by findmycollege."
-    }
+    "notes": "Fee confirmed from AU's own revaluation forms: Rs. 750 per paper (PG/professional, old batch form) and Rs. 500 per paper (SDE). The 15-day window is reported by findmycollege. FAQ only per the app rule — applied for through the university exam portal/office; no in-app application flow."
   },
   {
     "id": "faq-023",
@@ -640,25 +510,7 @@
       "https://forum.universityupdates.in/threads/jntua-rc-cv-pca-notification-for-b-tech-2-1-semester-r20-regular-supple-december-2023-exams.44711/?amp=1"
     ],
     "verified": true,
-    "notes": "Fees and procedure from official JNTUA Examinations Branch notifications (MCA Nov 2025 and B.Tech Dec 2023). Fees are per the notification for that exam — check the current notification for your semester.",
-    "application": {
-      "form_fields": [
-        "Full name",
-        "Registration / hall ticket number",
-        "Course and semester",
-        "Service requested (recounting / photocopy / challenge valuation)",
-        "Paper(s) concerned"
-      ],
-      "documents_to_upload": [
-        "Requisition/application to the Principal",
-        "Attested statement of marks",
-        "Fee payment receipt (Rs. 100 recounting / Rs. 1,500 photocopy / Rs. 10,000 challenge valuation)",
-        "Evaluated photocopy of the answer script (for challenge valuation)"
-      ],
-      "after_submission": "Submit to the Principal, who forwards it online through the university portal (emsrms). The university processes it per the notification deadlines; late applications are not accepted. Challenge valuation can be applied for within 30 days of the result, even after a photocopy evaluation.",
-      "verified": true,
-      "notes": "Flow and fees from official JNTUA Examinations Branch notifications. Fees are per the notification for that exam."
-    }
+    "notes": "Fees and procedure from official JNTUA Examinations Branch notifications (MCA Nov 2025 and B.Tech Dec 2023). Fees are per the notification for that exam — check the current notification for your semester. FAQ only per the app rule — university post-result service, applied for through the university; no in-app application flow."
   },
   {
     "id": "faq-024",
@@ -673,21 +525,7 @@
       "https://articles.findmycollege.com/andhra-university-result/"
     ],
     "verified": false,
-    "notes": "UNVERIFIED: fee and late-fee figures are from findmycollege, a secondary site. Confirm the exact fee and dates in the official AU exam notification for your semester.",
-    "application": {
-      "form_fields": [
-        "Full name",
-        "Registration / hall ticket number",
-        "Course and semester",
-        "Backlog subject(s) and paper codes"
-      ],
-      "documents_to_upload": [
-        "Exam fee payment (reported: from Rs. 600 for one paper)"
-      ],
-      "after_submission": "UNVERIFIED: as reported, register on the AU exams portal before the last date and pay per paper; a late fee of about Rs. 2,000 applies after the deadline. Confirm the exact fee and dates in the official AU exam notification for your semester.",
-      "verified": false,
-      "notes": "UNVERIFIED: fee and late-fee figures come from findmycollege, a secondary site, not an official AU notification."
-    }
+    "notes": "UNVERIFIED: fee and late-fee figures are from findmycollege, a secondary site. Confirm the exact fee and dates in the official AU exam notification for your semester. FAQ only per the app rule — exam registration on the AU exams portal; no in-app application flow."
   },
   {
     "id": "faq-025",
@@ -727,30 +565,7 @@
       "https://www.careers360.com/colleges/government-degree-college-porumamilla?icn=college_page&ici=clg_20764_college_listing_tuple"
     ],
     "verified": true,
-    "notes": "Document list and income limits are consistent across sources. The 2026-27 change (money goes directly to the student's Aadhaar-linked account instead of the college) is reported by aimindia — verify the current scheme name and payment mode on jnanabhumi.ap.gov.in, because the scheme was earlier called Jagananna Vidya Deevena.",
-    "application": {
-      "form_fields": [
-        "Full name",
-        "Aadhaar number",
-        "Course, college, and year of study",
-        "Caste/category",
-        "Annual family income",
-        "Bank account details (Aadhaar-linked)"
-      ],
-      "documents_to_upload": [
-        "Aadhaar card",
-        "Caste certificate",
-        "Income certificate (issued after 1 January 2026 for 2026-27)",
-        "Bonafide certificate from the current institution",
-        "Previous year mark sheet",
-        "Bank account details (Aadhaar-linked; mother's account for MTF in some schemes)",
-        "Passport-size photograph",
-        "Fee receipt from the college"
-      ],
-      "after_submission": "Apply on jnanabhumi.ap.gov.in, then complete biometric authentication at a MeeSeva centre with your application ID and Aadhaar number. The college verifies the application online and the government releases RTF (tuition fee) and MTF (maintenance) amounts. From 2026-27 the money is reported to go directly to the student's Aadhaar-linked bank account — verify the current payment mode on the portal.",
-      "verified": true,
-      "notes": "Document list confirmed by multiple sources. The 2026-27 payment-mode change is reported by aimindia; verify on jnanabhumi.ap.gov.in."
-    }
+    "notes": "Document list and income limits are consistent across sources. The 2026-27 change (money goes directly to the student's Aadhaar-linked account instead of the college) is reported by aimindia — verify the current scheme name and payment mode on jnanabhumi.ap.gov.in, because the scheme was earlier called Jagananna Vidya Deevena. FAQ only per the app rule — online portal (Jnanabhumi, AP government); no in-app application flow."
   },
   {
     "id": "faq-027",
@@ -775,31 +590,7 @@
       "https://www.citizennest.com/guide/scholarship-for-sc-st-obc"
     ],
     "verified": true,
-    "notes": "The minority post-matric scheme status (not running since 2022-23) is reported by buddy4study, citing a July 2026 Lok Sabha confirmation.",
-    "application": {
-      "form_fields": [
-        "Full name",
-        "Aadhaar number and mobile number",
-        "Course, institute, and year of study",
-        "Caste/category",
-        "Annual family income",
-        "Bank account details (Aadhaar-seeded for DBT)"
-      ],
-      "documents_to_upload": [
-        "Aadhaar card",
-        "Caste certificate (SC/ST/OBC/EBC/DNT)",
-        "Income certificate of the current financial year",
-        "Bonafide / enrolment certificate",
-        "Previous year mark sheet",
-        "Bank passbook first page or cancelled cheque",
-        "Fee receipt from the institution",
-        "Domicile certificate (if asked)",
-        "Passport-size photograph"
-      ],
-      "after_submission": "Register with One Time Registration (OTR) on scholarships.gov.in, fill the application, upload documents, and submit. The institute verifies the application online, then the state/central authority sanctions it and the amount is paid by Direct Benefit Transfer to the Aadhaar-seeded bank account.",
-      "verified": true,
-      "notes": "Flow confirmed by Buddy4Study, Karvado, and CitizenNest guides."
-    }
+    "notes": "The minority post-matric scheme status (not running since 2022-23) is reported by buddy4study, citing a July 2026 Lok Sabha confirmation. FAQ only per the app rule — online portal (National Scholarship Portal); no in-app application flow."
   },
   {
     "id": "faq-028",
@@ -822,28 +613,7 @@
       "https://writeupcafe.com/documents-required-for-education-loan-in-india-2025-26-loans-vs-scholarships-explained"
     ],
     "verified": true,
-    "notes": "The college's part in this is the admission letter and the fee structure/cost-of-study document — see faq-001 and faq-003 for how to get those from the college office.",
-    "application": {
-      "form_fields": [
-        "Student name, Aadhaar, PAN",
-        "Course, college, and duration",
-        "Total cost of study (from the fee structure)",
-        "Co-applicant (parent/guardian) name, income, and employment details",
-        "Collateral details (only for secured loans above Rs. 7.5 lakh)"
-      ],
-      "documents_to_upload": [
-        "Student KYC (Aadhaar, PAN, passport, address proof, photos)",
-        "10th and 12th mark sheets and certificates",
-        "Admission / offer letter",
-        "Fee structure / cost of study document from the college",
-        "Co-applicant income proof (salary slips + Form 16, or ITRs for 2 years + 6 months bank statements)",
-        "Collateral documents (only for loans above Rs. 7.5 lakh)",
-        "Scholarship award letter (if any)"
-      ],
-      "after_submission": "Submit the application with documents at the bank or on the Vidya Lakshmi portal. The bank verifies documents, sanctions the loan (SBI typically within 15 working days for a complete application), and disburses the fee directly to the college against the fee demand letter.",
-      "verified": true,
-      "notes": "Flow confirmed by WeMakeScholars, StudyCapital, and FundMyCampus checklists. The college's part is the admission letter and fee structure — see faq-001 and faq-003."
-    }
+    "notes": "The college's part in this is the admission letter and the fee structure/cost-of-study document — see faq-001 and faq-003 for how to get those from the college office. FAQ only per the app rule — external agency (bank / Vidya Lakshmi portal); no in-app application flow."
   },
   {
     "id": "faq-029",
@@ -892,9 +662,10 @@
         "Passport-size photograph (if asked)",
         "Old/damaged card (for damage replacement)"
       ],
-      "after_submission": "Report the loss at the student helpdesk / Lost and Found Cell, submit the HOD-signed application with the fee receipt, and collect the duplicate card in about 1 to 2 weeks. The fee varies by college (Rs. 100-500).",
+      "after_submission": "Step 1: you upload the documents listed above in the app. Step 2: a head administrator verifies your documents. Step 3: if everything is present and correct, the HOD is notified; if more than 10 students are waiting for the HOD's signature, the HOD or the head administrator account is notified. Step 4: the HOD posts a time for signing. Step 5: you come to the office in person at that time and collect the signed duplicate ID card. Duplicate ID cards are usually ready in about 1 to 2 weeks.",
       "verified": true,
-      "notes": "Flow confirmed by Chandigarh University, JVBI, and Salbari College sources. Fee varies widely — do not hard-code one amount."
+      "notes": "Flow confirmed by Chandigarh University, JVBI, and Salbari College sources. Fee varies widely — do not hard-code one amount. Application reshaped 2026-11-12 to the 5-step HOD-signing process.",
+      "letter_format": "To: The Principal\nThrough: The Head of the Department, [Department name]\nSubject: Request for duplicate identity card\nRespected Sir/Madam,\nI, [Full name], [Course, semester], Registration No. [Registration number], request a duplicate college identity card. My original card was [lost / damaged] on [Date of loss]. I have attached the fee payment receipt and a government-issued photo ID. Kindly issue a duplicate card.\nThanking you,\nYours faithfully,\n[Full name]\n[Registration number] | [Course, semester/year] | Date: [Date]"
     }
   },
   {
@@ -948,9 +719,10 @@
         "ID proof (Aadhaar)",
         "Hostel fee payment (full year in advance at many colleges)"
       ],
-      "after_submission": "Apply to the Chief Warden / warden. Where seats are limited, allotment is merit-based. Selected students pay the hostel fee in advance and must follow hostel rules and carry the hostel identity card on campus.",
+      "after_submission": "Step 1: you upload the documents listed above in the app. Step 2: a head administrator verifies your documents. Step 3: if everything is present and correct, the HOD is notified; if more than 10 students are waiting for the HOD's signature, the HOD or the head administrator account is notified. Step 4: the HOD posts a time for signing. Step 5: you come to the office in person at that time and collect the signed hostel allotment. Hostel seats are allotted by the warden; where seats are limited, allotment is merit-based, and the hostel fee is paid in advance.",
       "verified": true,
-      "notes": "General flow from JVBI, Salbari, and Chandigarh University sources. Andhra University's own hostel form, fee, and deadlines were not retrieved."
+      "notes": "General flow from JVBI, Salbari, and Chandigarh University sources. Andhra University's own hostel form, fee, and deadlines were not retrieved. Application reshaped 2026-11-12 to the 5-step HOD-signing process.",
+      "letter_format": "To: The Chief Warden\nSubject: Request for hostel accommodation\nRespected Sir/Madam,\nI, [Full name], [Course, year], Registration No. [Registration number], have taken admission into the college and request hostel accommodation. My preferred hostel / room type is [Hostel preference / room type]. My parent/guardian can be contacted at [Parent/guardian contact details]. I have attached my college admission proof / allotment letter, ID proof, and passport-size photographs. Kindly allot me a hostel seat.\nThanking you,\nYours faithfully,\n[Full name]\n[Registration number] | [Course, semester/year] | Date: [Date]"
     }
   },
   {
@@ -1037,9 +809,10 @@
         "Parent/guardian counter-signature (where asked)",
         "Condonation fee payment receipt"
       ],
-      "after_submission": "The College Academic Committee reviews the application and documents. If approved, the condonation fee is paid per course and the student is allowed to write the semester-end exams. Apply at least 2 to 3 weeks before the exams. Condonation is discretionary — it can be rejected if the reason is not genuine.",
+      "after_submission": "Step 1: you upload the documents listed above in the app. Step 2: a head administrator verifies your documents. Step 3: if everything is present and correct, the HOD is notified; if more than 10 students are waiting for the HOD's signature, the HOD or the head administrator account is notified. Step 4: the HOD posts a time for signing. Step 5: you come to the office in person at that time and collect the signed condonation approval. Apply at least 2 to 3 weeks before the exams. Condonation is discretionary — it can be rejected if the reason is not genuine.",
       "verified": true,
-      "notes": "Flow confirmed by JNTUK R25 academic regulations (official). Fee varies by university — do not hard-code one amount."
+      "notes": "Flow confirmed by JNTUK R25 academic regulations (official). Fee varies by university — do not hard-code one amount. Application reshaped 2026-11-12 to the 5-step HOD-signing process.",
+      "letter_format": "To: The Principal\nThrough: The Head of the Department, [Department name]\nSubject: Request for condonation of attendance shortage\nRespected Sir/Madam,\nI, [Full name], [Course, semester], Registration No. [Registration number], request condonation of my attendance shortage in [Subject(s) with shortage]. Total classes held: [Number]; classes attended: [Number]; shortfall: [Number]. Reason: [medical / sports / NSS]. I have attached the supporting proof and my parent/guardian's counter-signature. Kindly consider my request.\nThanking you,\nYours faithfully,\n[Full name]\n[Registration number] | [Course, semester/year] | Date: [Date]"
     }
   },
   {
@@ -1090,9 +863,10 @@
         "Affidavit (if the office asks)",
         "For a full legal name change: notarised affidavit + newspaper advertisements + Gazette notification copy"
       ],
-      "after_submission": "The exam cell verifies the documents against the SSC certificate and issues a corrected provisional certificate or marks memo. A full legal name change must first be done through affidavit + newspaper ads + Gazette publication, and the Gazette copy is then submitted to the university.",
+      "after_submission": "Step 1: you upload the documents listed above in the app. Step 2: a head administrator verifies your documents. Step 3: if everything is present and correct, the HOD is notified; if more than 10 students are waiting for the HOD's signature, the HOD or the head administrator account is notified. Step 4: the HOD posts a time for signing. Step 5: you come to the office in person at that time and collect the signed corrected certificate / marks memo. A full legal name change must first be done through affidavit + newspaper advertisements + Gazette publication, and the Gazette copy is then submitted to the university.",
       "verified": true,
-      "notes": "Internal correction steps vary by university; the Gazette process for a legal name change is consistent across sources."
+      "notes": "Internal correction steps vary by university; the Gazette process for a legal name change is consistent across sources. Application reshaped 2026-11-12 to the 5-step HOD-signing process.",
+      "letter_format": "To: The Principal / College Exam Cell\nThrough: The Head of the Department, [Department name]\nSubject: Correction of name spelling in university records\nRespected Sir/Madam,\nI, [Full name as in records], Registration No. [Registration number], [Course, semester], request correction of my name spelling in the university records. Name as in records: [Name as in records]. Correct spelling: [Correct name spelling]. I have attached my 10th class certificate and Aadhaar card. Kindly correct the records.\nThanking you,\nYours faithfully,\n[Full name]\n[Registration number] | [Course, semester/year] | Date: [Date]"
     }
   },
   {
@@ -1131,9 +905,10 @@
         "Gazette notification copy (where required)",
         "Court order (in some cases)"
       ],
-      "after_submission": "Submit the affidavit and proof to the college exam cell / university Controller of Examinations. Applications go through strict checking and approval can take 30 to 60 days or more.",
+      "after_submission": "Step 1: you upload the documents listed above in the app. Step 2: a head administrator verifies your documents. Step 3: if everything is present and correct, the HOD is notified; if more than 10 students are waiting for the HOD's signature, the HOD or the head administrator account is notified. Step 4: the HOD posts a time for signing. Step 5: you come to the office in person at that time and collect the signed corrected records. Approval can take 30 to 60 days or more, and applications go through strict checking.",
       "verified": true,
-      "notes": ""
+      "notes": "Application reshaped 2026-11-12 to the 5-step HOD-signing process.",
+      "letter_format": "To: The Principal / College Exam Cell\nThrough: The Head of the Department, [Department name]\nSubject: Correction of date of birth in records\nRespected Sir/Madam,\nI, [Full name], Registration No. [Registration number], [Course, semester], request correction of my date of birth in the records. Date of birth as in records: [Date of birth as in records]. Correct date of birth: [Correct date of birth]. Reason: [Reason for correction]. I have attached my birth certificate and a notarised affidavit. Kindly correct the records.\nThanking you,\nYours faithfully,\n[Full name]\n[Registration number] | [Course, semester/year] | Date: [Date]"
     }
   },
   {
@@ -1178,30 +953,7 @@
       "https://www.indiagovschemes.com/en/blog/education-loan-vidya-lakshmi-portal-how-to-apply/"
     ],
     "verified": true,
-    "notes": "The portal moved to pmvidyalaxmi.co.in in February 2025 under the PM-Vidyalaxmi scheme; the old vidyalakshmi.co.in address still redirects. Skill loans are no longer on this portal — they moved to the JanSamarth portal.",
-    "application": {
-      "form_fields": [
-        "Full name",
-        "Date of birth",
-        "Mobile number (Aadhaar-linked) and email ID",
-        "Course and college/institution",
-        "Loan amount required",
-        "Co-applicant (parent/guardian) details",
-        "Up to three banks to apply to"
-      ],
-      "documents_to_upload": [
-        "Class 10 marksheet",
-        "Class 12 or last exam marksheet",
-        "Admission letter",
-        "Fee structure from the college",
-        "Income proof of parent/guardian",
-        "Photographs of student and parent",
-        "Aadhaar and PAN of student and co-applicant"
-      ],
-      "after_submission": "The application goes to the banks you selected. The bank contacts you, verifies the documents, and sanctions the loan if you are eligible. Track the status on the portal; if one bank rejects it, the other banks you applied to can still sanction it.",
-      "verified": true,
-      "notes": "Portal flow and document list confirmed by Shiksha, upGrad and FinMandi guides; each upload must be under 200 KB."
-    }
+    "notes": "The portal moved to pmvidyalaxmi.co.in in February 2025 under the PM-Vidyalaxmi scheme; the old vidyalakshmi.co.in address still redirects. Skill loans are no longer on this portal — they moved to the JanSamarth portal. FAQ only per the app rule — online portal (PM Vidya Lakshmi) and bank; no in-app application flow."
   },
   {
     "id": "faq-042",
@@ -1226,28 +978,7 @@
       "https://propelld.com/site/blog/credila-vs-sbi-education-loan"
     ],
     "verified": true,
-    "notes": "Exact document lists vary slightly by bank; the bank gives its own checklist after you apply. For studies abroad, add passport, visa, and IELTS/TOEFL/GRE/GMAT scorecards.",
-    "application": {
-      "form_fields": [
-        "Student personal details",
-        "Course and institution",
-        "Loan amount required",
-        "Co-applicant details and income",
-        "Collateral details (if loan above ₹7.5 lakh)"
-      ],
-      "documents_to_upload": [
-        "Student KYC (Aadhaar, PAN, photographs)",
-        "Class 10 and 12 marksheets and certificates",
-        "Admission letter and fee structure",
-        "Entrance exam scorecard (if any)",
-        "Co-applicant income proof (salary slips / ITR / Form 16)",
-        "Co-applicant bank statements (last 6 months)",
-        "Collateral documents (if applicable)"
-      ],
-      "after_submission": "The bank verifies every document, checks the co-applicant's credit history, and issues a sanction letter — SBI reports up to 15 working days after all documents are received. The loan is then disbursed to the college, usually in instalments per semester or year.",
-      "verified": true,
-      "notes": "Document list confirmed by Shiksha, FinMandi and Nomad Credit guides; the 15-working-day sanction timeline is from the SBI process described by Propelld."
-    }
+    "notes": "Exact document lists vary slightly by bank; the bank gives its own checklist after you apply. For studies abroad, add passport, visa, and IELTS/TOEFL/GRE/GMAT scorecards. FAQ only per the app rule — external agency (bank); no in-app application flow."
   },
   {
     "id": "faq-043",
@@ -1371,28 +1102,7 @@
       "https://www.sahayakapps.in/scholarships/all-india/pm-scholarship-defence-wards"
     ],
     "verified": true,
-    "notes": "If even one document is missing, the application is rejected. The 31 December 2026 last date is reported by one guide — confirm on ksb.gov.in, as dates change every year.",
-    "application": {
-      "form_fields": [
-        "Student name, date of birth, Aadhaar number",
-        "Course, college/institution, year of admission",
-        "Ex-serviceman details (Part-1 and Part-2): service number, rank, force, PPO number",
-        "Bank account details (Aadhaar-linked)"
-      ],
-      "documents_to_upload": [
-        "Annexure-1 (ESM certificate)",
-        "Annexure-2 (bonafide certificate)",
-        "Annexure-3 (bank certificate)",
-        "Matriculation certificate",
-        "MEQ marksheet",
-        "Bank passbook first page",
-        "Aadhaar card",
-        "PPO / ESM Identity Card or category documents"
-      ],
-      "after_submission": "The college verifies the application online, then the Zila Sainik Board and Rajya Sainik Board verify the service details, and KSB gives the final approval. The scholarship is paid by DBT into the student's Aadhaar-linked bank account.",
-      "verified": true,
-      "notes": "Flow confirmed by KSB guides (newjobnotifications, AimIndia): apply on ksb.gov.in, download Annexures 1–3, fill Part-1 and Part-2 with ESM details, submit online."
-    }
+    "notes": "If even one document is missing, the application is rejected. The 31 December 2026 last date is reported by one guide — confirm on ksb.gov.in, as dates change every year. FAQ only per the app rule — online portal (KSB) and external agency (Ministry of Defence); no in-app application flow."
   },
   {
     "id": "faq-050",
@@ -1415,27 +1125,7 @@
       "https://www.indiascholarships.in/scholarships/pmss-capf-assam-rifles"
     ],
     "verified": true,
-    "notes": "All facts in this entry are from the official NSP PMSS FAQ except the 2026-27 dates, which are from Buddy4Study. One guide claims a ₹6 lakh income limit, but the official FAQ lists no income criterion and other guides say there is none — the dataset states there is no income limit.",
-    "application": {
-      "form_fields": [
-        "Student name, date of birth, Aadhaar number, mobile number",
-        "Parent's force (BSF/CRPF/ITBP/CISF/SSB/NSG/Assam Rifles/State Police), service status (serving/retired/deceased/disabled)",
-        "Course, college/institution, year of admission",
-        "MEQ marks (Class 12 / diploma / graduation)",
-        "Bank account details (Aadhaar-seeded)"
-      ],
-      "documents_to_upload": [
-        "Service certificate (Annexure-A) or PPO/Discharge certificate",
-        "Death/Disability/Gallantry certificate (if applicable)",
-        "Martyrdom certificate from the State Government (State police wards)",
-        "Bonafide certificate from the institution",
-        "Self-attested MEQ marksheet",
-        "Aadhaar card"
-      ],
-      "after_submission": "The college verifies the application and documents online, then the Force Nodal Officer verifies it. After merit selection, the amount is credited by DBT into the Aadhaar-seeded bank account through PFMS. If the application is marked defective, correct and resubmit it before the verification deadline.",
-      "verified": true,
-      "notes": "NSP flow confirmed by the official NSP PMSS FAQ and Buddy4Study; documents must be uploaded as PDF or JPG up to 200 KB."
-    }
+    "notes": "All facts in this entry are from the official NSP PMSS FAQ except the 2026-27 dates, which are from Buddy4Study. One guide claims a ₹6 lakh income limit, but the official FAQ lists no income criterion and other guides say there is none — the dataset states there is no income limit. FAQ only per the app rule — online portal (NSP) and external agency (Ministry of Home Affairs); no in-app application flow."
   },
   {
     "id": "faq-051",
@@ -1472,22 +1162,7 @@
       "https://newjobnotifications.com/prime-minister-scholarship-scheme-2026/"
     ],
     "verified": true,
-    "notes": "The 50% renewal rule and the one-year grace period are from the official NSP PMSS FAQ; the Annexure-2 renewal document is from the KSB guides.",
-    "application": {
-      "form_fields": [
-        "Student name and registration/application ID",
-        "Course and current year of study",
-        "Marks obtained in the previous academic year"
-      ],
-      "documents_to_upload": [
-        "Latest year marksheet",
-        "Annexure-2 certificate/undertaking (KSB route)",
-        "Bonafide certificate (if asked)"
-      ],
-      "after_submission": "The institute verifies the renewal, and the scholarship continues by DBT at the same monthly rate. If marks are below 50%, the renewal is rejected.",
-      "verified": true,
-      "notes": "Renewal flow confirmed by the official NSP FAQ and KSB guides."
-    }
+    "notes": "The 50% renewal rule and the one-year grace period are from the official NSP PMSS FAQ; the Annexure-2 renewal document is from the KSB guides. FAQ only per the app rule — online portal (KSB / NSP); no in-app application flow."
   },
   {
     "id": "faq-053",
@@ -1525,27 +1200,7 @@
       "https://leapscholar.com/blog/state-bank-of-india-abroad-education-loan/"
     ],
     "verified": true,
-    "notes": "Eligibility, loan limits and the DSP/ICGSP co-borrower rule are confirmed by five independent guides. The 8.65% rate is the SBI-published rate effective 09 June 2026 (via BankBazaar); Propelld quotes 10.15–11.75% for other categories — confirm the rate for your category at the branch.",
-    "application": {
-      "form_fields": [
-        "Student name, date of birth, Aadhaar number",
-        "Course and institution (India/abroad)",
-        "Loan amount required",
-        "Co-applicant details and DSP/ICGSP account number",
-        "Collateral details (if applicable)"
-      ],
-      "documents_to_upload": [
-        "Admission letter and fee structure",
-        "Class 10 and 12 marksheets",
-        "Aadhaar and PAN of student and co-applicant",
-        "DSP/ICGSP account proof of the co-applicant",
-        "Co-applicant income proof",
-        "Collateral documents (if applicable)"
-      ],
-      "after_submission": "The SBI branch verifies the documents and the DSP/ICGSP account, sanctions the loan, and disburses it to the institution. Apply at the SBI branch holding the salary/pension account, or through the SBI education loan portal.",
-      "verified": true,
-      "notes": "Flow is the standard SBI education loan process; Shaurya applications go through the branch holding the DSP/ICGSP account."
-    }
+    "notes": "Eligibility, loan limits and the DSP/ICGSP co-borrower rule are confirmed by five independent guides. The 8.65% rate is the SBI-published rate effective 09 June 2026 (via BankBazaar); Propelld quotes 10.15–11.75% for other categories — confirm the rate for your category at the branch. FAQ only per the app rule — external agency (bank); no in-app application flow."
   },
   {
     "id": "faq-055",
@@ -1681,9 +1336,10 @@
         "Exam fee payment receipt / transaction ID",
         "Passport-size photograph (if asked)"
       ],
-      "after_submission": "The college exam cell verifies the details with the department and forwards the duplicate hall ticket request to the university Controller of Examinations. The duplicate hall ticket is issued once the university releases it. Apply at least 2 to 3 days before the exam.",
+      "after_submission": "Step 1: you upload the documents listed above in the app. Step 2: a head administrator verifies your documents. Step 3: if everything is present and correct, the HOD is notified; if more than 10 students are waiting for the HOD's signature, the HOD or the head administrator account is notified. Step 4: the HOD posts a time for signing. Step 5: you come to the office in person at that time and collect the signed duplicate hall ticket. The duplicate hall ticket is issued once the university releases it — the college office cannot generate a hall ticket the university has not issued. Apply at least 2 to 3 days before the exam.",
       "verified": true,
-      "notes": "Procedure follows AU's duplicate hall ticket form for B.Tech. The duplicate fee is not stated here because the last published AU figure (Rs. 50, 2012 notification) is outdated — confirm the current fee at the exam cell."
+      "notes": "Procedure follows AU's duplicate hall ticket form for B.Tech. The duplicate fee is not stated here because the last published AU figure (Rs. 50, 2012 notification) is outdated — confirm the current fee at the exam cell. Application reshaped 2026-11-12 to the 5-step HOD-signing process.",
+      "letter_format": "To: The Principal / College Exam Cell\nThrough: The Head of the Department, [Department name]\nSubject: Request for duplicate hall ticket\nRespected Sir/Madam,\nI, [Full name as in university records], Registration No. [Registration number], [Course and semester — B.Tech], request a duplicate hall ticket for the [Examination — regular / supplementary, month and year]. Papers appearing for: [Papers appearing for]. Reason the hall ticket was not generated: [exam fee / attendance / dues / not yet released]. I have attached my college ID card and exam fee payment receipt / transaction ID. Kindly issue a duplicate hall ticket.\nThanking you,\nYours faithfully,\n[Full name]\n[Registration number] | [Course, semester/year] | Date: [Date]"
     }
   }
 ]

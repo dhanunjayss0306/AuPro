@@ -2967,7 +2967,9 @@ export default function Home() {
                                 <form
                                   onSubmit={async (e) => {
                                     e.preventDefault();
-                                    if (!hodTimeDraft.date.trim() || !hodTimeDraft.time.trim()) {
+                                    const draft = hodTimeDraft;
+                                    if (!draft) return;
+                                    if (!draft.date.trim() || !draft.time.trim()) {
                                       setToast('Please enter a signing date and time.');
                                       return;
                                     }
@@ -2979,9 +2981,9 @@ export default function Home() {
                                           refId: app.refId,
                                           status: 'time_posted',
                                           hodEmail: authEmail,
-                                          appointmentDate: hodTimeDraft.date,
-                                          appointmentTime: hodTimeDraft.time,
-                                          appointmentVenue: hodTimeDraft.venue,
+                                          appointmentDate: draft.date,
+                                          appointmentTime: draft.time,
+                                          appointmentVenue: draft.venue,
                                         }),
                                       });
                                       if (res.ok) {
@@ -3005,8 +3007,8 @@ export default function Home() {
                                       <label className="field-label" style={{ fontSize: 12, fontWeight: 600 }}>Signing Date *</label>
                                       <input
                                         className="search"
-                                        value={hodTimeDraft.date}
-                                        onChange={(e) => setHodTimeDraft({ ...hodTimeDraft, date: e.target.value })}
+                                        value={hodTimeDraft?.date ?? ''}
+                                        onChange={(e) => setHodTimeDraft(hodTimeDraft ? { ...hodTimeDraft, date: e.target.value } : { refId: app.refId, date: e.target.value, time: '', venue: '' })}
                                         placeholder="e.g. 13 Nov 2026"
                                         required
                                       />
@@ -3015,8 +3017,8 @@ export default function Home() {
                                       <label className="field-label" style={{ fontSize: 12, fontWeight: 600 }}>Time Slot *</label>
                                       <input
                                         className="search"
-                                        value={hodTimeDraft.time}
-                                        onChange={(e) => setHodTimeDraft({ ...hodTimeDraft, time: e.target.value })}
+                                        value={hodTimeDraft?.time ?? ''}
+                                        onChange={(e) => setHodTimeDraft(hodTimeDraft ? { ...hodTimeDraft, time: e.target.value } : { refId: app.refId, date: '', time: e.target.value, venue: '' })}
                                         placeholder="e.g. 11:30 AM - 12:30 PM"
                                         required
                                       />
@@ -3025,8 +3027,8 @@ export default function Home() {
                                       <label className="field-label" style={{ fontSize: 12, fontWeight: 600 }}>Venue</label>
                                       <input
                                         className="search"
-                                        value={hodTimeDraft.venue}
-                                        onChange={(e) => setHodTimeDraft({ ...hodTimeDraft, venue: e.target.value })}
+                                        value={hodTimeDraft?.venue ?? ''}
+                                        onChange={(e) => setHodTimeDraft(hodTimeDraft ? { ...hodTimeDraft, venue: e.target.value } : { refId: app.refId, date: '', time: '', venue: e.target.value })}
                                         placeholder="e.g. HOD Office, CSE Block"
                                       />
                                     </div>

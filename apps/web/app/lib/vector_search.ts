@@ -15,6 +15,12 @@ export interface QAEntry {
   keywords: string[];
 }
 
+// Researched college-office FAQ set (36 verified entries) — generated
+// from faq-data.json by scripts/build-faq-kb.mjs. The 10 entries in
+// initialKnowledgeBase below stay: they are AU campus facts (library,
+// hostels, canteen, Wi-Fi...) that the researched set does not cover.
+import { faqKnowledgeBase } from './faq-data';
+
 export interface VectorSearchResult {
   entry: QAEntry;
   similarity: number; // 0.0 to 1.0 (Cosine similarity score)
@@ -41,7 +47,7 @@ export const initialKnowledgeBase: QAEntry[] = [
     category: 'Certificates',
     question: 'How do I apply for a Bonafide Certificate or Study Certificate?',
     answer: 'Bonafide Certificate: Submit an application directly in the Applications tab. Certificates are processed in 1–2 working days and can be collected from Academic Section Counter 3 with your college ID.',
-    keywords: ['bonafide', 'certificate', 'study', 'custodian', 'verification', 'scholarship', 'passport', 'apply'],
+    keywords: ['bonafide', 'certificate', 'study', 'custodian', 'verification', 'passport', 'apply'],
   },
   {
     id: 'hallticket',
@@ -196,4 +202,7 @@ export class UniversityVectorDatabase {
   }
 }
 
-export const auVectorDB = new UniversityVectorDatabase();
+export const auVectorDB = new UniversityVectorDatabase([
+  ...initialKnowledgeBase,
+  ...faqKnowledgeBase,
+]);

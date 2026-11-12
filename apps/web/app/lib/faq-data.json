@@ -392,34 +392,40 @@
   {
     "id": "faq-015",
     "category": "certificates",
-    "question": "How do I get a provisional certificate from Andhra University?",
-    "answer": "UNVERIFIED — based on a student forum answer, not an official AU page. Andhra University offers an online certificate service at aucoe.info: go to the site, click 'apply for certificates', fill in your registration number and mobile number, fill the application form, select the purpose (provisional certificate, or duplicate provisional certificate), upload any evidence asked for, and pay the fee online. A tatkal (urgent) option for a duplicate provisional certificate is reported to exist. Note: once the convocation is over and the original degree is issued, the provisional certificate stops being valid — apply for the original degree instead. Confirm the current process and fees on aucoe.info before applying.",
+    "question": "How do I get a B.Tech provisional certificate from Andhra University?",
+    "answer": "Apply online on Andhra University's certificate portal, services.andhrauniversity.edu.in. Open the portal and choose 'Apply For Certificate' (the portal also offers 'Apply For Transcript' and 'Apply For Certificate Genuineness Verification'). Fill in your details — name, B.Tech registration (hall ticket) number, course and branch, college, batch and year of passing — select Provisional Certificate, and pay the prescribed fee online; only credit card, debit card and internet banking are accepted, and the fee once paid cannot be exchanged, cancelled or refunded. The fee is shown on the portal when you apply — a B.Tech student reported paying Rs. 200 as the processing fee in 2021, so confirm the current fee on the portal. The certificate is sent by courier/post to the address you give on the application, so keep your application reference number. The university generally issues original degree certificates in about 10-15 days; no separate timeline is published for provisional certificates. Do not use the university's old certificate website from older guides — that domain no longer belongs to Andhra University. Note: once the convocation is over and your original degree is issued, the provisional certificate stops being valid — apply for the original degree instead. A tatkal (urgent) option existed on the old portal; whether it exists on the current portal is not confirmed, so check on services.andhrauniversity.edu.in.",
     "documents_required": [
-      "Registration number and mobile number",
-      "Mark sheets",
-      "Fee payment (online)",
-      "Evidence document if the portal asks for it (for duplicate requests)"
+      "B.Tech registration (hall ticket) number",
+      "Course and branch, college, batch and year of passing",
+      "Postal address for delivery",
+      "Fee payment online (credit card, debit card or internet banking)",
+      "Scanned copies of any documents the portal asks for during the application (the exact upload list is shown on the portal, not published separately)"
     ],
     "sources": [
+      "https://services.andhrauniversity.edu.in/",
+      "https://www.jntufastresult.com/procedure-to-apply-andhra-university-certificates/",
+      "https://www.consumercomplaints.in/andhra-university-b101661",
       "https://www.indiastudychannel.com/experts/ViewQuestionDetails.aspx?QuestionId=44878&AnswerId=150762&PageAction=deleteanswerattachment&Filename=44878-1-andhrauniv.jpg"
     ],
-    "verified": false,
-    "notes": "UNVERIFIED: the aucoe.info portal and the tatkal option are described in a student forum answer, not confirmed from an official AU page. Treat the steps as a starting point and verify on the portal.",
+    "verified": true,
+    "notes": "Core procedure confirmed from the official AU certificate portal services.andhrauniversity.edu.in (homepage: candidates apply for Provisional Certificates by paying the prescribed fees online, for UG/PG/Professional courses). NOT confirmed: the current fee amount (Rs. 200 was reported by a B.Tech student in 2021 — confirm on the portal); whether a tatkal option exists on the current portal (it existed on the old portal, which is now dead and must never be linked); the exact processing time for a provisional certificate (10-15 days is the published figure for original degrees); the exact form fields and upload list (shown on the portal at application time).",
     "application": {
       "form_fields": [
-        "Registration number",
-        "Mobile number",
-        "Course and year of passing",
-        "Purpose (provisional certificate / duplicate provisional certificate)"
+        "Full name",
+        "B.Tech registration (hall ticket) number",
+        "Course (B.Tech) and branch",
+        "College name",
+        "Batch / year of passing",
+        "Certificate type: Provisional Certificate",
+        "Postal address for delivery"
       ],
       "documents_to_upload": [
-        "Mark sheets (if asked)",
-        "Evidence document if the portal asks for it (for duplicate requests)",
+        "Scanned copies of any documents the portal asks for during the application",
         "Fee payment (online)"
       ],
-      "after_submission": "UNVERIFIED: as reported on a student forum, the application is made on aucoe.info, the fee is paid online, and a tatkal (urgent) option is reported for duplicate provisional certificates. Confirm the current process, fees, and delivery mode on aucoe.info before applying.",
-      "verified": false,
-      "notes": "UNVERIFIED: flow rests on a student forum answer, not an official AU page."
+      "after_submission": "The certificate is sent by courier/post to the postal address given on the application. The university generally issues original degree certificates in about 10-15 days; no separate timeline is published for provisional certificates. The fee, once paid, cannot be exchanged, cancelled or refunded. If the certificate does not arrive, visit the corresponding section at the University with your application reference number.",
+      "verified": true,
+      "notes": "Flow confirmed from the official AU certificate portal and its published flow (Apply For Certificate, fill details, pay online). Exact form fields and upload list are as shown on the portal at application time; the current fee and any tatkal option are not confirmed — see entry notes."
     }
   },
   {

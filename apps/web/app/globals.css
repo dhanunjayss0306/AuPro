@@ -1371,6 +1371,10 @@ textarea, select { font: inherit; }
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  /* One scroll only: a scroll that hits the top or bottom of this list
+     must not chain into the main page behind it (double scroll). */
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 .sem-screen-scroll .sem-panel {

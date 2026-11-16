@@ -301,3 +301,18 @@ test('file groups: each group is its own page, not one long list', async () => {
   // Opening another subject resets the group.
   assert.ok(pageContent.includes("setSemSubjectId(s.id); setSemUnitId(null); setSemFileGroup(null)"), 'changing subject must reset the group');
 });
+
+test('sem screen: one scroll only, the main page must not scroll behind it', async () => {
+  const css = await readFile(new URL('../app/globals.css', import.meta.url), 'utf8');
+  const pageContent = await readFile(new URL('../app/page.tsx', import.meta.url), 'utf8');
+  // A scroll that hits the top or bottom of the SEM list must not chain
+  // into the page behind it (double scroll).
+  const scrollRule = css.slice(css.indexOf('.sem-screen-scroll {'));
+  assert.ok(scrollRule.includes('overscroll-behavior: contain'), 'the SEM list must contain its overscroll');
+  // While the SEM screen (or its file viewer) is open, the main page
+  // behind it is locked; closing restores it.
+  assert.ok(pageContent.includes("document.body.style.overflow = 'hidden'"), 'opening the SEM screen must lock the page scroll');
+  assert.ok(pageContent.includes("document.documentElement.style.overflow = 'hidden'"), 'the lock must cover the document element too');
+  assert.ok(pageContent.includes('document.body.style.overflow = prevBody'), 'closing must restore the page scroll');
+  assert.ok(pageContent.includes('[semPrepOpen, semViewer]'), 'the lock must follow the screen and the viewer');
+});

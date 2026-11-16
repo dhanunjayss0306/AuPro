@@ -1251,6 +1251,21 @@ export default function Home() {
   const [semViewer, setSemViewer] = useState<{ list: StudyDriveFile[]; index: number } | null>(null);
   const [topNotice, setTopNotice] = useState('');
 
+  // Single scroll while the SEM screen (or its file viewer) is open: the
+  // main page behind it must not scroll too. Without this the list and
+  // the page behind it both move, which feels like a double scroll.
+  useEffect(() => {
+    if (!semPrepOpen && !semViewer) return;
+    const prevBody = document.body.style.overflow;
+    const prevHtml = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevBody;
+      document.documentElement.style.overflow = prevHtml;
+    };
+  }, [semPrepOpen, semViewer]);
+
   useEffect(() => {
     try {
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

@@ -244,6 +244,38 @@ test('Shared store lives in Vercel KV, not in the server /tmp file', async () =>
   assert.ok(Array.isArray(getAllPosts()), 'Registry still reads posts without KV');
 });
 
+test('KV write is awaited before a mutation answers, never left to a timer', async () => {
+  const registryContent = await readFile(new URL('../app/api/auth/account-registry.ts', import.meta.url), 'utf8');
+
+  // The KV write starts at once in saveStoreToFile, tracked so handlers
+  // can await it. A serverless function freezes when the response is
+  // sent, so a write left to a setTimeout never runs: that is how a
+  // mobile post vanished (visible on the warm instance, invisible
+  // everywhere else). The only setTimeout left must be the local /tmp
+  // flush; the KV write must sit outside it.
+  assert.ok(registryContent.includes('export async function awaitPendingKvSave'), 'Registry must export awaitPendingKvSave');
+  assert.ok(registryContent.includes('kvSavePromise'), 'Registry must track the pending KV write');
+  assert.ok(registryContent.includes('kvSaveInFlight'), 'Registry must guard reads while a KV save is in flight');
+  const saveFn = registryContent.slice(registryContent.indexOf('function saveStoreToFile'));
+  const timerAt = saveFn.indexOf('setTimeout');
+  const kvAt = saveFn.indexOf('kvSavePromise = (async');
+  assert.ok(kvAt !== -1 && kvAt < timerAt, 'The KV write must start before the /tmp timer, not inside it');
+
+  // Every mutating handler awaits the pending KV save before answering.
+  const mutatingRoutes = [
+    '../app/api/feed/route.ts',
+    '../app/api/accounts/route.ts',
+    '../app/api/activity/route.ts',
+    '../app/api/applications/route.ts',
+    '../app/api/auth/verify-otp/route.ts',
+  ];
+  for (const route of mutatingRoutes) {
+    const content = await readFile(new URL(route, import.meta.url), 'utf8');
+    assert.ok(content.includes('awaitPendingKvSave'), `${route} must import awaitPendingKvSave`);
+    assert.ok(content.includes('await awaitPendingKvSave();'), `${route} must await the KV save before answering`);
+  }
+});
+
 test('Every route handler that touches the store awaits readiness first', async () => {
   const storeRoutes = [
     '../app/api/feed/route.ts',

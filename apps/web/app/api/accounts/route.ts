@@ -7,6 +7,7 @@ import {
   purgeAllAccountsExceptHead,
   logServerActivity,
   awaitStoreReady,
+  awaitPendingKvSave,
   MAIN_ADMIN_EMAIL,
 } from '../auth/account-registry';
 import {
@@ -101,6 +102,7 @@ export async function POST(req: Request) {
         `Student profile registered for ${stored?.name || name || 'AU Student'} (${stored?.rollNo || rollNo || 'ID pending'}, ${stored?.department || department || 'AU Eng'})`
       );
       const accounts = getAllAccounts();
+      await awaitPendingKvSave();
       return NextResponse.json({
         success: true,
         account: accounts[cleanEmail],
@@ -157,6 +159,7 @@ export async function DELETE(req: Request) {
         MAIN_ADMIN_EMAIL,
         'Reset platform registry to Head Account only'
       );
+      await awaitPendingKvSave();
       return NextResponse.json({
         success: true,
         message: 'All accounts except Head Account purged successfully.',
@@ -186,6 +189,7 @@ export async function DELETE(req: Request) {
         MAIN_ADMIN_EMAIL,
         `Removed student account for ${cleanEmail}`
       );
+      await awaitPendingKvSave();
       return NextResponse.json({
         success: true,
         message: `Account ${cleanEmail} removed successfully.`,

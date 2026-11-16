@@ -5,6 +5,7 @@ import {
   updateApplicationStatus,
   getApplicationByRefId,
   awaitStoreReady,
+  awaitPendingKvSave,
 } from '../auth/account-registry';
 import {
   checkRateLimit,
@@ -128,6 +129,7 @@ export async function POST(req: Request) {
       letterContent: sanitizeText(letterContent, 3000),
     });
 
+    await awaitPendingKvSave();
     return NextResponse.json({
       success: true,
       message: 'Application submitted successfully. Notified Head Administrator.',
@@ -208,6 +210,7 @@ export async function PATCH(req: Request) {
         );
       }
 
+      await awaitPendingKvSave();
       return NextResponse.json({
         success: true,
         message: `Application ${refId} updated to ${status}.`,
@@ -262,6 +265,7 @@ export async function PATCH(req: Request) {
           { status: 404 }
         );
       }
+      await awaitPendingKvSave();
       return NextResponse.json({
         success: true,
         message: `Signing time posted for application ${refId}. Students can now come in person to get it signed.`,
@@ -288,6 +292,7 @@ export async function PATCH(req: Request) {
           { status: 404 }
         );
       }
+      await awaitPendingKvSave();
       return NextResponse.json({
         success: true,
         message: `Application ${refId} marked signed and collected.`,

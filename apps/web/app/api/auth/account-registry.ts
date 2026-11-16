@@ -324,6 +324,13 @@ function loadStore(): ServerDataStore {
 
 let saveDebounceTimer: any = null;
 
+// The latest KV write, so route handlers can await it before answering.
+// A serverless function freezes once the response is sent, so a KV write
+// left to a timer never runs: that is exactly how a mobile post vanished
+// (visible on the warm instance that took it, invisible everywhere else).
+let kvSavePromise: Promise<void> | null = null;
+let kvSaveInFlight = false;
+
 function saveStoreToFile(store: ServerDataStore) {
   // Stamp every change so the newer copy always wins when KV and the
   // local store are compared.
@@ -332,7 +339,27 @@ function saveStoreToFile(store: ServerDataStore) {
   // 1. Synchronous in-memory update: read operations immediately see new data in 0.001ms
   (globalThis as any).__AUPRO_GLOBAL_STORE__ = store;
 
-  // 2. Debounced asynchronous disk flush: prevents blocking Node event loop on high-concurrency mobile traffic
+  // 2. Shared copy in KV, started at once, never left to a timer. Handlers
+  // await it via awaitPendingKvSave before they answer, so the change is
+  // in the shared store before the client hears success.
+  if (kvConfigured) {
+    kvSaveInFlight = true;
+    kvSavePromise = (async () => {
+      try {
+        // Waits for hydration first, so a cold instance never overwrites
+        // the shared copy with an empty local one.
+        await ensureKvHydrated();
+        const currentStore = (globalThis as any).__AUPRO_GLOBAL_STORE__ || store;
+        await kvSet(KV_STORE_KEY, currentStore);
+      } catch (err) {
+        console.error('Failed to persist AuPro store to KV:', err);
+      } finally {
+        kvSaveInFlight = false;
+      }
+    })();
+  }
+
+  // 3. Debounced asynchronous disk flush: prevents blocking Node event loop on high-concurrency mobile traffic
   if (saveDebounceTimer) return;
   saveDebounceTimer = setTimeout(() => {
     saveDebounceTimer = null;
@@ -352,22 +379,17 @@ function saveStoreToFile(store: ServerDataStore) {
     } catch (err) {
       console.error('Failed to persist AuPro store:', err);
     }
-
-    // 3. Shared copy in KV, so every instance (and every device) reads
-    // the same data. Waits for hydration first, so a cold instance never
-    // overwrites the shared copy with an empty local one.
-    if (kvConfigured) {
-      void (async () => {
-        try {
-          await ensureKvHydrated();
-          const currentStore = (globalThis as any).__AUPRO_GLOBAL_STORE__ || store;
-          await kvSet(KV_STORE_KEY, currentStore);
-        } catch (err) {
-          console.error('Failed to persist AuPro store to KV:', err);
-        }
-      })();
-    }
   }, 100);
+}
+
+// Route handlers await this after a mutation and before answering, so a
+// change is in the shared store before the client hears success. Without
+// KV configured it resolves at once.
+export async function awaitPendingKvSave(): Promise<void> {
+  if (!kvSavePromise) return;
+  try {
+    await kvSavePromise;
+  } catch {}
 }
 
 let kvHydratePromise: Promise<void> | null = null;
@@ -384,7 +406,7 @@ async function syncFromKv(): Promise<void> {
     if (!remote || !remote.accounts) return;
     const local = (globalThis as any).__AUPRO_GLOBAL_STORE__ as ServerDataStore | undefined;
     if (local?.updatedAt && remote.updatedAt && remote.updatedAt <= local.updatedAt) return;
-    if (saveDebounceTimer) return;
+    if (saveDebounceTimer || kvSaveInFlight) return;
     remote.posts = (remote.posts || []).filter(
       (p: any) => p && !p.id?.startsWith('post_init_') && (Boolean(p.caption?.trim()) || Boolean(p.imageUrl))
     );

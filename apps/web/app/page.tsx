@@ -1244,6 +1244,7 @@ export default function Home() {
   // Study Portal (2-1 SEM Preparation) state: subjects, units, question search.
   const [semPrepOpen, setSemPrepOpen] = useState(false);
   const [semSubjectId, setSemSubjectId] = useState<string | null>(null);
+  const [semFileGroup, setSemFileGroup] = useState<string | null>(null);
   const [semUnitId, setSemUnitId] = useState<string | null>(null);
   const [semSearchInput, setSemSearchInput] = useState('');
   const [semSearchResults, setSemSearchResults] = useState<VectorSearchResult[] | null>(null);
@@ -1549,6 +1550,13 @@ export default function Home() {
   const semSelectedSubject = studySubjects.find((s) => s.id === semSubjectId);
   const semSelectedUnit = semSelectedSubject?.units.find((u) => u.id === semUnitId);
   const semSelectedFiles = semSelectedSubject ? studySubjectFiles[semSelectedSubject.id] : undefined;
+  const semFileGroups = semSelectedFiles ? [
+    { key: 'syllabus', label: 'Syllabus', items: semSelectedFiles.syllabus },
+    { key: 'studyMaterials', label: 'Study Materials', items: semSelectedFiles.studyMaterials },
+    { key: 'previousPapers', label: 'Previous Papers', items: semSelectedFiles.previousPapers },
+    { key: 'guides', label: 'Study guides', items: semSelectedFiles.guides },
+  ] : [];
+  const semSelectedGroup = semFileGroups.find((g) => g.key === semFileGroup);
 
   // Head Account Administrative Handlers
   const handleAddStudentAccount = (e: React.FormEvent) => {
@@ -3425,7 +3433,10 @@ export default function Home() {
             <div className="sem-screen">
               <div className="sem-screen-head">
                 <button className="secondary-button" onClick={() => {
-                  if (semSubjectId) {
+                  if (semFileGroup) {
+                    setSemFileGroup(null);
+                    document.querySelector('.sem-screen-scroll')?.scrollTo({ top: 0 });
+                  } else if (semSubjectId) {
                     setSemSubjectId(null);
                     setSemUnitId(null);
                     document.querySelector('.sem-screen-scroll')?.scrollTo({ top: 0 });
@@ -3433,7 +3444,7 @@ export default function Home() {
                     setSemPrepOpen(false);
                   }
                 }}>
-                  {semSubjectId ? 'Back to subjects' : 'Back to chatbot'}
+                  {semFileGroup ? 'Back to files' : semSubjectId ? 'Back to subjects' : 'Back to chatbot'}
                 </button>
                 <div>
                   <div className="eyebrow">2nd Year, 1st Semester</div>
@@ -3482,7 +3493,7 @@ export default function Home() {
                   <button
                     key={s.id}
                     className={`sem-subject ${semSubjectId === s.id ? 'active' : ''}`}
-                    onClick={() => { setSemSubjectId(s.id); setSemUnitId(null); setTimeout(() => { (document.querySelector('.sem-units') || document.querySelector('.sem-files'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80); }}
+                    onClick={() => { setSemSubjectId(s.id); setSemUnitId(null); setSemFileGroup(null); setTimeout(() => { (document.querySelector('.sem-units') || document.querySelector('.sem-files'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80); }}
                   >
                     <strong>{s.code}</strong>
                     <span>{s.title}</span>
@@ -3531,51 +3542,61 @@ export default function Home() {
                       </ul>
                     </div>
                   )}
-                  {semSelectedFiles && (
+                  {semSelectedFiles && !semFileGroup && (
                     <div className="sem-files">
                       <h3>Files in Google Drive</h3>
-                      {[
-                        { label: 'Syllabus', items: semSelectedFiles.syllabus },
-                        { label: 'Study Materials', items: semSelectedFiles.studyMaterials },
-                        { label: 'Previous Papers', items: semSelectedFiles.previousPapers },
-                        { label: 'Study guides', items: semSelectedFiles.guides },
-                      ].map((g) => (
-                        <div key={g.label} className="sem-file-group">
-                          <h4>{g.label} ({g.items.length})</h4>
-                          <ul className="sem-file-list">
-                            {g.items.map((f, i) => (
-                              <li key={f.id}>
-                                <button
-                                  className="sem-file-row"
-                                  onClick={() => setSemViewer({ list: g.items, index: i })}
-                                >
-                                  <span className="sem-file-thumb-wrap">
-                                    <span className="sem-file-icon">
-                                      <Glyph n={f.kind === 'image' ? 'camera' : 'clipboard'} size={20} />
-                                    </span>
-                                    <img
-                                      className="sem-file-thumb"
-                                      src={studyThumbnailUrl(f.id)}
-                                      alt=""
-                                      loading="lazy"
-                                      onError={(e) => {
-                                        e.currentTarget.closest('.sem-file-thumb-wrap')?.classList.add('sem-file-thumb-failed');
-                                        e.currentTarget.style.display = 'none';
-                                      }}
-                                    />
-                                  </span>
-                                  <span className="sem-file-text">
-                                    <span className="sem-file-name">{f.name}</span>
-                                    <span className="sem-file-meta">{f.kind === 'image' ? 'Image' : 'PDF'} · {f.size}</span>
-                                    {f.note && <span className="sem-file-note">{f.note}</span>}
-                                  </span>
-                                  <span className="sem-file-open"><Glyph n="arrow" size={18} /></span>
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
+                      <div className="sem-file-groups">
+                        {semFileGroups.map((g) => (
+                          <button
+                            key={g.key}
+                            className="sem-file-group-card"
+                            onClick={() => { setSemFileGroup(g.key); document.querySelector('.sem-screen-scroll')?.scrollTo({ top: 0 }); }}
+                          >
+                            <span className="sem-file-group-text">
+                              <span className="sem-file-group-name">{g.label}</span>
+                              <span className="sem-file-group-count">{g.items.length} file{g.items.length === 1 ? '' : 's'}</span>
+                            </span>
+                            <span className="sem-file-open"><Glyph n="arrow" size={18} /></span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {semSelectedFiles && semSelectedGroup && (
+                    <div className="sem-files">
+                      <h3>{semSelectedGroup.label} ({semSelectedGroup.items.length})</h3>
+                      <ul className="sem-file-list">
+                        {semSelectedGroup.items.map((f, i) => (
+                          <li key={f.id}>
+                            <button
+                              className="sem-file-row"
+                              onClick={() => setSemViewer({ list: semSelectedGroup.items, index: i })}
+                            >
+                              <span className="sem-file-thumb-wrap">
+                                <span className="sem-file-icon">
+                                  <Glyph n={f.kind === 'image' ? 'camera' : 'clipboard'} size={20} />
+                                </span>
+                                <img
+                                  className="sem-file-thumb"
+                                  src={studyThumbnailUrl(f.id)}
+                                  alt=""
+                                  loading="lazy"
+                                  onError={(e) => {
+                                    e.currentTarget.closest('.sem-file-thumb-wrap')?.classList.add('sem-file-thumb-failed');
+                                    e.currentTarget.style.display = 'none';
+                                  }}
+                                />
+                              </span>
+                              <span className="sem-file-text">
+                                <span className="sem-file-name">{f.name}</span>
+                                <span className="sem-file-meta">{f.kind === 'image' ? 'Image' : 'PDF'} · {f.size}</span>
+                                {f.note && <span className="sem-file-note">{f.note}</span>}
+                              </span>
+                              <span className="sem-file-open"><Glyph n="arrow" size={18} /></span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   )}
                 </>

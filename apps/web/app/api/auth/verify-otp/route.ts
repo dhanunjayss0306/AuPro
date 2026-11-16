@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
-import { registerAccount, findAccount, logServerActivity, awaitStoreReady } from '../account-registry';
+import { registerAccount, findAccount, logServerActivity, awaitStoreReady, awaitPendingKvSave } from '../account-registry';
 import { signSessionToken, isHeadAdmin, isHod } from '../security';
 import {
   CSE_DEPARTMENT,
@@ -181,6 +181,9 @@ export async function POST(req: Request) {
       cleanEmail,
       `Student ${profileData.name || cleanEmail} verified identity via 6-digit OTP`
     );
+
+    // The account must be in the shared store before the client hears success.
+    await awaitPendingKvSave();
 
     // Verified! Generate proof of verification timestamp & signed session token
     const role = isHeadAdmin(cleanEmail) ? 'head_admin' : isHod(cleanEmail) ? 'hod' : 'student';

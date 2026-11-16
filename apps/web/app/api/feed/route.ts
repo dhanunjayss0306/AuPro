@@ -8,6 +8,7 @@ import {
   addPostComment,
   repostFeedPost,
   awaitStoreReady,
+  awaitPendingKvSave,
   ServerFeedPost,
 } from '../auth/account-registry';
 import {
@@ -181,6 +182,8 @@ export async function POST(req: Request) {
       cleanCaption ? cleanCaption.substring(0, 90) : (location || 'Campus post')
     );
 
+    // The post must be in the shared store before the client hears success.
+    await awaitPendingKvSave();
     return NextResponse.json({
       success: true,
       post: saved,
@@ -246,6 +249,7 @@ export async function PATCH(req: Request) {
     if (action === 'like') {
       const cleanEmail = sanitizeEmail(userEmail);
       const result = togglePostLike(postId, cleanEmail, cleanPostDetails);
+      await awaitPendingKvSave();
       return NextResponse.json({
         success: true,
         action: 'like',
@@ -274,6 +278,7 @@ export async function PATCH(req: Request) {
         timeAgo: sanitizeText(comment.timeAgo, 30) || 'Just now',
       };
       const result = addPostComment(postId, cleanComment, cleanPostDetails);
+      await awaitPendingKvSave();
       return NextResponse.json({
         success: true,
         action: 'comment',
@@ -292,6 +297,7 @@ export async function PATCH(req: Request) {
           { status: 404 }
         );
       }
+      await awaitPendingKvSave();
       return NextResponse.json({
         success: true,
         action: 'repost',
@@ -356,6 +362,7 @@ export async function DELETE(req: Request) {
     }
 
     deleteServerPost(postId);
+    await awaitPendingKvSave();
     return NextResponse.json({
       success: true,
       message: `Post ${postId} deleted.`,

@@ -286,3 +286,18 @@ test('sem screen: back goes to the subject list, and rows show the preview', asy
   assert.ok(pageContent.includes("e.currentTarget.style.display = 'none'"), 'a failed thumbnail must fall back to the icon');
   assert.ok(pageContent.includes('sem-file-thumb-failed'), 'a failed thumbnail must collapse the row to the compact icon look');
 });
+
+test('file groups: each group is its own page, not one long list', async () => {
+  const pageContent = await readFile(new URL('../app/page.tsx', import.meta.url), 'utf8');
+  // Four group cards (Syllabus, Study Materials, Previous Papers, Study
+  // guides); tapping one opens that group on its own page.
+  assert.ok(pageContent.includes('semFileGroup'), 'the screen must track the open file group');
+  assert.ok(pageContent.includes('sem-file-group-card'), 'groups must render as cards');
+  assert.ok(pageContent.includes("setSemFileGroup(g.key)"), 'tapping a card must open that group');
+  assert.ok(pageContent.includes('semSelectedGroup'), 'the group page must show only that group');
+  // Back from a group page returns to the subject's files, not to the chat.
+  assert.ok(pageContent.includes('Back to files'), 'a group page needs a back-to-files button');
+  assert.ok(pageContent.includes("setSemFileGroup(null)"), 'back to files must clear the group');
+  // Opening another subject resets the group.
+  assert.ok(pageContent.includes("setSemSubjectId(s.id); setSemUnitId(null); setSemFileGroup(null)"), 'changing subject must reset the group');
+});

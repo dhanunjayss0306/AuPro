@@ -4,6 +4,7 @@ import {
   logServerActivity,
   clearAllActivities,
   awaitStoreReady,
+  awaitPendingKvSave,
 } from '../auth/account-registry';
 import {
   checkRateLimit,
@@ -74,6 +75,7 @@ export async function POST(req: Request) {
       details ? sanitizeText(details, 300) : undefined
     );
 
+    await awaitPendingKvSave();
     return NextResponse.json({
       success: true,
       activity,
@@ -106,6 +108,7 @@ export async function DELETE(req: Request) {
     }
 
     clearAllActivities();
+    await awaitPendingKvSave();
     return NextResponse.json({
       success: true,
       message: 'All platform activities cleared.',

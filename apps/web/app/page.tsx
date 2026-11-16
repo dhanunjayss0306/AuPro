@@ -33,7 +33,7 @@ import {
   StudentProfile,
 } from './lib/auth';
 import { auVectorDB, type VectorSearchResult } from './lib/vector_search';
-import { studySubjects, studyVectorDB, studySubjectFiles, studyPreviewUrl, studyImageUrl, type StudyDriveFile } from './lib/study-data';
+import { studySubjects, studyVectorDB, studySubjectFiles, studyPreviewUrl, studyImageUrl, studyThumbnailUrl, type StudyDriveFile } from './lib/study-data';
 import {
   getRollNoFromEmail,
   lookupCseStudentByEmail,
@@ -1243,7 +1243,7 @@ export default function Home() {
   const [chatStatus, setChatStatus] = useState('');
   // Study Portal (2-1 SEM Preparation) state: subjects, units, question search.
   const [semPrepOpen, setSemPrepOpen] = useState(false);
-  const [semSubjectId, setSemSubjectId] = useState('os');
+  const [semSubjectId, setSemSubjectId] = useState<string | null>(null);
   const [semUnitId, setSemUnitId] = useState<string | null>(null);
   const [semSearchInput, setSemSearchInput] = useState('');
   const [semSearchResults, setSemSearchResults] = useState<VectorSearchResult[] | null>(null);
@@ -3424,8 +3424,16 @@ export default function Home() {
             {semPrepOpen && (
             <div className="sem-screen">
               <div className="sem-screen-head">
-                <button className="secondary-button" onClick={() => setSemPrepOpen(false)}>
-                  Back to chatbot
+                <button className="secondary-button" onClick={() => {
+                  if (semSubjectId) {
+                    setSemSubjectId(null);
+                    setSemUnitId(null);
+                    document.querySelector('.sem-screen-scroll')?.scrollTo({ top: 0 });
+                  } else {
+                    setSemPrepOpen(false);
+                  }
+                }}>
+                  {semSubjectId ? 'Back to subjects' : 'Back to chatbot'}
                 </button>
                 <div>
                   <div className="eyebrow">2nd Year, 1st Semester</div>
@@ -3541,8 +3549,20 @@ export default function Home() {
                                   className="sem-file-row"
                                   onClick={() => setSemViewer({ list: g.items, index: i })}
                                 >
-                                  <span className="sem-file-icon">
-                                    <Glyph n={f.kind === 'image' ? 'camera' : 'clipboard'} size={20} />
+                                  <span className="sem-file-thumb-wrap">
+                                    <span className="sem-file-icon">
+                                      <Glyph n={f.kind === 'image' ? 'camera' : 'clipboard'} size={20} />
+                                    </span>
+                                    <img
+                                      className="sem-file-thumb"
+                                      src={studyThumbnailUrl(f.id)}
+                                      alt=""
+                                      loading="lazy"
+                                      onError={(e) => {
+                                        e.currentTarget.closest('.sem-file-thumb-wrap')?.classList.add('sem-file-thumb-failed');
+                                        e.currentTarget.style.display = 'none';
+                                      }}
+                                    />
                                   </span>
                                   <span className="sem-file-text">
                                     <span className="sem-file-name">{f.name}</span>

@@ -730,3 +730,10 @@ export function studyPreviewUrl(fileId: string): string {
 export function studyImageUrl(fileId: string): string {
   return `https://drive.google.com/thumbnail?id=${fileId}&sz=w2000`;
 }
+
+// Small first-page preview for the file list, WhatsApp-style: Drive renders
+// the first page of a PDF (or the photo itself) as an image.
+// Verified live 2026-11-16: returns a real PNG (400x565) for PDFs (HTTP 200).
+export function studyThumbnailUrl(fileId: string): string {
+  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
+}

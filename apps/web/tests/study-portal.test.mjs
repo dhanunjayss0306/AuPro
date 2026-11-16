@@ -14,6 +14,7 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import {
   studySubjects,
   studyQuestionBank,
@@ -22,6 +23,7 @@ import {
   studySubjectFiles,
   studyPreviewUrl,
   studyImageUrl,
+  studyThumbnailUrl,
 } from '../app/lib/study-data.ts';
 
 test('subjects: 5 listed, OS units ready, other 4 units soon', () => {
@@ -248,4 +250,39 @@ test('subject files: OS guides include the lesson-wise study plan', () => {
     plan.url,
     'https://drive.google.com/file/d/1CSZdaOa6pmtRssC0CZoh4ee7V_Tw3dDL/view?usp=drivesdk'
   );
+});
+
+test('file rows: each file has a first-page preview thumbnail, WhatsApp-style', () => {
+  const osSyllabus = studySubjectFiles.os.syllabus[0];
+  assert.equal(
+    studyThumbnailUrl(osSyllabus.id),
+    `https://drive.google.com/thumbnail?id=${osSyllabus.id}&sz=w400`
+  );
+  // Every file in every subject must be thumbnailed the same way.
+  for (const files of Object.values(studySubjectFiles)) {
+    for (const section of ['syllabus', 'studyMaterials', 'previousPapers', 'guides']) {
+      for (const f of files[section]) {
+        assert.match(
+          studyThumbnailUrl(f.id),
+          /^https:\/\/drive\.google\.com\/thumbnail\?id=[A-Za-z0-9_-]+&sz=w400$/
+        );
+      }
+    }
+  }
+});
+
+test('sem screen: back goes to the subject list, and rows show the preview', async () => {
+  const pageContent = await readFile(new URL('../app/page.tsx', import.meta.url), 'utf8');
+  // A subject open shows "Back to subjects" (clears the selection and
+  // scrolls to the top); only the subject list shows "Back to chatbot".
+  assert.ok(pageContent.includes('Back to subjects'), 'subject view needs a back-to-subjects button');
+  assert.ok(pageContent.includes("setSemSubjectId(null)"), 'back to subjects must clear the selection');
+  assert.ok(pageContent.includes("document.querySelector('.sem-screen-scroll')?.scrollTo"), 'back to subjects must scroll to the top');
+  // The screen opens on the subject list, not on one subject.
+  assert.ok(pageContent.includes("useState<string | null>(null)"), 'screen must open on the subject list');
+  // File rows render the first-page thumbnail, with the icon as fallback.
+  assert.ok(pageContent.includes('studyThumbnailUrl(f.id)'), 'file rows must render the thumbnail');
+  assert.ok(pageContent.includes('sem-file-thumb'), 'thumbnail needs its style class');
+  assert.ok(pageContent.includes("e.currentTarget.style.display = 'none'"), 'a failed thumbnail must fall back to the icon');
+  assert.ok(pageContent.includes('sem-file-thumb-failed'), 'a failed thumbnail must collapse the row to the compact icon look');
 });

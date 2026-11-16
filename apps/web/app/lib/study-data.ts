@@ -546,3 +546,171 @@ export const studyQuestionBank: QAEntry[] = [
 
 /** In-memory vector search over the study questions. Same engine as the FAQ chatbot. */
 export const studyVectorDB = new UniversityVectorDatabase(studyQuestionBank);
+export interface StudyDriveFile {
+  name: string;
+  url: string;
+  note?: string;
+}
+
+export interface StudySubjectFiles {
+  folderUrl: string;
+  syllabus: StudyDriveFile[];
+  studyMaterials: StudyDriveFile[];
+  previousPapers: StudyDriveFile[];
+  guides: StudyDriveFile[];
+}
+
+// Files as they sit in the sem 2-1 Google Drive folder, same to same.
+// Verified live from Drive 2026-11-16 22:41 IST (drive_listing.json).
+export const studySubjectFiles: Record<string, StudySubjectFiles> = {
+  os: {
+    folderUrl: 'https://drive.google.com/drive/folders/16tmgY8eqNcY9mYpZYy3NtjnB8Pd4NOAz',
+    syllabus: [
+      { name: 'Operating Systems AI2104', url: 'https://drive.google.com/file/d/1Kl238zU48GqfeO8RwhsEZn5E20-L7g-E/view?usp=drivesdk' },
+    ],
+    studyMaterials: [
+      { name: 'Silberschatz 7th ed (duplicate copy)', url: 'https://drive.google.com/file/d/1Za0-xBdYlVlTgh11NVKkcfI90eWWA0P3/view?usp=drivesdk', note: 'Duplicate copy' },
+      { name: 'Silberschatz 7th ed', url: 'https://drive.google.com/file/d/1Npv1O4bAwBfYBFNbLl3HzX4Un9zz2p9Q/view?usp=drivesdk' },
+      { name: 'Memory Management', url: 'https://drive.google.com/file/d/14wOuWRXn57FI1_DJyfMVE_bgWN1jiQSw/view?usp=drivesdk' },
+      { name: 'OS Notes', url: 'https://drive.google.com/file/d/193uXSrwoQtbwJNRobLsVCmuD4qj1MdEd/view?usp=drivesdk' },
+      { name: 'File System', url: 'https://drive.google.com/file/d/145VsKKXma8Jf8uZiRtesVhdBtUSF2d2u/view?usp=drivesdk' },
+      { name: 'Operating System Lecture Notes', url: 'https://drive.google.com/file/d/1sJmBToConoqY9cz8mSHTE0cr3V-SV60R/view?usp=drivesdk' },
+      { name: 'Deadlock', url: 'https://drive.google.com/file/d/1H3Bt_z_sxrhdhX5-6UuFMcpQkqUwXvd-/view?usp=drivesdk' },
+      { name: 'OS Material A Process Concept', url: 'https://drive.google.com/file/d/1WV_dHEXANHwg93FXPoip3z52C1GzA8wS/view?usp=drivesdk' },
+      { name: 'OS Material Chapter 1 Introduction', url: 'https://drive.google.com/file/d/1C9oMdHFj214kE5B_2i4qNyz-zU27xwJc/view?usp=drivesdk' },
+      { name: 'Process Management', url: 'https://drive.google.com/file/d/1jRv0tPaNLtGLsnMmaXZwuhgs1yQXXylU/view?usp=drivesdk' },
+    ],
+    previousPapers: [
+      { name: 'OS CSE 2025', url: 'https://drive.google.com/file/d/16jBdDxoOE4356f3e05VxJlSylBlcTU4a/view?usp=drivesdk' },
+      { name: 'OS CSE 2024', url: 'https://drive.google.com/file/d/1PaaTFdxNTqFbos5ixWov08JJPwTQ6CoS/view?usp=drivesdk' },
+      { name: 'OS 2023', url: 'https://drive.google.com/file/d/1gpwGhO_REbcf-OPjgJrKii4qxYaytJUR/view?usp=drivesdk' },
+      { name: 'OS 2022 CSE', url: 'https://drive.google.com/file/d/149i6SHimjB90uF0upt3kcCbgmU48uON8/view?usp=drivesdk' },
+      { name: 'OS, IT and CSE, Feb 2022, III-IV First Semester', url: 'https://drive.google.com/file/d/1EMkk3VgN8JuGgikW6-NFlZdllLdUc2nS/view?usp=drivesdk' },
+      { name: 'OS IT and CSE 2020 Second Semester', url: 'https://drive.google.com/file/d/1SQKuxnvYN9JfG3jSf80YWchTFYGV958i/view?usp=drivesdk' },
+      { name: 'OS, IT Second Semester', url: 'https://drive.google.com/file/d/1LrxFJk4nDlpK1mwPefV07AtabsNRSGga/view?usp=drivesdk' },
+    ],
+    guides: [
+      { name: 'Marks per unit', url: 'https://drive.google.com/file/d/1LFMutvPdY2RIw03igfsBWhU5Km_1Jmk-/view?usp=drivesdk' },
+      { name: 'Previous papers, lesson-wise', url: 'https://drive.google.com/file/d/19633g5Fx1RhiIZjFyY3YSBKDniGQ-Ymx/view?usp=drivesdk' },
+      { name: 'Lesson-wise study plan', url: 'https://drive.google.com/file/d/1CSZdaOa6pmtRssC0CZoh4ee7V_Tw3dDL/view?usp=drivesdk' },
+    ],
+  },
+  psqt: {
+    folderUrl: 'https://drive.google.com/drive/folders/1IBhRLsRMLkHDsmoNNCqbO4b-BxkkWZd-',
+    syllabus: [
+      { name: 'PSQT question paper, page 1 (photo)', url: 'https://drive.google.com/file/d/1dOMh2mcYoKJYLVvmuI9r_QQlYwOHRfST/view?usp=drivesdk', note: 'Not a syllabus, a photo of a question paper page' },
+    ],
+    studyMaterials: [
+      { name: 'Sampling Theory', url: 'https://drive.google.com/file/d/1REuxJ4HBqid20lOSfwgjfzdab9MgEW9-/view?usp=drivesdk' },
+      { name: 'Correlation and Regression', url: 'https://drive.google.com/file/d/1JCWKTSBYpFn-Wz92-sgideRlP_PHML8g/view?usp=drivesdk' },
+      { name: 'Chapter 4 Attributes and Tests', url: 'https://drive.google.com/file/d/1xC78gpL8fJuLofAZJYkwIXSAinFB4PoF/view?usp=drivesdk' },
+      { name: 'Testing of Hypothesis', url: 'https://drive.google.com/file/d/1oaHv5hpnhoaoxCCGMwbDdXZn3LVvj2sW/view?usp=drivesdk' },
+      { name: 'Chapter 8 Queuing Theory', url: 'https://drive.google.com/file/d/1sjdPXAIAwm0rRNiOqk0FiIJR9Y_CCHn8/view?usp=drivesdk' },
+      { name: 'Chapter 7 Small Sample Tests', url: 'https://drive.google.com/file/d/1okTm8oJaqOBkqchc1M6HG2kzG9c4qWEM/view?usp=drivesdk' },
+      { name: 'Large Sample Tests', url: 'https://drive.google.com/file/d/1SYVTiYYoYO1NrD-zWBTtQgwKmGSUZl43/view?usp=drivesdk' },
+      { name: 'Chapter 5-6 Sampling Distribution', url: 'https://drive.google.com/file/d/1Tf3riHHIDebF8wAHz26IHbgMIcv-yPol/view?usp=drivesdk' },
+      { name: 'Chi Square Distribution', url: 'https://drive.google.com/file/d/1gi_iwT1mAigC-cEU20OOkLkPDL_NP8xS/view?usp=drivesdk' },
+      { name: 'Large Samples Z Table', url: 'https://drive.google.com/file/d/1hKqi6xGWVSVbu9jKsldtThbI118Ef4-u/view?usp=drivesdk' },
+    ],
+    previousPapers: [
+      { name: 'PSQT CSE 2025', url: 'https://drive.google.com/file/d/1f7TmYZMYSAS5pNKeVEeBIT5XwLI4agvJ/view?usp=drivesdk' },
+      { name: 'PSQT CSE 2024', url: 'https://drive.google.com/file/d/1keCben7BUrtmINwai4204psfgMwLWIC_/view?usp=drivesdk' },
+      { name: 'PSQT 2023, IT Second Semester', url: 'https://drive.google.com/file/d/1TLMFLAlZdQURPEPLf_d6Rr0x4v6VcqlF/view?usp=drivesdk' },
+      { name: 'PSQT 2022 CSE', url: 'https://drive.google.com/file/d/1xgyghJcLbkx0Yd8WOQJBpjszVLkQXnXV/view?usp=drivesdk' },
+      { name: 'PSQT 2020 IT Second Semester', url: 'https://drive.google.com/file/d/1faH4BShWG4vs4rPaT1tfWj2-z9NwapIg/view?usp=drivesdk' },
+      { name: 'PSQT Previous Year Paper', url: 'https://drive.google.com/file/d/1mkf6lQTDkq1B7x33hOJyr7h-7gbwfK-n/view?usp=drivesdk' },
+    ],
+    guides: [
+      { name: 'Marks per unit', url: 'https://drive.google.com/file/d/13308t_je6P6BY-6FyMsOsvVmVkNBLQfW/view?usp=drivesdk' },
+      { name: 'Previous papers, lesson-wise', url: 'https://drive.google.com/file/d/19ceoHou7HIy4WigHay6yXIReEMN5J5sJ/view?usp=drivesdk' },
+    ],
+  },
+  coa: {
+    folderUrl: 'https://drive.google.com/drive/folders/1GL753KbUDOC64BQrtLjr0Tqf69FzVjcl',
+    syllabus: [
+      { name: 'Computer Organization AI2102', url: 'https://drive.google.com/file/d/1BKjlgrumjHt0Yr2EFNZmIJPa8Z3lgIr4/view?usp=drivesdk' },
+      { name: 'COA syllabus (duplicate copy)', url: 'https://drive.google.com/file/d/1X0PMbqzPrRy_rqVDQ8UQXCgxzmcH_HfM/view?usp=drivesdk', note: 'Duplicate copy' },
+    ],
+    studyMaterials: [
+      { name: 'Mano Computer System Architecture 3rd ed', url: 'https://drive.google.com/file/d/1ttYZCy-ZrIYUDdmtuwFlqcGfxdcQXaV1/view?usp=drivesdk' },
+      { name: 'COA handwritten notes', url: 'https://drive.google.com/file/d/1wyUNjRAb7Y5eV3TVsMahew-D_j2zm8I6/view?usp=drivesdk' },
+      { name: 'CO Textbook Mano', url: 'https://drive.google.com/file/d/1959nZ-bXxDcxgHvp4glZ6Cb9hwDeoL5o/view?usp=drivesdk' },
+      { name: 'COA Notes Ch 3-4-5', url: 'https://drive.google.com/file/d/1npCmtA4FXXWaQ_NY3VNZ3JGoNZ74c6YS/view?usp=drivesdk' },
+      { name: 'CO Material by Darshan', url: 'https://drive.google.com/file/d/1LejioGoImtZLKjvNDJFuDYpIiSzRNbSJ/view?usp=drivesdk' },
+      { name: 'COA Study Material Unit 1 Register Transfer', url: 'https://drive.google.com/file/d/1fVPYdJBrD2797BwXR0LIGY-tz2GpD3YM/view?usp=drivesdk' },
+      { name: 'COA Notes Ch 1', url: 'https://drive.google.com/file/d/10goJSvUed6avjNfyMOye8lG7sF9j8Le1/view?usp=drivesdk' },
+    ],
+    previousPapers: [
+      { name: 'COA CSE 2025', url: 'https://drive.google.com/file/d/1hZEPtkoNcElKGAhqpZ6LfYLI0FtvOahK/view?usp=drivesdk' },
+      { name: 'COA Question Paper 2024', url: 'https://drive.google.com/file/d/1PONamdCnTnO1iWwEVsJi1I0hRz96eTpG/view?usp=drivesdk' },
+      { name: 'COA 2023 CSE', url: 'https://drive.google.com/file/d/18frAT_VsSxHYrIBsPUDDkLzkwRZyef_a/view?usp=drivesdk' },
+      { name: 'COA 2022 CSE', url: 'https://drive.google.com/file/d/1jQtK4y0CsL_y3zFBzvsjq_hDNla_C3Id/view?usp=drivesdk' },
+      { name: 'COA 2021 Second Semester', url: 'https://drive.google.com/file/d/1r1d6mn0GaRVSqJpS4vHyiRda2FbHz3mD/view?usp=drivesdk' },
+      { name: 'IT and CSE 2020 Second Semester', url: 'https://drive.google.com/file/d/10_ayojeXkAa798Endvf_86g85Iuu14Yh/view?usp=drivesdk' },
+      { name: 'COA Papers Compiled', url: 'https://drive.google.com/file/d/1HsiHSsRmZ992extd3R5Pa-OJnyNnmLbn/view?usp=drivesdk' },
+      { name: 'COA compiled question bank (screenshot collage)', url: 'https://drive.google.com/file/d/1YqkFSnNrI4PYAvPjDaPBwzvswUHmZhDC/view?usp=drivesdk', note: 'Filed under Syllabus by mistake in the source' },
+      { name: 'COA 2-1 Sem paper', url: 'https://drive.google.com/file/d/1QDpMqVPJpg3e6Dsys_OJ8tpbjRxLmP0C/view?usp=drivesdk' },
+    ],
+    guides: [
+      { name: 'Marks per unit', url: 'https://drive.google.com/file/d/1CQkyarxy_r4G_JKiWSGzo5bGTCmmR94p/view?usp=drivesdk' },
+      { name: 'Previous papers, lesson-wise', url: 'https://drive.google.com/file/d/1cmXTBeOHZFU6aHApIJHHi20A48dUvfzO/view?usp=drivesdk' },
+    ],
+  },
+  oop: {
+    folderUrl: 'https://drive.google.com/drive/folders/13dZ6fq6eNTwRlYW8pujiDgR3wzZjfToH',
+    syllabus: [
+      { name: 'Object Oriented Programming AI2105', url: 'https://drive.google.com/file/d/1ZBfntyRX8JKYXcVCljMvd6Wm3kcZaKez/view?usp=drivesdk' },
+    ],
+    studyMaterials: [
+      { name: 'OOPs Java Ch 1-4 (repaired, opens)', url: 'https://drive.google.com/file/d/1GskZDrhi1dc-_wX1uG5vrl49AsEacq3B/view?usp=drivesdk' },
+      { name: 'OOPs Java Ch 1-4 (damaged copy)', url: 'https://drive.google.com/file/d/10oGlPJ5IJRh84FgIdDEDHjJPydni9Dhl/view?usp=drivesdk', note: 'Does not open, use the repaired copy above' },
+      { name: 'OOPs Ch 5-6-7', url: 'https://drive.google.com/file/d/1mtFa7zrA_rq1zVSur-jESxCB7T-3_L5Z/view?usp=drivesdk' },
+      { name: 'UNIT 1', url: 'https://drive.google.com/file/d/1Z271bEGs8VAZUelY_J_nc0o3cCsnjWXL/view?usp=drivesdk' },
+      { name: 'UNIT 4', url: 'https://drive.google.com/file/d/1jzfbrPYpyLk38GCwT165UQeH4KULHIHs/view?usp=drivesdk' },
+      { name: 'OOPs with Java', url: 'https://drive.google.com/file/d/1seYBqAaKNWbrbO9hYwTnDdmfD1FZV4Ph/view?usp=drivesdk' },
+      { name: 'Unit 6: Multithreading', url: 'https://drive.google.com/file/d/1tXBSf3EuCet4ktF9J88bye7HW4KXHsY4/view?usp=drivesdk', note: 'Labelled Unit 5 in the source, actually Unit 6' },
+      { name: 'UNIT 2', url: 'https://drive.google.com/file/d/1FgXjhW3t-lgJxw-0gCU_OAF7JtFJqVF5/view?usp=drivesdk' },
+      { name: 'UNIT 3', url: 'https://drive.google.com/file/d/1AzNHY7sYNv2ISY9pZLluU9yaP0GrzRwy/view?usp=drivesdk' },
+      { name: 'Unit 5: Text and Binary IO', url: 'https://drive.google.com/file/d/1vjsf6b1XdWdvrJoweqfYykOofobxcoZP/view?usp=drivesdk', note: 'Labelled Unit 6 in the source, actually Unit 5' },
+      { name: 'UNIT 7', url: 'https://drive.google.com/file/d/1NpqON-c6c2YHB_E5LvBZo4RrCsjJLmGB/view?usp=drivesdk' },
+    ],
+    previousPapers: [
+      { name: 'OOPS CSE 2025', url: 'https://drive.google.com/file/d/11QEN-2jNGVmGoStK6IMKMnlAP1hKHPd1/view?usp=drivesdk' },
+      { name: 'Intro to Python 2024, EEE First Sem', url: 'https://drive.google.com/file/d/1gHBiTXxiwyQcksEiSBtYuzJtHzZEtZPL/view?usp=drivesdk', note: 'Not an OOP paper, misfiled in the source' },
+      { name: 'OOPS CSE 2024', url: 'https://drive.google.com/file/d/1h3gKar-yt4HgXV9nUcCG1BySllmNQEGt/view?usp=drivesdk' },
+      { name: 'OOPS CSE 2023', url: 'https://drive.google.com/file/d/11uv513VQJb6JKin1mOr1qBHe-zJiRxqV/view?usp=drivesdk' },
+      { name: 'OOPS 2022 CSE', url: 'https://drive.google.com/file/d/1Lds5ybYRFRPim921pR2dEcjvrR6Xz-jm/view?usp=drivesdk' },
+      { name: 'IT and CSE 2021, C++', url: 'https://drive.google.com/file/d/1RJqt3LSXECKj-9o7H89ck_iJcG6Y467j/view?usp=drivesdk' },
+      { name: 'IT and CSE 2019, C++', url: 'https://drive.google.com/file/d/1YJdv7mwDAHRmpr2PIlkf8YzmrqGMva9t/view?usp=drivesdk' },
+      { name: 'OOPS Previous Question Papers Compiled Second Semester', url: 'https://drive.google.com/file/d/1Misq2eDWCtb6LpThaneQEseMnHh50Zgf/view?usp=drivesdk' },
+    ],
+    guides: [
+      { name: 'Marks per unit', url: 'https://drive.google.com/file/d/1XzSm9DAdHTcAIWrD6rTeLZ40ZvcHhm7d/view?usp=drivesdk' },
+      { name: 'Previous papers, lesson-wise', url: 'https://drive.google.com/file/d/1FOhMeHbWHdKyWLbAZGtRZQnkELzm8Upk/view?usp=drivesdk' },
+    ],
+  },
+  dms: {
+    folderUrl: 'https://drive.google.com/drive/folders/12e99V3XMYswi9uNPkmtJzb-X-if7ZqXz',
+    syllabus: [
+      { name: 'Discrete Mathematical Structures AI2101', url: 'https://drive.google.com/file/d/1GQGJcqNDzeK4Ts1kAHNV3KwClfZM2WSo/view?usp=drivesdk' },
+    ],
+    studyMaterials: [
+      { name: 'Rosen Discrete Mathematics 7th ed', url: 'https://drive.google.com/file/d/1a0FIaAk-IEfhOTJGcD0nOyjqOLsSNWOK/view?usp=drivesdk' },
+      { name: 'DMS Important Q and A', url: 'https://drive.google.com/file/d/1LGnZAy8LhR6_IYw3UA2hyH4ntH1XbBL-/view?usp=drivesdk' },
+      { name: 'DMS Notes', url: 'https://drive.google.com/file/d/1fiua0RkaHZeUJsWjrt9geqEPLM89eY0k/view?usp=drivesdk' },
+      { name: 'DMS Hand Written Notes', url: 'https://drive.google.com/file/d/1LTF6-2IqQrQ4ykMlk5N8GHYLTGFXqaSH/view?usp=drivesdk' },
+      { name: 'Problem on Queuing Theory (VTU Operations Research notes)', url: 'https://drive.google.com/file/d/13QcGe6i2KH77oyWPR5lrWj_N2EO6QpEn/view?usp=drivesdk', note: 'Filed under DMS, actually a Queuing Theory note' },
+      { name: 'Lerma Notes on Discrete Mathematics', url: 'https://drive.google.com/file/d/1ulGPC_BVX7Nj-rx3fe04LlngLo9glBn9/view?usp=drivesdk' },
+    ],
+    previousPapers: [
+      { name: 'DMS 2023-24', url: 'https://drive.google.com/file/d/1grp-GdNDuvRWIbxFsioNrKVTdwWKzX5M/view?usp=drivesdk' },
+      { name: 'DMS April 2022 Sem 1 (2021-22)', url: 'https://drive.google.com/file/d/1wnfYqQdtk9aOpa2epuRK7aDINKUPaggg/view?usp=drivesdk' },
+      { name: 'IT and CSE 2019', url: 'https://drive.google.com/file/d/15pg82vLGz1FjFhxRpHXNXDQ8vVl5dxZ_/view?usp=drivesdk' },
+      { name: 'DMS paper 3', url: 'https://drive.google.com/file/d/1psB2rQxMXzh2WNfzR3W-3YbRjuEYOT49/view?usp=drivesdk' },
+    ],
+    guides: [
+      { name: 'Marks per unit', url: 'https://drive.google.com/file/d/133x4nuVezLo3fA-g_KQt08-bkm2UkFtU/view?usp=drivesdk' },
+      { name: 'Previous papers, lesson-wise', url: 'https://drive.google.com/file/d/1rPRm4P1SJi4MFYRSqjEfC4GXEypxtrM6/view?usp=drivesdk' },
+    ],
+  },
+};

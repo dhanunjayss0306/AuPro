@@ -1,12 +1,15 @@
 /**
- * AuPro Study Portal test suite (2-1 SEM Preparation, OS only).
+ * AuPro Study Portal test suite (2-1 SEM Preparation).
  *
- * 1. Subjects: 5 listed, OS available, the other 4 marked coming soon.
+ * 1. Subjects: 5 listed, OS units ready, the other 4 marked units soon
+ *    (their Drive files are still open).
  * 2. OS units: 7 units, with topics, one-line explanations and real questions.
  * 3. Vector search: the same in-app TF-IDF engine as the FAQ chatbot
  *    finds the right OS question for plain-language queries, and returns
  *    nothing confident for unrelated words.
  * 4. Drive link: the portal points at the real sem 2-1 Drive folder.
+ * 5. Subject files: every subject opens its syllabus, study materials,
+ *    previous papers and study guides, same to same as the Drive folder.
  */
 
 import test from 'node:test';
@@ -16,9 +19,10 @@ import {
   studyQuestionBank,
   studyVectorDB,
   STUDY_DRIVE_URL,
+  studySubjectFiles,
 } from '../app/lib/study-data.ts';
 
-test('subjects: 5 listed, OS ready, other 4 coming soon', () => {
+test('subjects: 5 listed, OS units ready, other 4 units soon', () => {
   assert.equal(studySubjects.length, 5);
   const os = studySubjects.find((s) => s.id === 'os');
   assert.ok(os);
@@ -164,5 +168,53 @@ test('Drive link points at the sem 2-1 folder', () => {
   assert.equal(
     STUDY_DRIVE_URL,
     'https://drive.google.com/drive/folders/10XfL3TjQ5CQL7oqQMEHO-aaa3TrpGP_Z'
+  );
+});
+
+test('subject files: all 5 subjects open their Drive files, same to same', () => {
+  const expected = {
+    os: { syllabus: 1, studyMaterials: 10, previousPapers: 7, guides: 3 },
+    psqt: { syllabus: 1, studyMaterials: 10, previousPapers: 6, guides: 2 },
+    coa: { syllabus: 2, studyMaterials: 7, previousPapers: 9, guides: 2 },
+    oop: { syllabus: 1, studyMaterials: 11, previousPapers: 8, guides: 2 },
+    dms: { syllabus: 1, studyMaterials: 6, previousPapers: 4, guides: 2 },
+  };
+  let total = 0;
+  for (const [id, counts] of Object.entries(expected)) {
+    const files = studySubjectFiles[id];
+    assert.ok(files, `${id} needs a files entry`);
+    assert.match(files.folderUrl, /^https:\/\/drive\.google\.com\/drive\/folders\/[A-Za-z0-9_-]+$/);
+    for (const [section, count] of Object.entries(counts)) {
+      assert.equal(files[section].length, count, `${id} ${section}`);
+      total += count;
+    }
+  }
+  assert.equal(total, 95, '95 Drive files across the 5 subjects');
+});
+
+test('subject files: every file links to its real Drive file', () => {
+  const urls = new Set();
+  for (const files of Object.values(studySubjectFiles)) {
+    for (const section of ['syllabus', 'studyMaterials', 'previousPapers', 'guides']) {
+      for (const f of files[section]) {
+        assert.ok(f.name.length > 0);
+        assert.match(f.url, /^https:\/\/drive\.google\.com\/file\/d\/[A-Za-z0-9_-]+\/view\?usp=drivesdk$/);
+        assert.equal(f.name.includes('—'), false, 'no em dashes in file names');
+        if (f.note) assert.equal(f.note.includes('—'), false, 'no em dashes in notes');
+        assert.ok(!urls.has(f.url), `duplicate Drive link: ${f.url}`);
+        urls.add(f.url);
+      }
+    }
+  }
+  assert.equal(urls.size, 95);
+});
+
+test('subject files: OS guides include the lesson-wise study plan', () => {
+  const os = studySubjectFiles.os;
+  const plan = os.guides.find((g) => g.name === 'Lesson-wise study plan');
+  assert.ok(plan);
+  assert.equal(
+    plan.url,
+    'https://drive.google.com/file/d/1CSZdaOa6pmtRssC0CZoh4ee7V_Tw3dDL/view?usp=drivesdk'
   );
 });

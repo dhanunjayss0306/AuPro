@@ -1523,6 +1523,50 @@ textarea, select { font: inherit; }
   margin-top: 12px;
 }
 
+.sem-files {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 20px;
+  border-top: 1px solid var(--border-light);
+  padding-top: 16px;
+}
+
+.sem-files h3 {
+  margin: 0 0 4px;
+}
+
+.sem-file-group h4 {
+  margin: 14px 0 6px;
+}
+
+.sem-file-list {
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+.sem-file-list li {
+  margin-bottom: 4px;
+}
+
+.sem-file-list a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.sem-file-list a:hover {
+  text-decoration: underline;
+}
+
+.sem-file-note {
+  color: var(--muted);
+  font-size: 13px;
+  margin-left: 6px;
+}
+
 .chat-messages-scroll {
   display: flex;
   flex-direction: column;

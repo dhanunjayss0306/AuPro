@@ -33,7 +33,7 @@ import {
   StudentProfile,
 } from './lib/auth';
 import { auVectorDB, type VectorSearchResult } from './lib/vector_search';
-import { studySubjects, studyVectorDB, STUDY_DRIVE_URL } from './lib/study-data';
+import { studySubjects, studyVectorDB, STUDY_DRIVE_URL, studySubjectFiles } from './lib/study-data';
 import {
   getRollNoFromEmail,
   lookupCseStudentByEmail,
@@ -1547,6 +1547,7 @@ export default function Home() {
 
   const semSelectedSubject = studySubjects.find((s) => s.id === semSubjectId);
   const semSelectedUnit = semSelectedSubject?.units.find((u) => u.id === semUnitId);
+  const semSelectedFiles = semSelectedSubject ? studySubjectFiles[semSelectedSubject.id] : undefined;
 
   // Head Account Administrative Handlers
   const handleAddStudentAccount = (e: React.FormEvent) => {
@@ -3425,7 +3426,7 @@ export default function Home() {
                 <div>
                   <div className="eyebrow">2nd Year, 1st Semester</div>
                   <h2>SEM Preparation</h2>
-                  <p className="lead">Pick a subject, pick a unit. Search any question from the real papers.</p>
+                  <p className="lead">Pick a subject to see its syllabus, notes and previous papers. Pick a unit to study it. Search any question from the real papers.</p>
                 </div>
                 <button className="secondary-button" onClick={() => setSemPrepOpen(false)}>
                   Back to chatbot
@@ -3470,32 +3471,35 @@ export default function Home() {
                   <button
                     key={s.id}
                     className={`sem-subject ${semSubjectId === s.id ? 'active' : ''}`}
-                    disabled={s.comingSoon}
                     onClick={() => { setSemSubjectId(s.id); setSemUnitId(null); }}
                   >
                     <strong>{s.code}</strong>
                     <span>{s.title}</span>
-                    {s.comingSoon && <span className="sem-soon">Coming soon</span>}
+                    {s.comingSoon && <span className="sem-soon">Units soon</span>}
                   </button>
                 ))}
               </div>
 
-              {semSelectedSubject && !semSelectedSubject.comingSoon && (
+              {semSelectedSubject && (
                 <>
-                  <p className="sem-exam-note">{semSelectedSubject.examNote}</p>
-                  <div className="sem-units">
-                    {semSelectedSubject.units.map((u) => (
-                      <button
-                        key={u.id}
-                        className={`sem-unit ${semUnitId === u.id ? 'active' : ''}`}
-                        onClick={() => setSemUnitId(u.id)}
-                      >
-                        <span className="sem-unit-num">Unit {u.id}</span>
-                        <span className="sem-unit-title">{u.title}</span>
-                        <span className={`sem-badge ${u.priority}`}>{u.priorityNote}</span>
-                      </button>
-                    ))}
-                  </div>
+                  {semSelectedSubject.examNote && (
+                    <p className="sem-exam-note">{semSelectedSubject.examNote}</p>
+                  )}
+                  {semSelectedSubject.units.length > 0 && (
+                    <div className="sem-units">
+                      {semSelectedSubject.units.map((u) => (
+                        <button
+                          key={u.id}
+                          className={`sem-unit ${semUnitId === u.id ? 'active' : ''}`}
+                          onClick={() => setSemUnitId(u.id)}
+                        >
+                          <span className="sem-unit-num">Unit {u.id}</span>
+                          <span className="sem-unit-title">{u.title}</span>
+                          <span className={`sem-badge ${u.priority}`}>{u.priorityNote}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   {semSelectedUnit && (
                     <div className="sem-unit-detail">
                       <h3>Unit {semSelectedUnit.id}: {semSelectedUnit.title}</h3>
@@ -3517,6 +3521,32 @@ export default function Home() {
                       <a className="primary-button sem-drive-btn" href={STUDY_DRIVE_URL} target="_blank" rel="noreferrer">
                         Open notes and papers in Google Drive
                       </a>
+                    </div>
+                  )}
+                  {semSelectedFiles && (
+                    <div className="sem-files">
+                      <h3>Files in Google Drive</h3>
+                      <a className="primary-button sem-drive-btn" href={semSelectedFiles.folderUrl} target="_blank" rel="noreferrer">
+                        Open {semSelectedSubject.code} folder in Google Drive
+                      </a>
+                      {[
+                        { label: 'Syllabus', items: semSelectedFiles.syllabus },
+                        { label: 'Study Materials', items: semSelectedFiles.studyMaterials },
+                        { label: 'Previous Papers', items: semSelectedFiles.previousPapers },
+                        { label: 'Study guides', items: semSelectedFiles.guides },
+                      ].map((g) => (
+                        <div key={g.label} className="sem-file-group">
+                          <h4>{g.label} ({g.items.length})</h4>
+                          <ul className="sem-file-list">
+                            {g.items.map((f) => (
+                              <li key={f.url}>
+                                <a href={f.url} target="_blank" rel="noreferrer">{f.name}</a>
+                                {f.note && <span className="sem-file-note">{f.note}</span>}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </>

@@ -19,7 +19,7 @@ export interface QAEntry {
 // from faq-data.json by scripts/build-faq-kb.mjs. The 10 entries in
 // initialKnowledgeBase below stay: they are AU campus facts (library,
 // hostels, canteen, Wi-Fi...) that the researched set does not cover.
-import { faqKnowledgeBase } from './faq-data';
+import { faqKnowledgeBase } from './faq-data.ts';
 
 export interface VectorSearchResult {
   entry: QAEntry;

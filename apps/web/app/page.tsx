@@ -32,7 +32,8 @@ import {
   PlatformActivity,
   StudentProfile,
 } from './lib/auth';
-import { auVectorDB } from './lib/vector_search';
+import { auVectorDB, type VectorSearchResult } from './lib/vector_search';
+import { studySubjects, studyVectorDB, STUDY_DRIVE_URL } from './lib/study-data';
 import {
   getRollNoFromEmail,
   lookupCseStudentByEmail,
@@ -1240,6 +1241,12 @@ export default function Home() {
   ]);
   const [chatInput, setChatInput] = useState('');
   const [chatStatus, setChatStatus] = useState('');
+  // Study Portal (2-1 SEM Preparation) state: subjects, units, question search.
+  const [semPrepOpen, setSemPrepOpen] = useState(false);
+  const [semSubjectId, setSemSubjectId] = useState('os');
+  const [semUnitId, setSemUnitId] = useState<string | null>(null);
+  const [semSearchInput, setSemSearchInput] = useState('');
+  const [semSearchResults, setSemSearchResults] = useState<VectorSearchResult[] | null>(null);
   const [topNotice, setTopNotice] = useState('');
 
   useEffect(() => {
@@ -1529,6 +1536,17 @@ export default function Home() {
     setChatInput('');
     setChatStatus('');
   };
+
+  // Study Portal: search real previous-paper questions with the same
+  // in-app vector engine as the FAQ chatbot. Search only, nothing else.
+  const handleSemSearch = (searchText: string) => {
+    const q = searchText.trim();
+    if (!q) return;
+    setSemSearchResults(studyVectorDB.query(q, 3));
+  };
+
+  const semSelectedSubject = studySubjects.find((s) => s.id === semSubjectId);
+  const semSelectedUnit = semSelectedSubject?.units.find((u) => u.id === semUnitId);
 
   // Head Account Administrative Handlers
   const handleAddStudentAccount = (e: React.FormEvent) => {
@@ -3332,6 +3350,12 @@ export default function Home() {
 
             {/* Quick Answer Prompt Chips */}
             <div className="chatbot-chip-container">
+              <button
+                className="chatbot-chip sem-prep-chip"
+                onClick={() => { setSemPrepOpen(true); setSemUnitId(null); setSemSearchResults(null); }}
+              >
+                2-1 SEM Preparation
+              </button>
               {[
                 'Office Timings',
                 'Bonafide Certificate',
@@ -3345,7 +3369,7 @@ export default function Home() {
                 <button
                   key={chip}
                   className="chatbot-chip"
-                  onClick={() => handleAskBot(chip)}
+                  onClick={() => { setSemPrepOpen(false); handleAskBot(chip); }}
                 >
                   {chip}
                 </button>
@@ -3353,6 +3377,7 @@ export default function Home() {
             </div>
 
             {/* Conversational Stream */}
+            {!semPrepOpen && (
             <div className="card chat-card">
               <div className="chat-messages-scroll" aria-live="polite">
                 {chatMessages.map((msg, index) => (
@@ -3393,6 +3418,111 @@ export default function Home() {
                 </div>
               </form>
             </div>
+            )}
+            {semPrepOpen && (
+            <div className="card sem-panel">
+              <div className="sem-panel-head">
+                <div>
+                  <div className="eyebrow">2nd Year, 1st Semester</div>
+                  <h2>SEM Preparation</h2>
+                  <p className="lead">Pick a subject, pick a unit. Search any question from the real papers.</p>
+                </div>
+                <button className="secondary-button" onClick={() => setSemPrepOpen(false)}>
+                  Back to chatbot
+                </button>
+              </div>
+
+              <form
+                className="sem-search-form"
+                onSubmit={(e) => { e.preventDefault(); handleSemSearch(semSearchInput); }}
+              >
+                <input
+                  className="search sem-search-input"
+                  value={semSearchInput}
+                  onChange={(e) => setSemSearchInput(e.target.value)}
+                  placeholder="Search a question, like Banker's algorithm or page faults..."
+                />
+                <button className="primary-button" type="submit" disabled={!semSearchInput.trim()}>
+                  Search
+                </button>
+              </form>
+
+              {semSearchResults && (
+                <div className="sem-results">
+                  {semSearchResults.filter((r) => r.confidencePercent >= 25).length === 0 ? (
+                    <p className="sem-empty">No matching question found. Try different words, like &ldquo;deadlock&rdquo; or &ldquo;scheduling&rdquo;.</p>
+                  ) : (
+                    semSearchResults
+                      .filter((r) => r.confidencePercent >= 25)
+                      .map((r) => (
+                        <div key={r.entry.id} className="sem-result">
+                          <div className="sem-result-meta">{r.entry.category}</div>
+                          <p className="sem-result-q">{r.entry.question}</p>
+                          <p className="sem-result-a">{r.entry.answer}</p>
+                        </div>
+                      ))
+                  )}
+                </div>
+              )}
+
+              <div className="sem-subjects">
+                {studySubjects.map((s) => (
+                  <button
+                    key={s.id}
+                    className={`sem-subject ${semSubjectId === s.id ? 'active' : ''}`}
+                    disabled={s.comingSoon}
+                    onClick={() => { setSemSubjectId(s.id); setSemUnitId(null); }}
+                  >
+                    <strong>{s.code}</strong>
+                    <span>{s.title}</span>
+                    {s.comingSoon && <span className="sem-soon">Coming soon</span>}
+                  </button>
+                ))}
+              </div>
+
+              {semSelectedSubject && !semSelectedSubject.comingSoon && (
+                <>
+                  <p className="sem-exam-note">{semSelectedSubject.examNote}</p>
+                  <div className="sem-units">
+                    {semSelectedSubject.units.map((u) => (
+                      <button
+                        key={u.id}
+                        className={`sem-unit ${semUnitId === u.id ? 'active' : ''}`}
+                        onClick={() => setSemUnitId(u.id)}
+                      >
+                        <span className="sem-unit-num">Unit {u.id}</span>
+                        <span className="sem-unit-title">{u.title}</span>
+                        <span className={`sem-badge ${u.priority}`}>{u.priorityNote}</span>
+                      </button>
+                    ))}
+                  </div>
+                  {semSelectedUnit && (
+                    <div className="sem-unit-detail">
+                      <h3>Unit {semSelectedUnit.id}: {semSelectedUnit.title}</h3>
+                      <h4>Important topics</h4>
+                      <ul className="sem-topics">
+                        {semSelectedUnit.topics.map((t) => (
+                          <li key={t.name}><strong>{t.name}:</strong> {t.expl}</li>
+                        ))}
+                      </ul>
+                      <h4>Questions asked</h4>
+                      <ul className="sem-questions">
+                        {semSelectedUnit.questions.map((q, i) => (
+                          <li key={`${q.paper}-${q.year}-${i}`}>
+                            <strong>{q.year} {q.paper}:</strong> {q.text}{' '}
+                            <span className="sem-marks">{q.marks}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <a className="primary-button sem-drive-btn" href={STUDY_DRIVE_URL} target="_blank" rel="noreferrer">
+                        Open notes and papers in Google Drive
+                      </a>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+            )}
           </div>
         )}
 

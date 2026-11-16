@@ -1516,13 +1516,6 @@ textarea, select { font: inherit; }
   color: var(--primary);
 }
 
-.sem-drive-btn {
-  display: inline-flex;
-  align-self: flex-start;
-  text-decoration: none;
-  margin-top: 12px;
-}
-
 .sem-files {
   display: flex;
   flex-direction: column;
@@ -1542,29 +1535,128 @@ textarea, select { font: inherit; }
 
 .sem-file-list {
   margin: 0;
-  padding-left: 18px;
-  line-height: 1.7;
+  padding: 0;
+  list-style: none;
   font-size: 14px;
 }
 
 .sem-file-list li {
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
-.sem-file-list a {
+.sem-file-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  color: var(--text-main);
+  font: inherit;
+}
+
+.sem-file-row:hover {
+  background: var(--hover-subtle);
+}
+
+.sem-file-icon {
+  flex-shrink: 0;
   color: var(--primary);
-  text-decoration: none;
+  margin-top: 2px;
+}
+
+.sem-file-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sem-file-name {
   font-weight: 600;
 }
 
-.sem-file-list a:hover {
-  text-decoration: underline;
+.sem-file-meta {
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .sem-file-note {
   color: var(--muted);
   font-size: 13px;
-  margin-left: 6px;
+}
+
+.sem-file-open {
+  flex-shrink: 0;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.sem-viewer-sheet {
+  max-width: 960px;
+  max-height: 92vh;
+  height: 92vh;
+}
+
+.sem-viewer-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.sem-viewer-close {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sem-viewer-title {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.sem-viewer-meta {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.sem-viewer-frame {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  min-height: 0;
+  background: #fff;
+}
+
+.sem-viewer-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border-light);
+}
+
+.sem-viewer-count {
+  flex: 1;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.sem-viewer-foot a {
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .chat-messages-scroll {

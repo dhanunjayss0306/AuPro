@@ -20,6 +20,7 @@ import {
   studyVectorDB,
   STUDY_DRIVE_URL,
   studySubjectFiles,
+  studyPreviewUrl,
 } from '../app/lib/study-data.ts';
 
 test('subjects: 5 listed, OS units ready, other 4 units soon', () => {
@@ -194,19 +195,43 @@ test('subject files: all 5 subjects open their Drive files, same to same', () =>
 
 test('subject files: every file links to its real Drive file', () => {
   const urls = new Set();
+  const ids = new Set();
   for (const files of Object.values(studySubjectFiles)) {
     for (const section of ['syllabus', 'studyMaterials', 'previousPapers', 'guides']) {
       for (const f of files[section]) {
         assert.ok(f.name.length > 0);
+        assert.ok(f.id.length > 0);
+        assert.ok(['pdf', 'image'].includes(f.kind), `${f.name} needs pdf or image kind`);
+        assert.match(f.size, /^\d+(\.\d+)? (KB|MB|B)$/, `${f.name} needs a readable size`);
         assert.match(f.url, /^https:\/\/drive\.google\.com\/file\/d\/[A-Za-z0-9_-]+\/view\?usp=drivesdk$/);
+        assert.ok(f.url.includes(`/d/${f.id}/`), 'url must carry the file id');
+        assert.equal(
+          studyPreviewUrl(f.id),
+          `https://drive.google.com/file/d/${f.id}/preview`
+        );
         assert.equal(f.name.includes('—'), false, 'no em dashes in file names');
         if (f.note) assert.equal(f.note.includes('—'), false, 'no em dashes in notes');
         assert.ok(!urls.has(f.url), `duplicate Drive link: ${f.url}`);
+        assert.ok(!ids.has(f.id), `duplicate Drive id: ${f.id}`);
         urls.add(f.url);
+        ids.add(f.id);
       }
     }
   }
   assert.equal(urls.size, 95);
+  assert.equal(ids.size, 95);
+});
+
+test('subject files: exactly one image, the PSQT photo', () => {
+  const images = [];
+  for (const files of Object.values(studySubjectFiles)) {
+    for (const section of ['syllabus', 'studyMaterials', 'previousPapers', 'guides']) {
+      for (const f of files[section]) {
+        if (f.kind === 'image') images.push(f.name);
+      }
+    }
+  }
+  assert.deepEqual(images, ['PSQT question paper, page 1 (photo)']);
 });
 
 test('subject files: OS guides include the lesson-wise study plan', () => {

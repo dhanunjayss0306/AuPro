@@ -33,7 +33,7 @@ import {
   StudentProfile,
 } from './lib/auth';
 import { auVectorDB, type VectorSearchResult } from './lib/vector_search';
-import { studySubjects, studyVectorDB, STUDY_DRIVE_URL, studySubjectFiles } from './lib/study-data';
+import { studySubjects, studyVectorDB, studySubjectFiles, studyPreviewUrl, type StudyDriveFile } from './lib/study-data';
 import {
   getRollNoFromEmail,
   lookupCseStudentByEmail,
@@ -1247,6 +1247,7 @@ export default function Home() {
   const [semUnitId, setSemUnitId] = useState<string | null>(null);
   const [semSearchInput, setSemSearchInput] = useState('');
   const [semSearchResults, setSemSearchResults] = useState<VectorSearchResult[] | null>(null);
+  const [semViewer, setSemViewer] = useState<{ list: StudyDriveFile[]; index: number } | null>(null);
   const [topNotice, setTopNotice] = useState('');
 
   useEffect(() => {
@@ -3518,17 +3519,11 @@ export default function Home() {
                           </li>
                         ))}
                       </ul>
-                      <a className="primary-button sem-drive-btn" href={STUDY_DRIVE_URL} target="_blank" rel="noreferrer">
-                        Open notes and papers in Google Drive
-                      </a>
                     </div>
                   )}
                   {semSelectedFiles && (
                     <div className="sem-files">
                       <h3>Files in Google Drive</h3>
-                      <a className="primary-button sem-drive-btn" href={semSelectedFiles.folderUrl} target="_blank" rel="noreferrer">
-                        Open {semSelectedSubject.code} folder in Google Drive
-                      </a>
                       {[
                         { label: 'Syllabus', items: semSelectedFiles.syllabus },
                         { label: 'Study Materials', items: semSelectedFiles.studyMaterials },
@@ -3538,10 +3533,22 @@ export default function Home() {
                         <div key={g.label} className="sem-file-group">
                           <h4>{g.label} ({g.items.length})</h4>
                           <ul className="sem-file-list">
-                            {g.items.map((f) => (
-                              <li key={f.url}>
-                                <a href={f.url} target="_blank" rel="noreferrer">{f.name}</a>
-                                {f.note && <span className="sem-file-note">{f.note}</span>}
+                            {g.items.map((f, i) => (
+                              <li key={f.id}>
+                                <button
+                                  className="sem-file-row"
+                                  onClick={() => setSemViewer({ list: g.items, index: i })}
+                                >
+                                  <span className="sem-file-icon">
+                                    <Glyph n={f.kind === 'image' ? 'camera' : 'clipboard'} size={20} />
+                                  </span>
+                                  <span className="sem-file-text">
+                                    <span className="sem-file-name">{f.name}</span>
+                                    <span className="sem-file-meta">{f.kind === 'image' ? 'Image' : 'PDF'} · {f.size}</span>
+                                    {f.note && <span className="sem-file-note">{f.note}</span>}
+                                  </span>
+                                  <span className="sem-file-open"><Glyph n="arrow" size={18} /></span>
+                                </button>
                               </li>
                             ))}
                           </ul>
@@ -3552,6 +3559,46 @@ export default function Home() {
                 </>
               )}
             </div>
+            )}
+            {semViewer && (
+              <div className="insta-modal-backdrop" onClick={() => setSemViewer(null)}>
+                <div className="insta-modal-sheet sem-viewer-sheet" onClick={(e) => e.stopPropagation()}>
+                  <div className="sem-viewer-head">
+                    <button className="secondary-button sem-viewer-close" onClick={() => setSemViewer(null)}>
+                      <Glyph n="x" size={18} /> Close
+                    </button>
+                    <div className="sem-viewer-title">{semViewer.list[semViewer.index].name}</div>
+                    <div className="sem-viewer-meta">
+                      {semViewer.list[semViewer.index].kind === 'image' ? 'Image' : 'PDF'} · {semViewer.list[semViewer.index].size}
+                    </div>
+                  </div>
+                  <iframe
+                    className="sem-viewer-frame"
+                    title={semViewer.list[semViewer.index].name}
+                    src={studyPreviewUrl(semViewer.list[semViewer.index].id)}
+                  />
+                  <div className="sem-viewer-foot">
+                    <button
+                      className="secondary-button"
+                      disabled={semViewer.index === 0}
+                      onClick={() => setSemViewer({ list: semViewer.list, index: semViewer.index - 1 })}
+                    >
+                      Previous
+                    </button>
+                    <span className="sem-viewer-count">{semViewer.index + 1} of {semViewer.list.length}</span>
+                    <button
+                      className="secondary-button"
+                      disabled={semViewer.index === semViewer.list.length - 1}
+                      onClick={() => setSemViewer({ list: semViewer.list, index: semViewer.index + 1 })}
+                    >
+                      Next
+                    </button>
+                    <a href={semViewer.list[semViewer.index].url} target="_blank" rel="noreferrer">
+                      Open in Google Drive
+                    </a>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         )}

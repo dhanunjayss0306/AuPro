@@ -1341,6 +1341,44 @@ textarea, select { font: inherit; }
   gap: 16px;
 }
 
+/* SEM Preparation opens as its own full screen, like opening a chat:
+   fixed header with the back button, the rest scrolls on its own. */
+.sem-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+}
+
+.sem-screen-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.sem-screen-head h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.sem-screen-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sem-screen-scroll .sem-panel {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 16px 16px 48px;
+}
+
 .sem-panel-head {
   display: flex;
   justify-content: space-between;

@@ -3422,17 +3422,19 @@ export default function Home() {
             </div>
             )}
             {semPrepOpen && (
-            <div className="card sem-panel">
-              <div className="sem-panel-head">
-                <div>
-                  <div className="eyebrow">2nd Year, 1st Semester</div>
-                  <h2>SEM Preparation</h2>
-                  <p className="lead">Pick a subject to see its syllabus, notes and previous papers. Pick a unit to study it. Search any question from the real papers.</p>
-                </div>
+            <div className="sem-screen">
+              <div className="sem-screen-head">
                 <button className="secondary-button" onClick={() => setSemPrepOpen(false)}>
                   Back to chatbot
                 </button>
+                <div>
+                  <div className="eyebrow">2nd Year, 1st Semester</div>
+                  <h2>SEM Preparation</h2>
+                </div>
               </div>
+              <div className="sem-screen-scroll">
+              <div className="sem-panel">
+                <p className="lead">Pick a subject to see its syllabus, notes and previous papers. Pick a unit to study it. Search any question from the real papers.</p>
 
               <form
                 className="sem-search-form"
@@ -3472,7 +3474,7 @@ export default function Home() {
                   <button
                     key={s.id}
                     className={`sem-subject ${semSubjectId === s.id ? 'active' : ''}`}
-                    onClick={() => { setSemSubjectId(s.id); setSemUnitId(null); }}
+                    onClick={() => { setSemSubjectId(s.id); setSemUnitId(null); setTimeout(() => { (document.querySelector('.sem-units') || document.querySelector('.sem-files'))?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80); }}
                   >
                     <strong>{s.code}</strong>
                     <span>{s.title}</span>
@@ -3492,7 +3494,7 @@ export default function Home() {
                         <button
                           key={u.id}
                           className={`sem-unit ${semUnitId === u.id ? 'active' : ''}`}
-                          onClick={() => setSemUnitId(u.id)}
+                          onClick={() => { setSemUnitId(u.id); setTimeout(() => { document.querySelector('.sem-unit-detail')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80); }}
                         >
                           <span className="sem-unit-num">Unit {u.id}</span>
                           <span className="sem-unit-title">{u.title}</span>
@@ -3558,6 +3560,8 @@ export default function Home() {
                   )}
                 </>
               )}
+              </div>
+              </div>
             </div>
             )}
             {semViewer && (

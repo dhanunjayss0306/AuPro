@@ -724,3 +724,9 @@ export const studySubjectFiles: Record<string, StudySubjectFiles> = {
 export function studyPreviewUrl(fileId: string): string {
   return `https://drive.google.com/file/d/${fileId}/preview`;
 }
+
+// Direct image URL for photos: renders as a plain image, no viewer needed.
+// Verified live 2026-11-16: returns the real JPEG (HTTP 200).
+export function studyImageUrl(fileId: string): string {
+  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w2000`;
+}

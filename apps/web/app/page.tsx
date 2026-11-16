@@ -33,7 +33,7 @@ import {
   StudentProfile,
 } from './lib/auth';
 import { auVectorDB, type VectorSearchResult } from './lib/vector_search';
-import { studySubjects, studyVectorDB, studySubjectFiles, studyPreviewUrl, type StudyDriveFile } from './lib/study-data';
+import { studySubjects, studyVectorDB, studySubjectFiles, studyPreviewUrl, studyImageUrl, type StudyDriveFile } from './lib/study-data';
 import {
   getRollNoFromEmail,
   lookupCseStudentByEmail,
@@ -3572,11 +3572,19 @@ export default function Home() {
                       {semViewer.list[semViewer.index].kind === 'image' ? 'Image' : 'PDF'} · {semViewer.list[semViewer.index].size}
                     </div>
                   </div>
-                  <iframe
-                    className="sem-viewer-frame"
-                    title={semViewer.list[semViewer.index].name}
-                    src={studyPreviewUrl(semViewer.list[semViewer.index].id)}
-                  />
+                  {semViewer.list[semViewer.index].kind === 'image' ? (
+                    <img
+                      className="sem-viewer-image"
+                      src={studyImageUrl(semViewer.list[semViewer.index].id)}
+                      alt={semViewer.list[semViewer.index].name}
+                    />
+                  ) : (
+                    <iframe
+                      className="sem-viewer-frame"
+                      title={semViewer.list[semViewer.index].name}
+                      src={studyPreviewUrl(semViewer.list[semViewer.index].id)}
+                    />
+                  )}
                   <div className="sem-viewer-foot">
                     <button
                       className="secondary-button"

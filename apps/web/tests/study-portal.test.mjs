@@ -21,6 +21,7 @@ import {
   STUDY_DRIVE_URL,
   studySubjectFiles,
   studyPreviewUrl,
+  studyImageUrl,
 } from '../app/lib/study-data.ts';
 
 test('subjects: 5 listed, OS units ready, other 4 units soon', () => {
@@ -227,11 +228,16 @@ test('subject files: exactly one image, the PSQT photo', () => {
   for (const files of Object.values(studySubjectFiles)) {
     for (const section of ['syllabus', 'studyMaterials', 'previousPapers', 'guides']) {
       for (const f of files[section]) {
-        if (f.kind === 'image') images.push(f.name);
+        if (f.kind === 'image') images.push(f);
       }
     }
   }
-  assert.deepEqual(images, ['PSQT question paper, page 1 (photo)']);
+  assert.equal(images.length, 1);
+  assert.equal(images[0].name, 'PSQT question paper, page 1 (photo)');
+  assert.equal(
+    studyImageUrl(images[0].id),
+    `https://drive.google.com/thumbnail?id=${images[0].id}&sz=w2000`
+  );
 });
 
 test('subject files: OS guides include the lesson-wise study plan', () => {

@@ -57,10 +57,10 @@ test('OS: 7 units, each with topics and real questions', () => {
   assert.ok(priorities.includes('7:low'));
 });
 
-test('question bank: 36 entries, all with paper and marks', () => {
-  assert.equal(studyQuestionBank.length, 36);
+test('question bank: 44 entries, all with paper and marks', () => {
+  assert.equal(studyQuestionBank.length, 44);
   const ids = new Set(studyQuestionBank.map((e) => e.id));
-  assert.equal(ids.size, 36, 'ids must be unique');
+  assert.equal(ids.size, 44, 'ids must be unique');
   for (const entry of studyQuestionBank) {
     assert.ok(entry.question.length > 0);
     assert.ok(entry.answer.length > 0);
@@ -69,9 +69,13 @@ test('question bank: 36 entries, all with paper and marks', () => {
     assert.equal(entry.answer.includes('—'), false, 'no em dashes in answers');
   }
   const unitQuestions = studyQuestionBank.filter((e) =>
-    e.category.startsWith('Operating Systems, Unit ')
+    e.category.startsWith('Operating Systems, Unit ') && !e.id.includes('weightage')
   );
   assert.equal(unitQuestions.length, 32, '32 real paper questions');
+  const guideEntries = studyQuestionBank.filter((e) =>
+    !e.category.startsWith('Operating Systems, Unit ') || e.id.includes('weightage')
+  );
+  assert.equal(guideEntries.length, 12, '12 guide entries: weightage, most asked, exam pattern, study order, per-unit weightage, must read');
 });
 
 test('vector search: Banker query finds the Banker question', () => {
@@ -120,6 +124,34 @@ test('vector search: which unit first finds the study order answer', () => {
   const results = studyVectorDB.query('Which unit should I study first?', 3);
   assert.ok(results.length > 0);
   assert.equal(results[0].entry.id, 'os-which-unit-first');
+  assert.ok(results[0].confidencePercent >= 25);
+});
+
+test('vector search: weightage of one unit finds that unit weightage', () => {
+  const results = studyVectorDB.query('What is the weightage of Unit 5?', 3);
+  assert.ok(results.length > 0);
+  assert.equal(results[0].entry.id, 'os-u5-weightage');
+  assert.ok(results[0].confidencePercent >= 25);
+});
+
+test('vector search: weightage of a chapter finds that unit weightage', () => {
+  const results = studyVectorDB.query('weightage of chapter 4', 3);
+  assert.ok(results.length > 0);
+  assert.equal(results[0].entry.id, 'os-u4-weightage');
+  assert.ok(results[0].confidencePercent >= 25);
+});
+
+test('vector search: overall weightage still finds the overall answer', () => {
+  const results = studyVectorDB.query('What is the weightage of this lesson?', 3);
+  assert.ok(results.length > 0);
+  assert.equal(results[0].entry.id, 'os-weightage');
+  assert.ok(results[0].confidencePercent >= 25);
+});
+
+test('vector search: questions I have to read finds the must-read list', () => {
+  const results = studyVectorDB.query('What are the questions I have to read?', 3);
+  assert.ok(results.length > 0);
+  assert.equal(results[0].entry.id, 'os-must-read');
   assert.ok(results[0].confidencePercent >= 25);
 });
 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
-import { isAccountRegistered, getAllAccounts, MAIN_ADMIN_EMAIL } from '../account-registry';
+import { isAccountRegistered, getAllAccounts, awaitStoreReady, MAIN_ADMIN_EMAIL } from '../account-registry';
 import { isHeadAdmin, isHod } from '../security';
 import { NOT_IN_CSE_LIST_MESSAGE, lookupCseStudentByEmail } from '../../../lib/cse-students';
 
@@ -179,6 +179,7 @@ async function sendViaBrevo(email: string, name: string, otp: string, rollNo: st
 
 export async function POST(req: Request) {
   try {
+    await awaitStoreReady();
     const body = await req.json();
     const { email, fullName = '', rollNo = '' } = body;
 

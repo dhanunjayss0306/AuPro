@@ -4,6 +4,7 @@ import {
   addStudentApplication,
   updateApplicationStatus,
   getApplicationByRefId,
+  awaitStoreReady,
 } from '../auth/account-registry';
 import {
   checkRateLimit,
@@ -33,6 +34,7 @@ const DEFAULT_SERVICES = [
  */
 export async function GET(req: Request) {
   try {
+    await awaitStoreReady();
     const ip = getClientIp(req);
     const limit = checkRateLimit(`get_apps:${ip}`, 60, 60 * 1000);
     if (!limit.allowed) {
@@ -69,6 +71,7 @@ export async function GET(req: Request) {
  */
 export async function POST(req: Request) {
   try {
+    await awaitStoreReady();
     if (!isAllowedOrigin(req)) {
       return NextResponse.json(
         { error: 'Forbidden: Request domain not authorized.' },
@@ -152,6 +155,7 @@ export async function POST(req: Request) {
  */
 export async function PATCH(req: Request) {
   try {
+    await awaitStoreReady();
     if (!isAllowedOrigin(req)) {
       return NextResponse.json(
         { error: 'Forbidden: Request domain not authorized.' },

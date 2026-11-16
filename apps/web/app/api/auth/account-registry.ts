@@ -10,6 +10,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import { kv } from '@vercel/kv';
 
 export const MAIN_ADMIN_EMAIL = '325506402371@andhrauniversity.edu.in';
 
@@ -114,9 +115,21 @@ interface ServerDataStore {
   activities: ServerPlatformActivity[];
   posts: ServerFeedPost[];
   applications?: ServerStudentApplication[];
+  updatedAt?: string;
 }
 
 const DB_FILE = path.join(os.tmpdir(), 'aupro_shared_store_v1.json');
+
+// Shared store in Vercel KV (Upstash Redis): the one copy every serverless
+// instance reads and writes, so a post made on one device shows up on
+// every other device. The /tmp file above was the old store, and every
+// Vercel instance has its own empty /tmp, which is why a mobile post
+// never reached the desktop. /tmp stays as the local backup when KV is
+// not configured (local dev, tests) and as the migration source on the
+// first run with KV. Free tier: 256 MB storage, 30,000 requests/month.
+const KV_STORE_KEY = 'aupro:shared-store:v1';
+const kvConfigured =
+  Boolean(process.env.KV_REST_API_URL) && Boolean(process.env.KV_REST_API_TOKEN);
 
 const INITIAL_HEAD_ACCOUNT: ServerStudentProfile = {
   email: MAIN_ADMIN_EMAIL,
@@ -236,10 +249,15 @@ function pruneAccounts(store: ServerDataStore): boolean {
 }
 
 function loadStore(): ServerDataStore {
+  // Start the one-time KV hydration in the background (route handlers
+  // await it via awaitStoreReady before they read or write).
+  if (kvConfigured) void ensureKvHydrated();
+
   // Global memory cache first
   const globalStore = (globalThis as any).__AUPRO_GLOBAL_STORE__;
   if (globalStore && globalStore.accounts) {
     if (pruneAccounts(globalStore)) saveStoreToFile(globalStore);
+    maybeRefreshFromKv();
     return globalStore;
   }
 
@@ -288,6 +306,10 @@ function loadStore(): ServerDataStore {
 let saveDebounceTimer: any = null;
 
 function saveStoreToFile(store: ServerDataStore) {
+  // Stamp every change so the newer copy always wins when KV and the
+  // local store are compared.
+  store.updatedAt = new Date().toISOString();
+
   // 1. Synchronous in-memory update: read operations immediately see new data in 0.001ms
   (globalThis as any).__AUPRO_GLOBAL_STORE__ = store;
 
@@ -311,7 +333,88 @@ function saveStoreToFile(store: ServerDataStore) {
     } catch (err) {
       console.error('Failed to persist AuPro store:', err);
     }
+
+    // 3. Shared copy in KV, so every instance (and every device) reads
+    // the same data. Waits for hydration first, so a cold instance never
+    // overwrites the shared copy with an empty local one.
+    if (kvConfigured) {
+      void (async () => {
+        try {
+          await ensureKvHydrated();
+          const currentStore = (globalThis as any).__AUPRO_GLOBAL_STORE__ || store;
+          await kv.set(KV_STORE_KEY, currentStore);
+        } catch (err) {
+          console.error('Failed to persist AuPro store to KV:', err);
+        }
+      })();
+    }
   }, 100);
+}
+
+let kvHydratePromise: Promise<void> | null = null;
+let kvHydrated = false;
+let lastKvRefreshAt = 0;
+
+// Adopt the shared KV copy when it is newer than the local one. Never
+// adopts while a local save is pending, so an unsaved local change is
+// never clobbered.
+async function syncFromKv(): Promise<void> {
+  if (!kvConfigured) return;
+  try {
+    const remote = await kv.get<ServerDataStore>(KV_STORE_KEY);
+    if (!remote || !remote.accounts) return;
+    const local = (globalThis as any).__AUPRO_GLOBAL_STORE__ as ServerDataStore | undefined;
+    if (local?.updatedAt && remote.updatedAt && remote.updatedAt <= local.updatedAt) return;
+    if (saveDebounceTimer) return;
+    remote.posts = (remote.posts || []).filter(
+      (p: any) => p && !p.id?.startsWith('post_init_') && (Boolean(p.caption?.trim()) || Boolean(p.imageUrl))
+    );
+    remote.applications = remote.applications || [];
+    if (!remote.accounts[MAIN_ADMIN_EMAIL]) {
+      remote.accounts[MAIN_ADMIN_EMAIL] = INITIAL_HEAD_ACCOUNT;
+    }
+    pruneAccounts(remote);
+    (globalThis as any).__AUPRO_GLOBAL_STORE__ = remote;
+  } catch (err) {
+    console.error('AuPro KV sync failed, staying on local store:', err);
+  }
+}
+
+// One-time hydration per instance.
+function ensureKvHydrated(): Promise<void> {
+  if (!kvConfigured || kvHydrated) return Promise.resolve();
+  if (kvHydratePromise) return kvHydratePromise;
+  kvHydratePromise = (async () => {
+    await syncFromKv();
+    // First run with KV and nothing stored yet: seed it from the local copy.
+    try {
+      const existing = await kv.get<ServerDataStore>(KV_STORE_KEY);
+      if (!existing) {
+        const local = (globalThis as any).__AUPRO_GLOBAL_STORE__ as ServerDataStore | undefined;
+        if (local) await kv.set(KV_STORE_KEY, local);
+      }
+    } catch {}
+    kvHydrated = true;
+  })();
+  return kvHydratePromise;
+}
+
+// Re-read the shared copy in the background when the local cache is older
+// than 30 seconds, so a warm instance does not keep serving stale data
+// after another instance saved.
+function maybeRefreshFromKv(): void {
+  if (!kvConfigured || !kvHydrated) return;
+  if (Date.now() - lastKvRefreshAt < 30000) return;
+  lastKvRefreshAt = Date.now();
+  void syncFromKv();
+}
+
+// Route handlers call this first. Without KV configured it is a no-op,
+// so local dev and tests behave exactly as before.
+export async function awaitStoreReady(): Promise<void> {
+  if (!kvConfigured) return;
+  loadStore();
+  await ensureKvHydrated();
 }
 
 export function getAllAccounts(): Record<string, ServerStudentProfile> {

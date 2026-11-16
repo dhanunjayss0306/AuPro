@@ -3,6 +3,7 @@ import {
   getAllActivities,
   logServerActivity,
   clearAllActivities,
+  awaitStoreReady,
 } from '../auth/account-registry';
 import {
   checkRateLimit,
@@ -17,6 +18,7 @@ import {
  */
 export async function GET(req: Request) {
   try {
+    await awaitStoreReady();
     const ip = getClientIp(req);
     const limit = checkRateLimit(`get_activity:${ip}`, 60, 60 * 1000);
     if (!limit.allowed) {
@@ -46,6 +48,7 @@ export async function GET(req: Request) {
  */
 export async function POST(req: Request) {
   try {
+    await awaitStoreReady();
     const ip = getClientIp(req);
     const limit = checkRateLimit(`post_activity:${ip}`, 30, 60 * 1000);
     if (!limit.allowed) {
@@ -90,6 +93,7 @@ export async function POST(req: Request) {
  */
 export async function DELETE(req: Request) {
   try {
+    await awaitStoreReady();
     const url = new URL(req.url);
     const adminEmail = url.searchParams.get('adminEmail') || '';
     const isAuthorized = isRequestAuthorizedAsAdmin(req, adminEmail);

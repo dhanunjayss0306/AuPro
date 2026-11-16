@@ -227,6 +227,40 @@ test('Headteacher Administrator central server accounts, live activity stream, a
   assert.ok(pageContent.includes("fetch('/api/feed')"), 'Page must fetch feed posts from server API');
 });
 
+test('Shared store lives in Vercel KV, not in the server /tmp file', async () => {
+  const { awaitStoreReady, getAllPosts } = await import('../app/api/auth/account-registry.ts');
+  const registryContent = await readFile(new URL('../app/api/auth/account-registry.ts', import.meta.url), 'utf8');
+
+  // KV is the shared copy: one key every instance reads and writes.
+  assert.ok(registryContent.includes("KV_STORE_KEY = 'aupro:shared-store:v1'"), 'Registry must name the KV key');
+  assert.ok(registryContent.includes('kv.set(KV_STORE_KEY'), 'Saves must write the shared copy to KV');
+  assert.ok(registryContent.includes('kv.get<ServerDataStore>(KV_STORE_KEY)'), 'Loads must read the shared copy from KV');
+
+  // Without KV env vars configured this is a no-op, so local dev and
+  // tests behave exactly as before (in-memory + /tmp fallback).
+  assert.equal(process.env.KV_REST_API_URL, undefined, 'Tests run without KV configured');
+  await assert.doesNotReject(awaitStoreReady(), 'awaitStoreReady must resolve without KV');
+  assert.ok(Array.isArray(getAllPosts()), 'Registry still reads posts without KV');
+});
+
+test('Every route handler that touches the store awaits readiness first', async () => {
+  const storeRoutes = [
+    '../app/api/feed/route.ts',
+    '../app/api/accounts/route.ts',
+    '../app/api/activity/route.ts',
+    '../app/api/applications/route.ts',
+    '../app/api/auth/send-otp/route.ts',
+    '../app/api/auth/verify-otp/route.ts',
+  ];
+  for (const route of storeRoutes) {
+    const content = await readFile(new URL(route, import.meta.url), 'utf8');
+    const handlers = (content.match(/^export async function (GET|POST|PATCH|DELETE)\(req: Request\) \{$/gm) || []).length;
+    const awaits = (content.match(/await awaitStoreReady\(\);/g) || []).length;
+    assert.ok(handlers > 0, `${route} must have handlers`);
+    assert.equal(awaits, handlers, `${route}: every handler (${handlers}) must await the store first, found ${awaits}`);
+  }
+});
+
 test('Real interactions & strict delete permission enforcement', async () => {
   const cardContent = await readFile(new URL('../app/components/MomentCard.tsx', import.meta.url), 'utf8');
   const feedRoute = await readFile(new URL('../app/api/feed/route.ts', import.meta.url), 'utf8');

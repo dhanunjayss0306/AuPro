@@ -6,6 +6,7 @@ import {
   removeAccount,
   purgeAllAccountsExceptHead,
   logServerActivity,
+  awaitStoreReady,
   MAIN_ADMIN_EMAIL,
 } from '../auth/account-registry';
 import {
@@ -25,6 +26,7 @@ import { NOT_IN_CSE_LIST_MESSAGE, lookupCseStudentByEmail } from '../../lib/cse-
  */
 export async function GET(req: Request) {
   try {
+    await awaitStoreReady();
     const ip = getClientIp(req);
     const limit = checkRateLimit(`get_accounts:${ip}`, 60, 60 * 1000);
     if (!limit.allowed) {
@@ -54,6 +56,7 @@ export async function GET(req: Request) {
  */
 export async function POST(req: Request) {
   try {
+    await awaitStoreReady();
     const ip = getClientIp(req);
     const limit = checkRateLimit(`post_accounts:${ip}`, 30, 60 * 1000);
     if (!limit.allowed) {
@@ -123,6 +126,7 @@ export async function POST(req: Request) {
  */
 export async function DELETE(req: Request) {
   try {
+    await awaitStoreReady();
     const ip = getClientIp(req);
     const limit = checkRateLimit(`del_accounts:${ip}`, 20, 60 * 1000);
     if (!limit.allowed) {

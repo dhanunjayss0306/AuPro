@@ -7,6 +7,7 @@ import {
   togglePostLike,
   addPostComment,
   repostFeedPost,
+  awaitStoreReady,
   ServerFeedPost,
 } from '../auth/account-registry';
 import {
@@ -26,6 +27,7 @@ import {
  */
 export async function GET(req: Request) {
   try {
+    await awaitStoreReady();
     const ip = getClientIp(req);
     const limitCheck = checkRateLimit(`get_feed:${ip}`, 120, 60 * 1000);
     if (!limitCheck.allowed) {
@@ -86,6 +88,7 @@ export async function GET(req: Request) {
  */
 export async function POST(req: Request) {
   try {
+    await awaitStoreReady();
     if (!isAllowedOrigin(req)) {
       return NextResponse.json(
         { error: 'Forbidden: Request domain not authorized.' },
@@ -197,6 +200,7 @@ export async function POST(req: Request) {
  */
 export async function PATCH(req: Request) {
   try {
+    await awaitStoreReady();
     if (!isAllowedOrigin(req)) {
       return NextResponse.json(
         { error: 'Forbidden: Request domain not authorized.' },
@@ -316,6 +320,7 @@ export async function PATCH(req: Request) {
  */
 export async function DELETE(req: Request) {
   try {
+    await awaitStoreReady();
     if (!isAllowedOrigin(req)) {
       return NextResponse.json(
         { error: 'Forbidden: Request domain not authorized.' },

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
-import { registerAccount, findAccount, logServerActivity } from '../account-registry';
+import { registerAccount, findAccount, logServerActivity, awaitStoreReady } from '../account-registry';
 import { signSessionToken, isHeadAdmin, isHod } from '../security';
 import {
   CSE_DEPARTMENT,
@@ -42,6 +42,7 @@ function clearFailures(key: string) {
 
 export async function POST(req: Request) {
   try {
+    await awaitStoreReady();
     const body = await req.json();
     const { email, otp, token } = body;
 

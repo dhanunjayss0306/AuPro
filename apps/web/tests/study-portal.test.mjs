@@ -57,16 +57,21 @@ test('OS: 7 units, each with topics and real questions', () => {
   assert.ok(priorities.includes('7:low'));
 });
 
-test('question bank: 32 real OS questions, all with paper and marks', () => {
-  assert.equal(studyQuestionBank.length, 32);
+test('question bank: 36 entries, all with paper and marks', () => {
+  assert.equal(studyQuestionBank.length, 36);
   const ids = new Set(studyQuestionBank.map((e) => e.id));
-  assert.equal(ids.size, 32, 'ids must be unique');
+  assert.equal(ids.size, 36, 'ids must be unique');
   for (const entry of studyQuestionBank) {
     assert.ok(entry.question.length > 0);
     assert.ok(entry.answer.length > 0);
     assert.ok(entry.keywords.length >= 3);
-    assert.ok(entry.category.startsWith('Operating Systems, Unit '));
+    assert.ok(entry.category.startsWith('Operating Systems, '));
+    assert.equal(entry.answer.includes('—'), false, 'no em dashes in answers');
   }
+  const unitQuestions = studyQuestionBank.filter((e) =>
+    e.category.startsWith('Operating Systems, Unit ')
+  );
+  assert.equal(unitQuestions.length, 32, '32 real paper questions');
 });
 
 test('vector search: Banker query finds the Banker question', () => {
@@ -87,6 +92,34 @@ test('vector search: scheduling query finds a scheduling question', () => {
   const results = studyVectorDB.query('Round Robin CPU scheduling example', 3);
   assert.ok(results.length > 0);
   assert.equal(results[0].entry.id, 'os-u2-rr');
+  assert.ok(results[0].confidencePercent >= 25);
+});
+
+test('vector search: weightage question finds the weightage answer', () => {
+  const results = studyVectorDB.query('What is the weightage of this lesson?', 3);
+  assert.ok(results.length > 0);
+  assert.equal(results[0].entry.id, 'os-weightage');
+  assert.ok(results[0].confidencePercent >= 25);
+});
+
+test('vector search: most asked question finds the most asked list', () => {
+  const results = studyVectorDB.query('What are the highest asked questions?', 3);
+  assert.ok(results.length > 0);
+  assert.equal(results[0].entry.id, 'os-most-asked');
+  assert.ok(results[0].confidencePercent >= 25);
+});
+
+test('vector search: exam pattern question finds the exam pattern answer', () => {
+  const results = studyVectorDB.query('What is the exam pattern? How many marks?', 3);
+  assert.ok(results.length > 0);
+  assert.equal(results[0].entry.id, 'os-exam-pattern');
+  assert.ok(results[0].confidencePercent >= 25);
+});
+
+test('vector search: which unit first finds the study order answer', () => {
+  const results = studyVectorDB.query('Which unit should I study first?', 3);
+  assert.ok(results.length > 0);
+  assert.equal(results[0].entry.id, 'os-which-unit-first');
   assert.ok(results[0].confidencePercent >= 25);
 });
 

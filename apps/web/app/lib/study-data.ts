@@ -458,6 +458,34 @@ export const studyQuestionBank: QAEntry[] = [
     answer: '2022 CSE paper, Q8, Unit 7 Case study, 14 marks. The ONLY full Unit 7 question in all papers checked. Absent in 2023, 2024 and 2025.',
     keywords: ['linux', 'kernel', 'windows', 'components', 'diagram'],
   },
+  {
+    id: 'os-weightage',
+    category: 'Operating Systems, Weightage',
+    question: 'What is the weightage of each unit in Operating Systems? How many marks is each lesson worth?',
+    answer: 'Each unit is worth 14 marks if you pick its question, plus 2 marks in Q1 short questions. Units 2, 4 and 5 are the most important: 14 marks every year, with the same numerical types. Units 3 and 6 are also 14 marks every year. Unit 1 had a 14-mark question in 2024, 2023 and 2022, but none in 2025. Unit 7 is the weakest: only one full question in all papers checked, 2022 Q8, and nothing in 2023, 2024 or 2025. Study order: Unit 2, then 5, then 4.',
+    keywords: ['weightage', 'weight', 'marks', 'lesson', 'unit', 'important', 'highest', 'exam', 'priority'],
+  },
+  {
+    id: 'os-most-asked',
+    category: 'Operating Systems, Most asked',
+    question: 'What are the most asked questions in Operating Systems? Which questions repeat the most? What are the most repeated questions?',
+    answer: 'Most repeated questions: Banker algorithm, 2025 Q6 (14 marks). Page faults with FIFO, Optimal and LRU, 2025 Q3 and 2024 Q4. FCFS and Round Robin scheduling, 2025 Q2, 2024 Q3 and 2023 Q3. Process Control Block, 2025 Q4, 2023 Q4 and 2022 Q3. Dining Philosophers, 2025 Q5 and 2023 Q5. Virtual memory and thrashing, 2025 Q7 and 2023. Deadlock recovery, 2024 Q6, 2023 Q5 and 2022 Q5. IPC shared memory, 2025 Q4 and 2023 Q4.',
+    keywords: ['most', 'asked', 'repeated', 'repeat', 'highest', 'frequently', 'common', 'important', 'questions'],
+  },
+  {
+    id: 'os-exam-pattern',
+    category: 'Operating Systems, Exam pattern',
+    question: 'What is the exam pattern for Operating Systems? How many marks is the exam? How many questions do I need to answer?',
+    answer: '3 hours, 70 marks. Q1 is compulsory: 7 short questions x 2 marks = 14, covering all units. Then answer any 4 of Q2 to Q8, each 14 marks. You attempt 5 questions total.',
+    keywords: ['exam', 'pattern', 'marks', 'total', 'hours', 'questions', 'answer', 'paper', 'structure', 'time'],
+  },
+  {
+    id: 'os-which-unit-first',
+    category: 'Operating Systems, Study order',
+    question: 'Which unit should I study first? Which is the most important unit in Operating Systems?',
+    answer: 'Start with Unit 2 Process Management, then Unit 5 Memory Management, then Unit 4 Deadlocks. Those three are the safest 42 marks. Then Unit 3 and Unit 6. Unit 1 after that. Unit 7 last, only for Q1.',
+    keywords: ['first', 'start', 'most', 'important', 'priority', 'order', 'study', 'begin', 'unit'],
+  },
 ];
 
 /** In-memory vector search over the study questions. Same engine as the FAQ chatbot. */

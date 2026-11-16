@@ -10,7 +10,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { kv } from '@vercel/kv';
+import { createClient } from '@vercel/kv';
 
 export const MAIN_ADMIN_EMAIL = '325506402371@andhrauniversity.edu.in';
 
@@ -128,8 +128,27 @@ const DB_FILE = path.join(os.tmpdir(), 'aupro_shared_store_v1.json');
 // not configured (local dev, tests) and as the migration source on the
 // first run with KV. Free tier: 256 MB storage, 30,000 requests/month.
 const KV_STORE_KEY = 'aupro:shared-store:v1';
-const kvConfigured =
-  Boolean(process.env.KV_REST_API_URL) && Boolean(process.env.KV_REST_API_TOKEN);
+// Vercel creates these names two ways: KV_REST_API_URL / KV_REST_API_TOKEN
+// (Storage, KV) or UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN
+// (Upstash marketplace integration). Accept either, so the connection
+// works whichever screen created it. A custom prefix on the connection
+// would rename them and break this lookup, so connect with no prefix.
+const kvRestUrl =
+  process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || '';
+const kvRestToken =
+  process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || '';
+const kvConfigured = Boolean(kvRestUrl && kvRestToken);
+const kv = kvConfigured ? createClient({ url: kvRestUrl, token: kvRestToken }) : null;
+
+function kvGet<T>(key: string): Promise<T | null> {
+  if (!kv) return Promise.resolve(null);
+  return kv.get<T>(key);
+}
+
+function kvSet(key: string, value: unknown): Promise<void> {
+  if (!kv) return Promise.resolve();
+  return kv.set(key, value).then(() => undefined);
+}
 
 const INITIAL_HEAD_ACCOUNT: ServerStudentProfile = {
   email: MAIN_ADMIN_EMAIL,
@@ -342,7 +361,7 @@ function saveStoreToFile(store: ServerDataStore) {
         try {
           await ensureKvHydrated();
           const currentStore = (globalThis as any).__AUPRO_GLOBAL_STORE__ || store;
-          await kv.set(KV_STORE_KEY, currentStore);
+          await kvSet(KV_STORE_KEY, currentStore);
         } catch (err) {
           console.error('Failed to persist AuPro store to KV:', err);
         }
@@ -361,7 +380,7 @@ let lastKvRefreshAt = 0;
 async function syncFromKv(): Promise<void> {
   if (!kvConfigured) return;
   try {
-    const remote = await kv.get<ServerDataStore>(KV_STORE_KEY);
+    const remote = await kvGet<ServerDataStore>(KV_STORE_KEY);
     if (!remote || !remote.accounts) return;
     const local = (globalThis as any).__AUPRO_GLOBAL_STORE__ as ServerDataStore | undefined;
     if (local?.updatedAt && remote.updatedAt && remote.updatedAt <= local.updatedAt) return;
@@ -388,10 +407,10 @@ function ensureKvHydrated(): Promise<void> {
     await syncFromKv();
     // First run with KV and nothing stored yet: seed it from the local copy.
     try {
-      const existing = await kv.get<ServerDataStore>(KV_STORE_KEY);
+      const existing = await kvGet<ServerDataStore>(KV_STORE_KEY);
       if (!existing) {
         const local = (globalThis as any).__AUPRO_GLOBAL_STORE__ as ServerDataStore | undefined;
-        if (local) await kv.set(KV_STORE_KEY, local);
+        if (local) await kvSet(KV_STORE_KEY, local);
       }
     } catch {}
     kvHydrated = true;

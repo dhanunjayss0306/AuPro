@@ -233,8 +233,9 @@ test('Shared store lives in Vercel KV, not in the server /tmp file', async () =>
 
   // KV is the shared copy: one key every instance reads and writes.
   assert.ok(registryContent.includes("KV_STORE_KEY = 'aupro:shared-store:v1'"), 'Registry must name the KV key');
-  assert.ok(registryContent.includes('kv.set(KV_STORE_KEY'), 'Saves must write the shared copy to KV');
-  assert.ok(registryContent.includes('kv.get<ServerDataStore>(KV_STORE_KEY)'), 'Loads must read the shared copy from KV');
+  assert.ok(registryContent.includes('kvSet(KV_STORE_KEY'), 'Saves must write the shared copy to KV');
+  assert.ok(registryContent.includes('kvGet<ServerDataStore>(KV_STORE_KEY)'), 'Loads must read the shared copy from KV');
+  assert.ok(registryContent.includes('UPSTASH_REDIS_REST_URL'), 'Registry must also accept the Upstash marketplace names');
 
   // Without KV env vars configured this is a no-op, so local dev and
   // tests behave exactly as before (in-memory + /tmp fallback).
